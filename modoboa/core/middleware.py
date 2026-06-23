@@ -10,4 +10,4 @@ class LocalConfigMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         """Inject LocalConfig instance to request."""
-        request.localconfig = models.LocalConfig.objects.first()
+        request.localconfig = models.LocalConfig.get_instance()

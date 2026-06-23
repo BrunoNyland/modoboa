@@ -1,7 +1,9 @@
 import { createGettext } from 'vue3-gettext'
-import translations from '@/locale/translations.json'
+// Only the locales selected in locales.config.js (or via MODOBOA_LOCALES)
+// are bundled here — see the virtual module in vite.config.js.
+import { translations, enabledLocales } from 'virtual:modoboa-translations'
 
-const availableLanguages = {
+const ALL_AVAILABLE_LANGUAGES = {
   br: 'Breton',
   cs: 'Czech',
   de: 'German',
@@ -20,6 +22,13 @@ const availableLanguages = {
   tr: 'tr',
   zh: 'Chinese',
 }
+
+// Restrict the languages vue3-gettext knows about to the bundled ones.
+const availableLanguages = Object.fromEntries(
+  Object.entries(ALL_AVAILABLE_LANGUAGES).filter(([code]) =>
+    enabledLocales.includes(code)
+  )
+)
 
 export const DEFAULT_LANGUAGE = 'en'
 

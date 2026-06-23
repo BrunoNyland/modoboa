@@ -8,6 +8,40 @@ import { federation } from '@module-federation/vite'
 // Utilities
 import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
+import fs from 'node:fs'
+import { getEnabledLocales } from './locales.config.js'
+
+// Exposes `virtual:modoboa-translations`, returning only the locales
+// selected in locales.config.js (or via the MODOBOA_LOCALES env var).
+// The committed translations.json keeps every language; this trims what
+// actually ends up in the bundle so unused languages aren't shipped.
+function bundledTranslations() {
+  const VIRTUAL_ID = 'virtual:modoboa-translations'
+  const RESOLVED_ID = '\0' + VIRTUAL_ID
+  const translationsPath = fileURLToPath(
+    new URL('./src/locale/translations.json', import.meta.url)
+  )
+  return {
+    name: 'modoboa-bundled-translations',
+    resolveId(id) {
+      if (id === VIRTUAL_ID) return RESOLVED_ID
+    },
+    load(id) {
+      if (id !== RESOLVED_ID) return
+      this.addWatchFile(translationsPath)
+      const enabledLocales = getEnabledLocales()
+      const all = JSON.parse(fs.readFileSync(translationsPath, 'utf8'))
+      const translations = {}
+      for (const locale of enabledLocales) {
+        if (all[locale]) translations[locale] = all[locale]
+      }
+      return (
+        `export const enabledLocales = ${JSON.stringify(enabledLocales)}\n` +
+        `export const translations = ${JSON.stringify(translations)}\n`
+      )
+    },
+  }
+}
 
 // @module-federation/vite emits its bootstrap shim files via emitFile() with
 // an explicit `fileName`, which bypasses Rollup's entry/asset naming patterns
@@ -108,6 +142,7 @@ export default defineConfig({
       },
     }),
     relocateMfBootstrap(),
+    bundledTranslations(),
   ],
   base: '/',
   define: { 'process.env': {} },

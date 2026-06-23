@@ -332,6 +332,12 @@ CACHES = {
     }
 }
 
+# Store sessions in the cache (Redis) instead of the database. ``cached_db``
+# serves reads from the cache and falls back to the database, so sessions
+# survive a Redis flush/restart while avoiding a database query on every
+# authenticated request.
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators

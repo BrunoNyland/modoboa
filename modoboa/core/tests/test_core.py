@@ -13,10 +13,12 @@ from oauth2_provider.models import get_application_model
 from django.conf import settings
 from django.core import mail
 from django.core import management
+from django.core.cache import cache
 from django.urls import reverse
 from django.utils import timezone
 
 from modoboa.lib.tests import ModoTestCase, SimpleModoTestCase
+from modoboa.parameters import tools as param_tools
 from .. import factories, mocks, models
 
 
@@ -276,3 +278,51 @@ class APICommunicationTestCase(ModoTestCase):
         ):
             management.call_command("communicate_with_public_api")
         self.assertEqual(len(mail.outbox), 1)
+
+
+class LocalConfigCacheTestCase(ModoTestCase):
+    """Validate caching of the LocalConfig singleton."""
+
+    def setUp(self):
+        super().setUp()
+        # Start from a clean cache so we control the first lookup.
+        cache.clear()
+
+    def test_get_instance_is_cached(self):
+        """The instance must be served from cache after the first hit."""
+        # Prime the cache.
+        instance = models.LocalConfig.get_instance()
+        self.assertIsNotNone(instance)
+
+        # Subsequent calls must not hit the database at all.
+        with self.assertNumQueries(0):
+            cached = models.LocalConfig.get_instance()
+        self.assertEqual(cached.pk, instance.pk)
+
+        # Parameters manager survives the cache round-trip.
+        self.assertIsInstance(cached.parameters, param_tools.Manager)
+
+    def test_save_invalidates_cache(self):
+        """Saving must refresh the cached instance."""
+        # Prime the cache.
+        models.LocalConfig.get_instance()
+        self.assertIsNotNone(cache.get(models.LocalConfig.CACHE_KEY))
+
+        instance = models.LocalConfig.objects.first()
+        instance.need_dovecot_update = True
+        instance.save()
+
+        # Saving invalidated the cache entry.
+        self.assertIsNone(cache.get(models.LocalConfig.CACHE_KEY))
+
+        # The next lookup reflects the new value.
+        refreshed = models.LocalConfig.get_instance()
+        self.assertTrue(refreshed.need_dovecot_update)
+
+    def test_returned_instances_are_independent(self):
+        """Mutating a returned instance must not affect other callers."""
+        first = models.LocalConfig.get_instance()
+        first.need_dovecot_update = True  # not saved
+
+        second = models.LocalConfig.get_instance()
+        self.assertFalse(second.need_dovecot_update)

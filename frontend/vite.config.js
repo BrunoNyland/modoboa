@@ -172,7 +172,10 @@ export default defineConfig({
     outDir: '../modoboa/frontend_dist',
     target: 'esnext',
     modulePreload: false,
-    minify: false,
+    // Minify JS and CSS in production. Without this the main bundle ships
+    // unminified (~2.3 MB JS / ~1 MB CSS); esbuild minification roughly
+    // halves the JavaScript and shrinks the stylesheet considerably.
+    minify: true,
     cssCodeSplit: false,
   },
 })

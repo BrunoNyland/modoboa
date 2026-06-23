@@ -12,7 +12,9 @@
     "format": "prettier . --write",
     "format-specific": "prettier --write",
     "gettext:extract": "vue-gettext-extract",
-    "gettext:compile": "vue-gettext-compile"
+    "gettext:compile": "vue-gettext-compile",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@mdi/font": "^7.3.67",
@@ -53,6 +55,10 @@
     "typescript": "^5",
     "unplugin-fonts": "^1.0.3",
     "vite": "^8",
-    "vite-plugin-vuetify": "^2.1.0"
+    "vite-plugin-vuetify": "^2.1.0",
+    "vitest": "^4.1.9"
+  },
+  "resolutions": {
+    "vite": "^8.0.0"
   }
 }

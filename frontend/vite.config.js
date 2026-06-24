@@ -44,9 +44,17 @@ function bundledTranslations() {
 
 // @module-federation/vite emits its bootstrap shim files via emitFile() with
 // an explicit `fileName`, which bypasses Rollup's entry/asset naming patterns
-// and dumps them at the bundle root. Relocate them under assets/ so the
-// produced layout matches the rest of the build (single canonical asset
-// directory for collectstatic / CDN sync).
+// and dumps them at the bundle root *without a content hash*. Relocate them
+// under assets/ AND give them a content hash, so the produced layout matches
+// the rest of the build (single canonical asset directory) and every emitted
+// file is content-addressed.
+//
+// The hash matters for caching: these shims are tiny but their content changes
+// on every build (they import the hashed entry chunks by name). Without a hash
+// in their own filename they cannot be served as immutable — a long-lived
+// cache would keep serving a stale bootstrap pointing at chunks that no longer
+// exist. Hashing them lets nginx mark the whole /assets/ tree immutable safely.
+// Only index.html references these files, so rewriting the HTML is enough.
 //
 // We do this in writeBundle (post-emit, on the filesystem) rather than
 // rewriting the bundle map in generateBundle. Vite 8 runs on Rolldown,
@@ -60,13 +68,21 @@ function relocateMfBootstrap() {
     async writeBundle(options, bundle) {
       const fs = await import('node:fs/promises')
       const path = await import('node:path')
+      const crypto = await import('node:crypto')
       const outDir = options.dir
       const moved = new Map()
       const htmlFiles = []
       for (const fileName of Object.keys(bundle)) {
         if (fileName.startsWith('mf-entry-bootstrap-')) {
-          const newName = `assets/${fileName}`
           const oldPath = path.join(outDir, fileName)
+          const content = await fs.readFile(oldPath)
+          const hash = crypto
+            .createHash('sha256')
+            .update(content)
+            .digest('hex')
+            .slice(0, 8)
+          // mf-entry-bootstrap-3.js -> assets/mf-entry-bootstrap-3-<hash>.js
+          const newName = `assets/${fileName.replace(/\.js$/, '')}-${hash}.js`
           const newPath = path.join(outDir, newName)
           await fs.mkdir(path.dirname(newPath), { recursive: true })
           await fs.rename(oldPath, newPath)

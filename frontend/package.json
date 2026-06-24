@@ -17,7 +17,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@mdi/js": "^7.4.47",
+    "@mdi/font": "^7.3.67",
     "@tiptap/extension-highlight": "^3.11.0",
     "@tiptap/extension-text-align": "^3.11.0",
     "@tiptap/pm": "^3.11.0",

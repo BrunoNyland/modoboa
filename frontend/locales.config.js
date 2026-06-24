@@ -34,7 +34,7 @@ export const ALL_LOCALES = [
 
 // 👉 Edit this to ship fewer languages, e.g. ['en', 'pt_BR'].
 //    Keep it as ALL_LOCALES to bundle every available translation.
-const BUNDLED_LOCALES = ALL_LOCALES
+const BUNDLED_LOCALES = ['en', 'pt_BR']
 
 export function getEnabledLocales() {
   const fromEnv = (process.env.MODOBOA_LOCALES || '')

@@ -17,6 +17,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@fontsource/roboto": "^5.2.10",
     "@mdi/js": "^7.4.47",
     "@tiptap/extension-highlight": "^3.11.0",
     "@tiptap/extension-text-align": "^3.11.0",
@@ -49,7 +50,6 @@
     "prettier": "^3.3.2",
     "sass": "^1.97.3",
     "typescript": "^5",
-    "unplugin-fonts": "^1.0.3",
     "vite": "^8",
     "vite-plugin-vuetify": "^2.1.0",
     "vitest": "^4.1.9",

@@ -1,7 +1,6 @@
 // Plugins
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
-import ViteFonts from 'unplugin-fonts/vite'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import { federation } from '@module-federation/vite'
 
@@ -100,19 +99,6 @@ export default defineConfig({
       autoImport: true,
       styles: {
         configFile: 'src/styles/settings.scss',
-      },
-    }),
-    ViteFonts({
-      google: {
-        families: [
-          {
-            name: 'Roboto',
-            // Only the weights actually used by Vuetify/the app: 300 (light),
-            // 400 (regular), 500 (medium), 700 (bold). Thin (100) and Black
-            // (900) were requested but never used in any component.
-            styles: 'wght@300;400;500;700',
-          },
-        ],
       },
     }),
     federation({

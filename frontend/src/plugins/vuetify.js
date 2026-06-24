@@ -5,6 +5,17 @@
  */
 
 // Styles
+// Self-hosted Roboto (no external Google Fonts request). Only the weights
+// the app uses (300/400/500/700), latin + latin-ext subsets — enough for
+// en/pt_BR and other Western-European text.
+import '@fontsource/roboto/latin-300.css'
+import '@fontsource/roboto/latin-400.css'
+import '@fontsource/roboto/latin-500.css'
+import '@fontsource/roboto/latin-700.css'
+import '@fontsource/roboto/latin-ext-300.css'
+import '@fontsource/roboto/latin-ext-400.css'
+import '@fontsource/roboto/latin-ext-500.css'
+import '@fontsource/roboto/latin-ext-700.css'
 import 'vuetify/styles'
 import '@/styles/main.scss'
 import {

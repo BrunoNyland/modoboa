@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "dev:mock": "VITE_MOCK_API=true vite",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .js,.vue --fix src",
@@ -14,7 +15,9 @@
     "gettext:extract": "vue-gettext-extract",
     "gettext:compile": "vue-gettext-compile",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@fontsource/roboto": "^5.2.10",
@@ -47,6 +50,7 @@
     "eslint": "^10.4.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10",
+    "msw": "^2.14.6",
     "prettier": "^3.3.2",
     "sass": "^1.97.3",
     "typescript": "^5",
@@ -57,5 +61,10 @@
   },
   "resolutions": {
     "vite": "^8.0.0"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

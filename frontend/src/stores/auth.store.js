@@ -114,6 +114,15 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function validateAccess() {
+    // Dev-only: skip OIDC entirely and treat the session as authenticated so
+    // the UI can be browsed against the MSW mocks. No effect in production
+    // (VITE_MOCK_API is unset there).
+    if (import.meta.env.VITE_MOCK_API) {
+      if (!isAuthenticated.value || !authUser.value) {
+        await fetchUser()
+      }
+      return true
+    }
     const user = await manager.getUser()
     if (!user || user.expired) {
       return false

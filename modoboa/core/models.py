@@ -523,13 +523,20 @@ class LocalConfig(models.Model):
         Django's cache framework serializes stored values, therefore each
         call returns a fresh, independent copy: callers can safely mutate
         the returned instance without affecting other requests.
+
+        Caching can be disabled by setting ``MODOBOA_LOCALCONFIG_CACHE_TIMEOUT``
+        to ``0`` (the test suite does this: a cached instance bypasses
+        ``__init__`` and would not see the parameters registry being reloaded
+        between tests).
         """
-        instance = cache.get(cls.CACHE_KEY)
-        if instance is None:
-            instance = cls.objects.select_related("site").first()
+        timeout = getattr(settings, "MODOBOA_LOCALCONFIG_CACHE_TIMEOUT", 300)
+        if timeout:
+            instance = cache.get(cls.CACHE_KEY)
             if instance is not None:
-                timeout = getattr(settings, "MODOBOA_LOCALCONFIG_CACHE_TIMEOUT", 300)
-                cache.set(cls.CACHE_KEY, instance, timeout)
+                return instance
+        instance = cls.objects.select_related("site").first()
+        if instance is not None and timeout:
+            cache.set(cls.CACHE_KEY, instance, timeout)
         return instance
 
     def save(self, *args, **kwargs):

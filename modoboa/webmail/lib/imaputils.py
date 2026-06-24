@@ -16,6 +16,7 @@ from modoboa.parameters import tools as param_tools
 from modoboa.webmail import constants
 
 from ..exceptions import ImapError, WebmailInternalError
+from . import imap_pool
 from .fetch_parser import FetchResponseParser
 
 # imaplib.Debug = 4
@@ -162,13 +163,47 @@ class IMAPconnector:
         self.with_namespaces = with_namespaces
 
     def __enter__(self):
+        if imap_pool.acquire(self):
+            # Reused a pooled connection: already authenticated, namespaces
+            # already loaded. Skip the (expensive) login round-trip.
+            return self
         self.login(self.user, self.password)
         if self.load_namespaces:
             self.load_namespaces()
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, exc_type=None, exc_value=None, traceback=None):
+        # On a clean exit, hand the live connection back to the pool instead of
+        # logging out. On error (or when pooling is disabled), close it.
+        if exc_type is None and imap_pool.release(self):
+            return
         self.logout()
+
+    def _pool_key(self) -> str:
+        """Key under which this connection is pooled (strict per-user)."""
+        return self.user
+
+    def _export_session(self) -> dict:
+        """Snapshot the live-connection state for the pool."""
+        return {
+            "m": self.m,
+            "capabilities": self.capabilities,
+            "hdelimiter": self.__hdelimiter,
+            "ns_prefixes": self.__ns_prefixes,
+        }
+
+    def _import_session(self, session: dict) -> None:
+        """Adopt a pooled live connection and reset per-request state."""
+        self.m = session["m"]
+        self.capabilities = session["capabilities"]
+        self.__hdelimiter = session["hdelimiter"]
+        self.__ns_prefixes = session["ns_prefixes"]
+        # Transient state must not leak across requests.
+        self.criterions = []
+        self.quota_usage = -1
+        self.quota_limit = self.quota_current = None
+        if hasattr(self, "current_mailbox"):
+            del self.current_mailbox
 
     def _cmd(self, name: str, *args, **kwargs) -> list | None:
         """IMAP command wrapper.

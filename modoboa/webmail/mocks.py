@@ -13,6 +13,12 @@ class IMAP4Mock:
     def _quote(self, data):
         return data
 
+    def noop(self):
+        return "OK", [b"NOOP completed"]
+
+    def logout(self):
+        return "BYE", [b"Logging out"]
+
     def _simple_command(self, name, *args, **kwargs):
         if name == "CAPABILITY":
             self.untagged_responses["CAPABILITY"] = [b"QUOTA"]

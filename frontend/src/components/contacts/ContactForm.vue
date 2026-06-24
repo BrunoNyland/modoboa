@@ -83,7 +83,7 @@
               <v-textarea
                 v-model="form.address"
                 :label="$gettext('Address')"
-                prepend-icon="mdi-location"
+                prepend-icon="mdi-map-marker"
                 variant="outlined"
                 density="compact"
                 rows="2"

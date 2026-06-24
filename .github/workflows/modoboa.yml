@@ -191,7 +191,9 @@ jobs:
           files: ./coverage.xml
 
   release:
-    if: github.event_name != 'pull_request'
+    # Only publish from the official repository. Forks don't have PyPI
+    # credentials and must not attempt to publish the `modoboa` package.
+    if: github.event_name != 'pull_request' && github.repository == 'modoboa/modoboa'
     needs: coverage
     runs-on: ubuntu-latest
     permissions:

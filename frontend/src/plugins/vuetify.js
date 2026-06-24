@@ -5,7 +5,6 @@
  */
 
 // Styles
-import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
 import '@/styles/main.scss'
 import {
@@ -28,14 +27,31 @@ import {
 } from 'vuetify/locale'
 
 // Composables
+import { h } from 'vue'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
+import { mdiIcons } from './icons'
+
+// SVG icon set: resolves the `mdi-*` names used across the app to the SVG
+// paths in icons.js (a tree-shaken subset of @mdi/js). Values that aren't
+// in the map — e.g. Vuetify's internal `$` aliases, already resolved to
+// SVG paths — are passed through unchanged.
+const mdiSvg = {
+  component: (props) =>
+    h(mdi.component, { ...props, icon: mdiIcons[props.icon] ?? props.icon }),
+}
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
   components,
   directives,
+  icons: {
+    defaultSet: 'mdi',
+    aliases,
+    sets: { mdi: mdiSvg },
+  },
   theme: {
     defaultTheme: 'light',
     themes: {

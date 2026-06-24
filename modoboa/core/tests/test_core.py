@@ -14,6 +14,7 @@ from django.conf import settings
 from django.core import mail
 from django.core import management
 from django.core.cache import cache
+from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -280,6 +281,7 @@ class APICommunicationTestCase(ModoTestCase):
         self.assertEqual(len(mail.outbox), 1)
 
 
+@override_settings(MODOBOA_LOCALCONFIG_CACHE_TIMEOUT=300)
 class LocalConfigCacheTestCase(ModoTestCase):
     """Validate caching of the LocalConfig singleton."""
 

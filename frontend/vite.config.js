@@ -107,7 +107,10 @@ export default defineConfig({
         families: [
           {
             name: 'Roboto',
-            styles: 'wght@100;300;400;500;700;900',
+            // Only the weights actually used by Vuetify/the app: 300 (light),
+            // 400 (regular), 500 (medium), 700 (bold). Thin (100) and Black
+            // (900) were requested but never used in any component.
+            styles: 'wght@300;400;500;700',
           },
         ],
       },

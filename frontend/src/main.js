@@ -14,6 +14,14 @@ import repository from '@/api/repository.js'
 import { setGlobalConfig } from '@/config'
 import { createUserManager } from '@/oidc'
 
+// Force @/auth-gate to be emitted as its own chunk so the inline login gate in
+// index.html can load it (to redirect an unauthenticated visitor) without
+// booting the SPA. This branch never runs — it exists only so the bundler
+// keeps the chunk.
+if (window.__forceAuthGateChunk__) {
+  import('@/auth-gate')
+}
+
 // Dev-only: intercept the API with mock data so the UI can run with no backend.
 // Gated by VITE_MOCK_API — the dynamic import is dead-code-eliminated in
 // production builds (where the flag is unset), so msw never ships.

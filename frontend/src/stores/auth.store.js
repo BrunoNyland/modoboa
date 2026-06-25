@@ -12,7 +12,7 @@ import accountApi from '@/api/account'
 import accountsApi from '@/api/accounts'
 import authApi from '@/api/auth.js'
 import { getAbsoluteUrl, toGettextLocale } from '@/utils'
-import { useGlobalConfig } from '@/main'
+import { useGlobalConfig } from '@/config'
 
 export const useAuthStore = defineStore('auth', () => {
   const config = useGlobalConfig()
@@ -136,6 +136,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function login() {
+    if (import.meta.env.VITE_MOCK_API) {
+      await fetchUser()
+      router.push({ name: 'Dashboard' })
+      return
+    }
     try {
       await manager.signinRedirect()
     } catch (error) {
@@ -170,6 +175,10 @@ export const useAuthStore = defineStore('auth', () => {
     delete repository.defaults.headers.common.Authorization
     authUser.value = {}
     isAuthenticated.value = false
+    if (import.meta.env.VITE_MOCK_API) {
+      router.push({ name: 'Login' })
+      return
+    }
     //TODO: Call the logout callback of OIDC and log out from the IdP
     manager.signoutRedirect()
   }

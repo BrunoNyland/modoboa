@@ -1,10 +1,11 @@
 <template>
   <div>
+    <input type="text" autocomplete="username" style="display:none" name="username" :value="account?.username || account?.email || ''" />
     <template v-if="withPasswordCheck">
       <label class="m-label">{{ $gettext('Current password') }}</label>
       <v-text-field
         v-model="account.password"
-        autocomplete="new-password"
+        autocomplete="current-password"
         variant="outlined"
         type="password"
         density="compact"
@@ -62,6 +63,7 @@
         v-model="account.password_confirmation"
         variant="outlined"
         type="password"
+        autocomplete="new-password"
         :label="$gettext('Confirmation')"
         density="compact"
         :disabled="disabled"

@@ -81,10 +81,11 @@
             }}
           </v-alert>
           <v-form ref="editTFAForm">
+            <input type="text" autocomplete="username" style="display:none" name="username" :value="authStore.authUser?.username || authStore.authUser?.email || ''" />
             <label class="m-label">{{ $gettext('Password') }} </label>
             <v-text-field
               v-model="password"
-              autocomplete="new-password"
+              autocomplete="current-password"
               type="password"
               variant="outlined"
               density="compact"

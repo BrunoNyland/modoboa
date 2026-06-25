@@ -186,7 +186,7 @@ watch(parameters, () => {
 })
 
 function display(element) {
-  if (element.display === '') {
+  if (!element.display) {
     return true
   }
   let result = true

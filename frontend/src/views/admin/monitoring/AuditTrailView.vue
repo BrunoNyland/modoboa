@@ -1,8 +1,10 @@
 <template>
-  <v-toolbar flat>
-    <v-toolbar-title>{{ $gettext('Audit trail') }}</v-toolbar-title>
-  </v-toolbar>
-  <AuditTrailList />
+  <div>
+    <v-toolbar flat>
+      <v-toolbar-title>{{ $gettext('Audit trail') }}</v-toolbar-title>
+    </v-toolbar>
+    <AuditTrailList />
+  </div>
 </template>
 
 <script setup lang="js">

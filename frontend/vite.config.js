@@ -106,7 +106,7 @@ function relocateMfBootstrap() {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    basicSsl(),
+    process.env.VITE_MOCK_API !== 'true' ? basicSsl() : null,
     vue({
       template: { transformAssetUrls },
     }),
@@ -175,7 +175,7 @@ export default defineConfig({
         secure: false,
       },
     },
-    https: true,
+    https: process.env.VITE_MOCK_API !== 'true',
     cors: {
       origin: '*',
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -200,7 +200,7 @@ export default defineConfig({
         secure: false,
       },
     },
-    https: true,
+    https: process.env.VITE_MOCK_API !== 'true',
     cors: {
       origin: '*',
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

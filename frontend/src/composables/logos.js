@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { useGlobalConfig } from '@/main'
+import { useGlobalConfig } from '@/config'
 import { useThemeState } from '@/composables/theme'
 
 export function useLogos() {

@@ -26,18 +26,21 @@ const userSettingsMenuItems = computed(() => {
   }
 
   result.push({
+    id: 'settings',
     text: $gettext('Settings'),
     to: { name: 'AccountSettings' },
     icon: 'mdi-cog',
   })
   if (authUser.value.mailbox) {
     result.push({
+      id: 'filters',
       text: $gettext('Filters'),
       to: { name: 'AccountFilters' },
       icon: 'mdi-filter',
     })
     for (const app of applications.value) {
       result.push({
+        id: `parameters-${app.name}`,
         icon: appIcons[app.name],
         text: app.label,
         to: { name: 'AccountParametersEdit', params: { app: app.name } },

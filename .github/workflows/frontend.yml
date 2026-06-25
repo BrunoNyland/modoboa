@@ -2,9 +2,9 @@ name: Frontend Build
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [master]
     paths:
-      - 'frontend/**'
+      - "frontend/**"
 
 jobs:
   build:
@@ -16,13 +16,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: yarn
-          cache-dependency-path: frontend/yarn.lock
 
       - name: Install dependencies
         working-directory: frontend
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: Test
         working-directory: frontend

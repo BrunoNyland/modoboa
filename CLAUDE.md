@@ -1,0 +1,98 @@
+# CLAUDE.md — contexto do projeto (fork BrunoNyland/modoboa)
+
+Memória de projeto para o Claude Code. Lida automaticamente no início de cada
+sessão. Mantém o contexto e as decisões já tomadas para não serem
+re-descobertas/re-litigadas.
+
+## O que é
+
+Fork pessoal do **Modoboa** (plataforma de e-mail em Django) rodando em
+produção em `mail.sintraffms.com` (~10 usuários, MariaDB/MySQL, uWSGI,
+Dovecot, nginx, layout do `modoboa-installer` em `/srv/modoboa/`). O foco do
+trabalho neste fork tem sido **performance** e **DX do frontend**.
+
+## Stack
+
+- **Backend:** Django, Django REST Framework, `oauth2_provider` (OIDC), Redis
+  (cache + RQ), per-app "parameters registry" (`modoboa/parameters/tools.py`).
+- **Frontend** (`frontend/`): Vue 3 + Vuetify 4, **Vite 8 (Rolldown)**,
+  **Module Federation** (`@module-federation/vite`), `vue3-gettext`, Pinia,
+  vue-router, axios, auth via `oidc-client-ts`.
+- **Deploy do frontend:** o build vai para `modoboa/frontend_dist/`; o comando
+  `load_initial_data` cria symlinks de `{BASE_DIR}/frontend/` para cada entrada
+  do `frontend_dist` (exceto `config.json`); o nginx serve direto.
+
+## Desenvolver o frontend SEM backend (principal p/ trabalho local)
+
+Ver `frontend/README.md` e `frontend/DEV_SEM_BACKEND.md`. Resumo:
+
+```bash
+cd frontend && yarn install && yarn dev:mock   # cross-env VITE_MOCK_API=true vite
+```
+
+- App sobe **logada** (SuperAdmin fake), API interceptada pelo **MSW**, em
+  **HTTP** (o `vite.config.js` desliga o `basicSsl`/https no modo mock, senão o
+  cert autoassinado quebra o registro do service worker).
+- Mocks em `frontend/src/mocks/`: `fixtures.js` (dados), `handlers.js`
+  (endpoints; tem um **catch-all** que loga `[mock] sem fixture: ...` no
+  console), `browser.js` (worker).
+- Tudo atrás de `VITE_MOCK_API` (import dinâmico) → **msw não entra no bundle de
+  produção**. O bypass do OIDC está em `src/stores/auth.store.js`
+  (`validateAccess`/`login`/`$reset`), checando `import.meta.env.VITE_MOCK_API`
+  **ou** o global `globalThis.__MODOBOA_MOCK_API__` setado no `main.js` (o env
+  não é injetado de forma confiável nos módulos expostos via Module Federation).
+- `useGlobalConfig` mora em `src/config.js` (não em `main.js`) para evitar ciclo
+  `store ↔ main`.
+- **Storybook** (componentes isolados): scaffold em `.storybook/`. Falta
+  instalar localmente: `yarn add -D storybook@^10 @storybook/vue3-vite@^10 && yarn storybook`.
+
+## Decisões / trabalho já feito (NÃO re-litigar)
+
+- **Cache do LocalConfig à prova de migrate** (`core/models.py` +
+  `parameters/tools.py`): os defaults do registry são carregados sob demanda via
+  `Registry.ensure_defaults()`. Cache fica ligado por padrão (timeout 300);
+  **não** precisa mais de `MODOBOA_LOCALCONFIG_CACHE_TIMEOUT = 0`.
+- **Ícones MDI em SVG** (`@mdi/js`, `vuetify/iconsets/mdi-svg`, mapa em
+  `src/plugins/icons.js`) — não voltar para a webfont.
+- **Roboto auto-hospedado** (`@fontsource/roboto`, latin + latin-ext, pesos
+  300/400/500/700) — sem Google Fonts externo.
+- **Assets imutáveis:** o plugin `relocateMfBootstrap` no `vite.config.js`
+  dá **hash de conteúdo** aos `mf-entry-bootstrap-*.js` → todo `/assets/`
+  é content-addressed. No nginx, `location ^~ /assets/` é `immutable`;
+  `index.html` e `/remoteEntry.js` ficam no-cache (revalidam). `remoteEntry.js`
+  é unhashed **de propósito** (contrato estável do Module Federation).
+- **Dovecot `auth_cache`** (ops, no servidor): TTL 1h. Cortou o `AUTHENTICATE`
+  de ~320ms → ~80ms (o custo era a introspection do token / PBKDF2 do
+  client-secret).
+- **Pool de conexões IMAP** (`webmail/lib/imap_pool.py`): reusa a conexão IMAP
+  autenticada por usuário/worker. Atrás da flag **`WEBMAIL_IMAP_POOL`** (ligada
+  em produção). Depende do uWSGI ser **só-processos, sem threads** (sem locks).
+  Webmail ficou ~85% mais rápido (~500ms → ~73ms).
+
+## Build / release / deploy
+
+- **`release.yml`** (workflow): em `release: published` ou tag `v*`, builda
+  frontend + compila `.mo` + `python -m build` → anexa o **wheel** na Release.
+  A tag/Release tem que apontar para o commit do fix (o build usa o ref da tag).
+- **Versionamento:** `setuptools_scm`; versões locais `2.9.1+sintraN`.
+- **Atualizar o servidor:** script `modoboa-update.sh` (detecta versão, baixa o
+  wheel da última release, instala, roda `migrate`/`collectstatic`/
+  `load_initial_data`, reinicia o uWSGI).
+- **Gotcha:** o `index.html` precisa ser **symlink** (o `load_initial_data`
+  recria). Se virar arquivo real, serve HTML velho apontando p/ assets errados.
+
+## Convenções
+
+- **CI:** `modoboa.yml` (matriz Python) tem `paths-ignore: frontend/**` →
+  mudanças só-frontend não rodam os testes Python, só o `frontend.yml` (`build`).
+- **Gerenciador:** **yarn** (clássico, com `yarn.lock`). Não versionar
+  `package-lock.json` (npm). O release usa `yarn install --frozen-lockfile` →
+  não adicione deps ao `package.json` sem atualizar o `yarn.lock` no mesmo commit.
+- **Nunca versionar capturas de rede (`*.har`)** — contêm tokens/cookies.
+- **Flags de dev** (`VITE_MOCK_API`, `WEBMAIL_IMAP_TIMING`) devem ser
+  importadas/usadas de forma que o build de produção fique intacto.
+- **Testes:** backend `cd test_project && DB=sqlite python manage.py test <app>`;
+  frontend `yarn test` (vitest).
+- **Commits:** trailer `Co-Authored-By: Claude ...` + `Claude-Session: ...`.
+  PRs criados como **draft**; mergeados após CI verde.
+- Não incluir identificadores internos de modelo em commits/PRs/código.

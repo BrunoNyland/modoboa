@@ -50,3 +50,9 @@ test_project/media
 docker/collections
 docker/redis
 docker/mariadb
+
+# Captura de rede (HAR) — pode conter tokens/cookies; nunca versionar
+*.har
+
+# Projeto usa yarn; não versionar lockfile do npm
+frontend/package-lock.json

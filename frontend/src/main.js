@@ -25,6 +25,10 @@ async function startMockApi() {
   if (!import.meta.env.VITE_MOCK_API) {
     return
   }
+  // Expose the mock flag as a runtime global: import.meta.env replacement is
+  // not reliably injected into the Module-Federation-exposed modules (e.g.
+  // the stores), so consumers there read this global instead.
+  globalThis.__MODOBOA_MOCK_API__ = true
   if (window.__mswStarted) {
     return
   }

@@ -117,7 +117,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Dev-only: skip OIDC entirely and treat the session as authenticated so
     // the UI can be browsed against the MSW mocks. No effect in production
     // (VITE_MOCK_API is unset there).
-    if (import.meta.env.VITE_MOCK_API) {
+    if (import.meta.env.VITE_MOCK_API || globalThis.__MODOBOA_MOCK_API__) {
       if (!isAuthenticated.value || !authUser.value) {
         await fetchUser()
       }
@@ -136,7 +136,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function login() {
-    if (import.meta.env.VITE_MOCK_API) {
+    if (import.meta.env.VITE_MOCK_API || globalThis.__MODOBOA_MOCK_API__) {
       await fetchUser()
       router.push({ name: 'Dashboard' })
       return
@@ -175,7 +175,7 @@ export const useAuthStore = defineStore('auth', () => {
     delete repository.defaults.headers.common.Authorization
     authUser.value = {}
     isAuthenticated.value = false
-    if (import.meta.env.VITE_MOCK_API) {
+    if (import.meta.env.VITE_MOCK_API || globalThis.__MODOBOA_MOCK_API__) {
       router.push({ name: 'Login' })
       return
     }

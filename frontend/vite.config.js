@@ -92,10 +92,73 @@ function relocateMfBootstrap() {
         }
       }
       if (moved.size === 0) return
+
+      // Locate the auth-gate chunk (emitted via the dynamic import in main.js)
+      // so the inline login gate can load it to redirect unauthenticated
+      // visitors without booting the SPA.
+      const authGateChunk = Object.values(bundle).find(
+        (c) =>
+          c.type === 'chunk' &&
+          (c.name === 'auth-gate' ||
+            (c.facadeModuleId && c.facadeModuleId.endsWith('auth-gate.js')))
+      )
+      const authGateSrc = authGateChunk ? `/${authGateChunk.fileName}` : null
+      if (!authGateSrc) {
+        console.warn(
+          '[login-gate] auth-gate chunk not found; leaving the eager MF ' +
+            'bootstrap scripts in index.html (no early login redirect).'
+        )
+      }
+      const bootSrcs = [...moved.values()].map((n) => `/${n}`)
+      // Matches the eager MF bootstrap <script> tags in the built index.html.
+      const bootRe =
+        /[ \t]*<script type="module"[^>]*\bsrc="\/assets\/mf-entry-bootstrap-[^"]+"[^>]*><\/script>\n?/g
+
       for (const htmlPath of htmlFiles) {
         let html = await fs.readFile(htmlPath, 'utf8')
         for (const [oldName, newName] of moved) {
           html = html.split(`/${oldName}`).join(`/${newName}`)
+        }
+        bootRe.lastIndex = 0
+        if (authGateSrc && bootRe.test(html)) {
+          // Remove the eager bootstrap tags; an inline gate injects them only
+          // when the visitor is authenticated (or on the OIDC callback, or on
+          // any error/uncertainty). Otherwise it loads the small auth-gate
+          // chunk and redirects to the IdP — skipping the heavy SPA download.
+          // Worst case (any doubt) == today's behaviour: load the full app.
+          bootRe.lastIndex = 0
+          html = html.replace(bootRe, '')
+          const gate =
+            '    <script>\n' +
+            '      (function () {\n' +
+            `        var BOOT = ${JSON.stringify(bootSrcs)};\n` +
+            `        var AUTH_GATE = ${JSON.stringify(authGateSrc)};\n` +
+            '        function loadApp() {\n' +
+            '          for (var i = 0; i < BOOT.length; i++) {\n' +
+            "            var s = document.createElement('script');\n" +
+            "            s.type = 'module'; s.async = false; s.crossOrigin = 'anonymous';\n" +
+            '            s.src = BOOT[i];\n' +
+            '            document.head.appendChild(s);\n' +
+            '          }\n' +
+            '        }\n' +
+            '        try {\n' +
+            "          if (location.pathname.lastIndexOf('/login', 0) === 0) { loadApp(); return; }\n" +
+            '          var authed = false;\n' +
+            '          for (var k = 0; k < localStorage.length; k++) {\n' +
+            '            var key = localStorage.key(k);\n' +
+            "            if (key && key.lastIndexOf('oidc.user:', 0) === 0) {\n" +
+            '              try {\n' +
+            '                var u = JSON.parse(localStorage.getItem(key));\n' +
+            '                if (u && u.access_token && (!u.expires_at || u.expires_at * 1000 > Date.now())) { authed = true; break; }\n' +
+            '              } catch (e) {}\n' +
+            '            }\n' +
+            '          }\n' +
+            '          if (authed) { loadApp(); return; }\n' +
+            '          import(AUTH_GATE).then(function (m) { return m.redirectToLogin(); }).catch(function () { loadApp(); });\n' +
+            '        } catch (e) { loadApp(); }\n' +
+            '      })();\n' +
+            '    </script>\n'
+          html = html.replace('</head>', gate + '  </head>')
         }
         await fs.writeFile(htmlPath, html)
       }

@@ -27,6 +27,6 @@ domainsApi.getDomain(route.params.id).then((resp) => {
 
 <style scoped>
 .v-toolbar {
-  background-color: #f7f8fa !important;
+  background-color: rgb(var(--v-theme-background)) !important;
 }
 </style>

@@ -4,8 +4,17 @@
  * Global style overrides
  */
 
+// Editorial dark design system (fonts, tokens, Vuetify overrides). Imported
+// after `vuetify/styles` (see plugins/vuetify.js) so its overrides win.
+@use './portfolio';
+
 // Restore heading margin reset removed in Vuetify 4's reduced CSS reset
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin-block-start: 0;
   margin-block-end: 0;
 }

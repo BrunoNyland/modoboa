@@ -40,7 +40,7 @@ const { enableTheme } = useModoboaTheme()
 const props = defineProps({
   color: {
     type: String,
-    default: 'primary',
+    default: 'background',
   },
   menuItems: {
     type: Array,
@@ -78,6 +78,6 @@ if (props.loadTheme) {
 
 <style>
 .v-application {
-  background-color: #f7f8fa !important;
+  background-color: rgb(var(--v-theme-background)) !important;
 }
 </style>

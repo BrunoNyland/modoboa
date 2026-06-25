@@ -16,6 +16,6 @@
 
 <style scoped>
 .v-main {
-  background-color: #f7f8fa;
+  background-color: rgb(var(--v-theme-background));
 }
 </style>

@@ -48,7 +48,7 @@ loadParams(route.params.app)
 
 <style scoped>
 .v-toolbar {
-  background-color: #f7f8fa !important;
+  background-color: rgb(var(--v-theme-background)) !important;
 }
 </style>
 

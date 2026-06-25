@@ -5,36 +5,22 @@ import { computed, inject, ref } from 'vue'
 import gettext, { DEFAULT_LANGUAGE } from '@/plugins/gettext'
 import { useLocale } from 'vuetify'
 import router from '@/router/index.js'
-import { UserManager } from 'oidc-client-ts'
+import { createUserManager } from '@/oidc'
 
 import repository from '@/api/repository'
 import accountApi from '@/api/account'
 import accountsApi from '@/api/accounts'
 import authApi from '@/api/auth.js'
-import { getAbsoluteUrl, toGettextLocale } from '@/utils'
+import { toGettextLocale } from '@/utils'
 import { useGlobalConfig } from '@/config'
 
 export const useAuthStore = defineStore('auth', () => {
   const config = useGlobalConfig()
   const authUser = ref(null)
   const isAuthenticated = ref(false)
-  let redirectUri = getAbsoluteUrl(config.OAUTH_REDIRECT_URI)
-  let postLogoutRedirectUri = getAbsoluteUrl(config.OAUTH_POST_REDIRECT_URI)
   const { current } = useLocale()
 
-  const manager = new UserManager({
-    authority: config.OAUTH_AUTHORITY_URL,
-    client_id: config.OAUTH_CLIENT_ID,
-    redirect_uri: redirectUri,
-    post_logout_redirect_uri: postLogoutRedirectUri,
-    response_type: 'code',
-    scope: 'openid read write',
-    automaticSilentRenew: true,
-    accessTokenExpiringNotificationTime: 60,
-    monitorSession: true,
-    filterProtocolClaims: true,
-    loadUserInfo: true,
-  })
+  const manager = createUserManager(config)
   const fidoCreds = ref([])
 
   const userHasMailbox = computed(() => {

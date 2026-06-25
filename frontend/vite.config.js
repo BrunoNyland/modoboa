@@ -211,7 +211,11 @@ export default defineConfig({
     emptyOutDir: true,
     outDir: '../modoboa/frontend_dist',
     target: 'esnext',
-    modulePreload: false,
+    // Inject <link rel="modulepreload"> for the static module graph so the
+    // browser fetches it in parallel instead of discovering each import
+    // serially (a request waterfall). Polyfill off: target is esnext, so the
+    // browsers we serve support modulepreload natively.
+    modulePreload: { polyfill: false },
     // Minify JS and CSS in production. Without this the main bundle ships
     // unminified (~2.3 MB JS / ~1 MB CSS); esbuild minification roughly
     // halves the JavaScript and shrinks the stylesheet considerably.

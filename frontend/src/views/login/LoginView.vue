@@ -7,22 +7,23 @@ const authStore = useAuthStore()
 const { $gettext } = useGettext()
 
 onMounted(() => authStore.login())
-
 </script>
 
 <template>
-  <v-container class="fill-height" fluid>
-    <v-row align="center" justify="center">
-      <v-col cols="auto" class="text-center">
-      <h1 class="ma-5">{{ $gettext('Attempting to log you in.') }}</h1>
-      <v-progress-circular
-        color="primary"
-        indeterminate
-        :size="128"
-        :width="12"
-        align-self="center"
-      ></v-progress-circular>
-      </v-col>
-    </v-row>
+  <v-container class="login-gate fill-height" fluid>
+    <div class="login-gate__inner">
+      <p class="eyebrow login-gate__eyebrow">
+        {{ $gettext('Redirecting to secure sign-in') }}
+      </p>
+      <h1 class="login-gate__mark">modo<span class="text-accent">boa</span></h1>
+      <div
+        class="login-gate__bar"
+        role="progressbar"
+        :aria-label="$gettext('Signing you in')"
+      >
+        <span></span>
+      </div>
+      <p class="login-gate__foot">{{ $gettext('Authenticating') }} · OIDC</p>
+    </div>
   </v-container>
 </template>

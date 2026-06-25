@@ -184,10 +184,10 @@ await refreshDomain()
 
 <style scoped>
 .v-toolbar {
-  background-color: #f7f8fa !important;
+  background-color: rgb(var(--v-theme-background)) !important;
 }
 .v-tabs-items {
-  background-color: #f7f8fa !important;
+  background-color: rgb(var(--v-theme-background)) !important;
 }
 </style>
 

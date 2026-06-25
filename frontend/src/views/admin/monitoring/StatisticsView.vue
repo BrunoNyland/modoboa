@@ -34,6 +34,6 @@ import TimeSerieChart from '@/components/tools/TimeSerieChart.vue'
 
 <style scoped>
 .v-toolbar {
-  background-color: #f7f8fa !important;
+  background-color: rgb(var(--v-theme-background)) !important;
 }
 </style>

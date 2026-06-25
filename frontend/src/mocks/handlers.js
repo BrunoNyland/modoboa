@@ -26,11 +26,11 @@ export const handlers = [
   ),
   http.get('*/theme/', () =>
     json({
-      theme_primary_color: '#046BF8',
-      theme_primary_color_light: '#3688F9',
-      theme_primary_color_dark: '#0350BA',
-      theme_secondary_color: '#F18429',
-      theme_label_color: '#616161',
+      theme_primary_color: '#7c5cff',
+      theme_primary_color_light: '#a594ff',
+      theme_primary_color_dark: '#5a3fd6',
+      theme_secondary_color: '#a594ff',
+      theme_label_color: '#a3a3a3',
       theme_login_logo_url: null,
       theme_menu_logo_url: null,
       theme_creation_form_logo_url: null,
@@ -177,7 +177,10 @@ export const handlers = [
   }),
   http.get('*/parameters/global/:app/', ({ params }) => {
     if (params.app === 'imap_migration') {
-      return json({ label: 'Migração IMAP', params: { enabled_imapmigration: true } })
+      return json({
+        label: 'Migração IMAP',
+        params: { enabled_imapmigration: true },
+      })
     }
     if (params.app === 'core') {
       return json({
@@ -193,7 +196,12 @@ export const handlers = [
   http.put('*/parameters/global/:app/', async ({ request, params }) => {
     const body = await request.json()
     return json({
-      label: params.app === 'core' ? 'Geral' : (params.app === 'imap_migration' ? 'Migração IMAP' : 'Configurações'),
+      label:
+        params.app === 'core'
+          ? 'Geral'
+          : params.app === 'imap_migration'
+            ? 'Migração IMAP'
+            : 'Configurações',
       params: body,
     })
   }),
@@ -276,19 +284,19 @@ export const handlers = [
       from_address: {
         fulladdress: 'noreply@example.com',
         address: 'noreply@example.com',
-        name: 'Modoboa'
+        name: 'Modoboa',
       },
       to: [
         {
           fulladdress: 'admin@example.com',
           address: 'admin@example.com',
-          name: 'Dev Admin'
-        }
+          name: 'Dev Admin',
+        },
       ],
       cc: [],
       body: '<h3>Bem-vindo ao Modoboa!</h3><p>Este é o corpo do e-mail de boas-vindas mockado em modo local.</p>',
       date: '2026-06-24T12:00:00Z',
-      attachments: []
+      attachments: [],
     }
 
     if (mailid === '1') {
@@ -297,33 +305,30 @@ export const handlers = [
         from_address: {
           fulladdress: 'reports@example.com',
           address: 'reports@example.com',
-          name: 'Reports'
+          name: 'Reports',
         },
         to: [
           {
             fulladdress: 'admin@example.com',
             address: 'admin@example.com',
-            name: 'Dev Admin'
-          }
+            name: 'Dev Admin',
+          },
         ],
         cc: [
           {
             fulladdress: 'manager@example.com',
             address: 'manager@example.com',
-            name: 'Manager'
-          }
+            name: 'Manager',
+          },
         ],
         body: '<h3>Relatório Semanal</h3><p>Olá,</p><p>Aqui está o seu relatório de performance semanal mockado.</p>',
         date: '2026-06-23T08:30:00Z',
-        attachments: [
-          { name: 'report.pdf', partnum: '2' }
-        ]
+        attachments: [{ name: 'report.pdf', partnum: '2' }],
       }
     }
 
     return json(emailContent)
   }),
-
 
   // ----- admin (amostras) -----
   http.get('*/domains/', () => json(fx.domains)),
@@ -489,11 +494,17 @@ export const handlers = [
     return json(newFilterSet)
   }),
   http.post('*/account/filtersets/deactivate_active/', () => {
-    fx.filtersets.forEach(fs => { fs.active = false })
+    fx.filtersets.forEach((fs) => {
+      fs.active = false
+    })
     return json({ status: 'ok' })
   }),
-  http.get('*/account/filtersets/condition_templates/', () => json(fx.conditionTemplates)),
-  http.get('*/account/filtersets/action_templates/', () => json(fx.actionTemplates)),
+  http.get('*/account/filtersets/condition_templates/', () =>
+    json(fx.conditionTemplates)
+  ),
+  http.get('*/account/filtersets/action_templates/', () =>
+    json(fx.actionTemplates)
+  ),
   http.get('*/account/filtersets/:filterset/download/', ({ params }) => {
     return json(`# Sieve Filter file for ${params.filterset}\nkeep;`)
   }),
@@ -509,7 +520,7 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 })
   }),
   http.post('*/account/filtersets/:filterset/activate/', ({ params }) => {
-    fx.filtersets.forEach(fs => {
+    fx.filtersets.forEach((fs) => {
       fs.active = fs.name === params.filterset
     })
     return json({ status: 'ok' })
@@ -517,69 +528,90 @@ export const handlers = [
   http.get('*/account/filtersets/:filterset/filters/', ({ params }) => {
     return json(fx.filtersMap[params.filterset] || [])
   }),
-  http.post('*/account/filtersets/:filterset/filters/', async ({ request, params }) => {
-    const body = await request.json()
-    if (!fx.filtersMap[params.filterset]) {
-      fx.filtersMap[params.filterset] = []
+  http.post(
+    '*/account/filtersets/:filterset/filters/',
+    async ({ request, params }) => {
+      const body = await request.json()
+      if (!fx.filtersMap[params.filterset]) {
+        fx.filtersMap[params.filterset] = []
+      }
+      const newFilter = { ...body, enabled: true }
+      fx.filtersMap[params.filterset].push(newFilter)
+      return json(newFilter)
     }
-    const newFilter = { ...body, enabled: true }
-    fx.filtersMap[params.filterset].push(newFilter)
-    return json(newFilter)
-  }),
-  http.put('*/account/filtersets/:filterset/filters/:filter/', async ({ request, params }) => {
-    const body = await request.json()
-    const filtersList = fx.filtersMap[params.filterset] || []
-    const idx = filtersList.findIndex((f) => f.name === params.filter)
-    if (idx !== -1) {
-      filtersList[idx] = { ...filtersList[idx], ...body }
-      return json(filtersList[idx])
+  ),
+  http.put(
+    '*/account/filtersets/:filterset/filters/:filter/',
+    async ({ request, params }) => {
+      const body = await request.json()
+      const filtersList = fx.filtersMap[params.filterset] || []
+      const idx = filtersList.findIndex((f) => f.name === params.filter)
+      if (idx !== -1) {
+        filtersList[idx] = { ...filtersList[idx], ...body }
+        return json(filtersList[idx])
+      }
+      return new HttpResponse(null, { status: 404 })
     }
-    return new HttpResponse(null, { status: 404 })
-  }),
-  http.delete('*/account/filtersets/:filterset/filters/:filter/', ({ params }) => {
-    const filtersList = fx.filtersMap[params.filterset] || []
-    const idx = filtersList.findIndex((f) => f.name === params.filter)
-    if (idx !== -1) {
-      filtersList.splice(idx, 1)
+  ),
+  http.delete(
+    '*/account/filtersets/:filterset/filters/:filter/',
+    ({ params }) => {
+      const filtersList = fx.filtersMap[params.filterset] || []
+      const idx = filtersList.findIndex((f) => f.name === params.filter)
+      if (idx !== -1) {
+        filtersList.splice(idx, 1)
+      }
+      return new HttpResponse(null, { status: 204 })
     }
-    return new HttpResponse(null, { status: 204 })
-  }),
-  http.post('*/account/filtersets/:filterset/filters/:filter/enable/', ({ params }) => {
-    const filtersList = fx.filtersMap[params.filterset] || []
-    const filterObj = filtersList.find((f) => f.name === params.filter)
-    if (filterObj) {
-      filterObj.enabled = true
+  ),
+  http.post(
+    '*/account/filtersets/:filterset/filters/:filter/enable/',
+    ({ params }) => {
+      const filtersList = fx.filtersMap[params.filterset] || []
+      const filterObj = filtersList.find((f) => f.name === params.filter)
+      if (filterObj) {
+        filterObj.enabled = true
+      }
+      return json({ status: 'ok' })
     }
-    return json({ status: 'ok' })
-  }),
-  http.post('*/account/filtersets/:filterset/filters/:filter/disable/', ({ params }) => {
-    const filtersList = fx.filtersMap[params.filterset] || []
-    const filterObj = filtersList.find((f) => f.name === params.filter)
-    if (filterObj) {
-      filterObj.enabled = false
+  ),
+  http.post(
+    '*/account/filtersets/:filterset/filters/:filter/disable/',
+    ({ params }) => {
+      const filtersList = fx.filtersMap[params.filterset] || []
+      const filterObj = filtersList.find((f) => f.name === params.filter)
+      if (filterObj) {
+        filterObj.enabled = false
+      }
+      return json({ status: 'ok' })
     }
-    return json({ status: 'ok' })
-  }),
-  http.post('*/account/filtersets/:filterset/filters/:filter/move_up/', ({ params }) => {
-    const filtersList = fx.filtersMap[params.filterset] || []
-    const idx = filtersList.findIndex((f) => f.name === params.filter)
-    if (idx > 0) {
-      const temp = filtersList[idx]
-      filtersList[idx] = filtersList[idx - 1]
-      filtersList[idx - 1] = temp
+  ),
+  http.post(
+    '*/account/filtersets/:filterset/filters/:filter/move_up/',
+    ({ params }) => {
+      const filtersList = fx.filtersMap[params.filterset] || []
+      const idx = filtersList.findIndex((f) => f.name === params.filter)
+      if (idx > 0) {
+        const temp = filtersList[idx]
+        filtersList[idx] = filtersList[idx - 1]
+        filtersList[idx - 1] = temp
+      }
+      return json({ status: 'ok' })
     }
-    return json({ status: 'ok' })
-  }),
-  http.post('*/account/filtersets/:filterset/filters/:filter/move_down/', ({ params }) => {
-    const filtersList = fx.filtersMap[params.filterset] || []
-    const idx = filtersList.findIndex((f) => f.name === params.filter)
-    if (idx !== -1 && idx < filtersList.length - 1) {
-      const temp = filtersList[idx]
-      filtersList[idx] = filtersList[idx + 1]
-      filtersList[idx + 1] = temp
+  ),
+  http.post(
+    '*/account/filtersets/:filterset/filters/:filter/move_down/',
+    ({ params }) => {
+      const filtersList = fx.filtersMap[params.filterset] || []
+      const idx = filtersList.findIndex((f) => f.name === params.filter)
+      if (idx !== -1 && idx < filtersList.length - 1) {
+        const temp = filtersList[idx]
+        filtersList[idx] = filtersList[idx + 1]
+        filtersList[idx + 1] = temp
+      }
+      return json({ status: 'ok' })
     }
-    return json({ status: 'ok' })
-  }),
+  ),
 
   // ----- catch-all: mantém a app de pé em endpoints não mockados -----
   http.all('*/api/v2/*', ({ request }) => {

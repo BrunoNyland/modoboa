@@ -26,7 +26,10 @@
       :lines="layoutStore.compactLeftMenu ? false : true"
       nav
     >
-      <template v-for="(item, index) in menuItems" :key="item.text + '-' + index">
+      <template
+        v-for="(item, index) in menuItems"
+        :key="item.text + '-' + index"
+      >
         <template v-if="displayMenuItem(item)">
           <v-list-subheader v-if="item.subheader" class="text-white">
             {{ item.text.toUpperCase() }}
@@ -61,7 +64,10 @@
               >
               </v-list-item>
             </template>
-            <template v-for="(subitem, subindex) in item.children" :key="subitem.text + '-' + subindex">
+            <template
+              v-for="(subitem, subindex) in item.children"
+              :key="subitem.text + '-' + subindex"
+            >
               <template v-if="displayMenuItem(subitem)">
                 <v-list-item
                   v-if="subitem.action"
@@ -96,7 +102,7 @@ import { useAuthStore, useLayoutStore } from '@/stores'
 const props = defineProps({
   color: {
     type: String,
-    default: 'primary',
+    default: 'background',
   },
   menuItems: {
     type: Array,

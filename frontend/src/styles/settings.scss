@@ -9,6 +9,14 @@
 //   $color-pack: false
 // );
 
+// Space Grotesk drives all Vuetify typography (self-hosted in
+// styles/portfolio.scss); crisp 4px corners replace Material's rounded look.
 @use 'vuetify/settings' with (
-  $card-title-flex: 1 0 auto
+  $card-title-flex: 1 0 auto,
+  $body-font-family: (
+    'Space Grotesk',
+    system-ui,
+    sans-serif,
+  ),
+  $border-radius-root: 4px
 );

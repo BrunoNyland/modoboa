@@ -64,8 +64,44 @@ export default createVuetify({
     sets: { mdi: mdiSvg },
   },
   theme: {
-    defaultTheme: 'light',
+    defaultTheme: 'modoboaDark',
     themes: {
+      // Editorial dark theme adapted from brunonyland.com. The deep
+      // background / surface / text tokens come from here; `primary` is the
+      // accent and may be overridden per-deployment by the backend theme
+      // (see composables/theme.js), mirroring the portfolio's accent picker.
+      modoboaDark: {
+        dark: true,
+        colors: {
+          background: '#0a0a0a',
+          surface: '#111111',
+          'surface-bright': '#1c1c1c',
+          'surface-light': '#1a1a1a',
+          'surface-variant': '#2a2a2a',
+          'on-surface-variant': '#a3a3a3',
+          primary: '#7c5cff',
+          'primary-lighten-1': '#a594ff',
+          'primary-darken-1': '#5a3fd6',
+          secondary: '#a594ff',
+          'secondary-darken-1': '#7c5cff',
+          error: '#ff5b3a',
+          info: '#7c5cff',
+          success: '#3ddc84',
+          warning: '#ffb020',
+          label: '#a3a3a3',
+          'on-background': '#f0f0f0',
+          'on-surface': '#f0f0f0',
+          'on-primary': '#0a0a0a',
+        },
+        variables: {
+          'border-color': '#f0f0f0',
+          'border-opacity': 0.16,
+          'high-emphasis-opacity': 0.95,
+          'medium-emphasis-opacity': 0.68,
+          'disabled-opacity': 0.4,
+        },
+      },
+      // Legacy light theme kept available for opt-in.
       light: {
         colors: {
           primary: '#046BF8',

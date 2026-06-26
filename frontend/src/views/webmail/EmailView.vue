@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div class="h-100">
     <div
       v-show="loaded"
-      class="bg-background rounded-lg pa-4 position-relative h-100"
+      class="email-view bg-background pa-4 h-100 d-flex flex-column"
     >
       <v-toolbar>
         <v-btn
@@ -98,7 +98,7 @@
         </v-btn>
       </v-toolbar>
 
-      <div v-if="email" ref="headers" class="email-header">
+      <div v-if="email" class="email-header">
         <h2>{{ email.subject }}</h2>
         <div class="d-flex mt-2">
           <v-menu key="sender">
@@ -157,7 +157,6 @@
       </div>
       <v-alert
         v-if="email?.scheduled_datetime"
-        ref="schedulingInfo"
         type="info"
         variant="tonal"
         density="compact"
@@ -186,7 +185,7 @@
 </template>
 
 <script setup>
-import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useGettext } from 'vue3-gettext'
 import { useBusStore } from '@/stores'
@@ -202,19 +201,12 @@ const router = useRouter()
 const enableLinks = ref(false)
 const email = ref(null)
 const emailSource = ref(null)
-const headers = ref(null)
 const loaded = ref(false)
-const schedulingInfo = ref()
 const showEmailSource = ref(false)
 const working = ref(false)
 
 onMounted(() => {
-  window.addEventListener('resize', resizeEmailIframe)
   fetchMailContent()
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', resizeEmailIframe)
 })
 
 watch(enableLinks, () => {
@@ -226,19 +218,6 @@ const close = () => {
     name: 'MailboxView',
     query: { mailbox: route.query.mailbox },
   })
-}
-
-const resizeEmailIframe = () => {
-  const iframe = document.querySelector('iframe')
-  let rect
-  if (schedulingInfo.value) {
-    rect = schedulingInfo.value.$el.getBoundingClientRect()
-  } else {
-    rect = headers.value.getBoundingClientRect()
-  }
-  iframe.style.top = `${rect.bottom}px`
-  iframe.style.width = `${rect.width}px`
-  iframe.style.height = `${window.innerHeight - rect.bottom - 32}px`
 }
 
 const fetchMailContent = () => {
@@ -261,7 +240,6 @@ const fetchMailContent = () => {
           iframeDoc.close()
         }
         loaded.value = true
-        nextTick(resizeEmailIframe)
       })
     })
 }
@@ -351,14 +329,39 @@ const editDraft = () => {
 </script>
 
 <style>
+/* The view is a flex column: toolbar + header + (optional alert) in flow,
+   then the message frame fills whatever height is left. No JS positioning,
+   so the body never slides up from the bottom or fails to anchor. */
+.email-view {
+  height: 100%;
+  min-height: 0;
+}
 .email-frame {
-  position: absolute !important;
-  /* Aligns with the pa-4 content edge so the body lines up with the header. */
-  left: 16px;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  margin-top: 12px;
   overflow-y: auto;
   border: none;
   /* The rendered email keeps a light canvas (messages assume white). */
   background-color: #fff;
+  /* Soft fade-in instead of an abrupt white pop. */
+  animation: email-frame-in 0.3s ease both;
+}
+
+@keyframes email-frame-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .email-frame {
+    animation: none;
+  }
 }
 
 /* Message header is app chrome, not email content. Flush with the content

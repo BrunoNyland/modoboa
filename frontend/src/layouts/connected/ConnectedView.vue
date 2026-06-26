@@ -2,7 +2,7 @@
   <v-main>
     <v-container fluid style="height: 100%">
       <router-view v-slot="{ Component }">
-        <transition name="fade">
+        <transition name="blur-fade" mode="out-in">
           <component :is="Component" />
         </transition>
       </router-view>

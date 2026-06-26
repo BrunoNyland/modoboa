@@ -145,6 +145,19 @@ body {
   outline-offset: 2px;
 }
 
+/* Vuetify form fields draw their own accent border on focus. Suppress the
+   native inner focus ring so it doesn't double up with that border or clip
+   the placeholder text inside the field. (a11y ring stays on buttons/links.) */
+.v-field input:focus,
+.v-field input:focus-visible,
+.v-field textarea:focus,
+.v-field textarea:focus-visible,
+.v-field select:focus,
+.v-field select:focus-visible,
+.v-field__input:focus-visible {
+  outline: none !important;
+}
+
 /* ============================================================
    TYPOGRAPHY HELPERS (opt-in classes)
    ============================================================ */
@@ -326,7 +339,7 @@ body {
   border: 0;
 }
 
-/* Fade used by App.vue (login <-> app) and ConnectedView (page changes). */
+/* Fade used by App.vue (login <-> app). */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.25s ease;
@@ -335,10 +348,31 @@ body {
 .fade-leave-to {
   opacity: 0;
 }
+
+/* Blur + fade for page/content changes — soft, no jarring skeleton. The
+   leaving view blurs out and the entering view sharpens in. */
+.blur-fade-enter-active,
+.blur-fade-leave-active {
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease;
+}
+.blur-fade-enter-from,
+.blur-fade-leave-to {
+  opacity: 0;
+  filter: blur(8px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fade-enter-active,
-  .fade-leave-active {
+  .fade-leave-active,
+  .blur-fade-enter-active,
+  .blur-fade-leave-active {
     transition: none;
+  }
+  .blur-fade-enter-from,
+  .blur-fade-leave-to {
+    filter: none;
   }
 }
 

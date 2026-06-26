@@ -117,6 +117,14 @@ const props = defineProps({
 })
 
 const options = ref({
+  chart: {
+    background: 'transparent',
+    foreColor: '#a3a3a3',
+    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+  },
+  theme: {
+    mode: 'dark',
+  },
   colors: [
     colors.green.lighten2,
     colors.orange.lighten2,
@@ -129,8 +137,15 @@ const options = ref({
     $gettext('Forwarded'),
     $gettext('Failed'),
   ],
+  stroke: {
+    colors: ['#0a0a0a'],
+  },
+  tooltip: {
+    theme: 'dark',
+  },
   legend: {
     position: 'bottom',
+    labels: { colors: '#a3a3a3' },
   },
 })
 

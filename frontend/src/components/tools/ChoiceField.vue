@@ -1,6 +1,6 @@
 <template>
   <div
-    class="text-subtitle-1 text-grey-darken-1 mb-5"
+    class="text-subtitle-1 text-medium-emphasis mb-5"
     :class="{ 'label--disabled': disabled }"
   >
     <label class="m-label">{{ label }}</label>
@@ -27,7 +27,7 @@
         size="x-large"
         :icon="choice.icon"
       />
-      <span class="text-grey-darken-1">{{ choice.label }}</span>
+      <span class="choice__label">{{ choice.label }}</span>
     </div>
   </div>
 </template>
@@ -97,18 +97,33 @@ onMounted(() => {
 <style lang="scss" scoped>
 .choice {
   flex-basis: 200px;
-  background-color: #f2f5f7;
-  border: 1px solid #dbdddf;
+  background-color: var(--bg-2);
+  border: 1px solid var(--line-2);
   cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+
+  &:hover {
+    background-color: #1a1a1a;
+  }
 
   &--selected {
-    border-color: #046bf8 !important;
+    border-color: var(--accent) !important;
+    background-color: rgba(124, 92, 255, 0.08);
   }
 
   &--disabled {
     cursor: unset;
     opacity: 0.5;
   }
+}
+.choice__label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg);
 }
 .label--disabled {
   opacity: 0.5;

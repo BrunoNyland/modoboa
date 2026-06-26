@@ -66,10 +66,10 @@ export default createVuetify({
   theme: {
     defaultTheme: 'modoboaDark',
     themes: {
-      // Editorial dark theme adapted from brunonyland.com. The deep
-      // background / surface / text tokens come from here; `primary` is the
-      // accent and may be overridden per-deployment by the backend theme
-      // (see composables/theme.js), mirroring the portfolio's accent picker.
+      // Editorial dark theme adapted from brunonyland.com. Appearance is
+      // entirely frontend-driven (the backend theme API was removed), so
+      // these tokens — deep background / surface / text and the accent
+      // `primary` — are the single source of truth.
       modoboaDark: {
         dark: true,
         colors: {

@@ -1,2 +1,6 @@
+# Allow only the public landing/login page ("/") to be indexed; keep the rest
+# of the private webmail/admin out of search results.
+# `Allow: /$` anchors to the exact root path (supported by Google/Bing).
 User-Agent: *
+Allow: /$
 Disallow: /

@@ -10,9 +10,8 @@
           variant="flat"
           @click="close"
         />
-        <v-btn-group color="primary" rounded="lg" density="compact" divided>
+        <v-btn-group class="ml-2" color="primary" rounded="lg" density="compact" divided>
           <v-btn
-            class="ml-2"
             prepend-icon="mdi-send"
             :loading="working"
             :text="$gettext('Send')"

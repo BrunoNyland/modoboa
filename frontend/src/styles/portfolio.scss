@@ -303,64 +303,43 @@ body {
 }
 
 /* ============================================================
-   LOGIN GATE — branded editorial loader (login / OIDC callback)
+   AUTH SCREEN + FADE TRANSITIONS
+   The login / OIDC-callback views render a plain dark screen (no busy
+   loader to glitch on fast redirects); route changes cross-fade instead.
    ============================================================ */
-.login-gate {
+.auth-screen {
+  position: fixed;
+  inset: 0;
   background: var(--bg);
 }
-.login-gate__inner {
-  width: 100%;
-  max-width: 680px;
-  margin-inline: auto;
-  padding: var(--pad);
-  text-align: center;
-}
-.login-gate__eyebrow {
-  margin-bottom: clamp(20px, 4vh, 40px);
-}
-.login-gate__mark {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(64px, 16vw, 200px);
-  line-height: 0.82;
-  letter-spacing: -0.055em;
-  color: var(--fg);
-}
-.login-gate__bar {
-  position: relative;
-  height: 2px;
-  margin: clamp(28px, 6vh, 56px) 0 18px;
-  background: var(--line-2);
-  overflow: hidden;
-}
-.login-gate__bar > span {
+
+/* Visually hidden, still announced to assistive tech. */
+.sr-only {
   position: absolute;
-  inset: 0;
-  width: 40%;
-  background: var(--accent);
-  animation: login-gate-slide 1.4s cubic-bezier(0.7, 0, 0.2, 1) infinite;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
-@keyframes login-gate-slide {
-  0% {
-    transform: translateX(-120%);
-  }
-  100% {
-    transform: translateX(320%);
-  }
+
+/* Fade used by App.vue (login <-> app) and ConnectedView (page changes). */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 @media (prefers-reduced-motion: reduce) {
-  .login-gate__bar > span {
-    width: 100%;
-    animation: none;
-    opacity: 0.6;
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: none;
   }
-}
-.login-gate__foot {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--fg-mute);
 }
 
 /* ============================================================

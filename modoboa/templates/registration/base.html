@@ -5,25 +5,196 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="color-scheme" content="dark" />
     <title>{% trans "Welcome to Modoboa" %}</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/offline.css' %}" />
     <style>
+     /* Editorial dark theme for the auth pages, matching the SPA
+        (brunonyland.com look). Self-hosted fonts, no external request. */
+     @font-face {
+       font-family: 'Space Grotesk'; font-style: normal; font-weight: 400;
+       font-display: swap;
+       src: url("{% static 'fonts/space-grotesk-latin-400.woff2' %}") format('woff2');
+       unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+     }
+     @font-face {
+       font-family: 'Space Grotesk'; font-style: normal; font-weight: 400;
+       font-display: swap;
+       src: url("{% static 'fonts/space-grotesk-latin-ext-400.woff2' %}") format('woff2');
+       unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+     }
+     @font-face {
+       font-family: 'Space Grotesk'; font-style: normal; font-weight: 700;
+       font-display: swap;
+       src: url("{% static 'fonts/space-grotesk-latin-700.woff2' %}") format('woff2');
+       unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+     }
+     @font-face {
+       font-family: 'Space Grotesk'; font-style: normal; font-weight: 700;
+       font-display: swap;
+       src: url("{% static 'fonts/space-grotesk-latin-ext-700.woff2' %}") format('woff2');
+       unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+     }
+     @font-face {
+       font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400;
+       font-display: swap;
+       src: url("{% static 'fonts/jetbrains-mono-latin-400.woff2' %}") format('woff2');
+       unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+     }
+     @font-face {
+       font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400;
+       font-display: swap;
+       src: url("{% static 'fonts/jetbrains-mono-latin-ext-400.woff2' %}") format('woff2');
+       unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+     }
+
+     :root {
+       --bg: #0a0a0a; --bg-2: #111111; --fg: #f0f0f0; --fg-dim: #a3a3a3;
+       --fg-mute: #7a7a7a; --line-2: #404040; --accent: #7c5cff;
+       --accent-2: #a594ff; --warn: #ff5b3a;
+     }
+
+     body {
+       background-color: var(--bg);
+       color: var(--fg);
+       font-family: 'Space Grotesk', system-ui, sans-serif;
+       -webkit-font-smoothing: antialiased;
+     }
      .left-column {
-       background-color: #7c5cff;
+       background-color: var(--bg) !important;
+       border-right: 1px solid var(--line-2);
        text-align: center;
+       gap: 22px;
      }
+     .right-column {
+       background-color: var(--bg) !important;
+     }
+     .logo img {
+       width: clamp(170px, 22vw, 260px);
+       margin-bottom: 0;
+     }
+     .brand__eyebrow {
+       margin: 0;
+       font-family: 'JetBrains Mono', ui-monospace, monospace;
+       font-size: 11px;
+       letter-spacing: 0.2em;
+       text-transform: uppercase;
+       color: var(--fg-dim);
+     }
+
+     .login-box, .message-box {
+       text-align: left;
+     }
+     .login-box { max-width: 380px; }
+     h2 {
+       font-family: 'Space Grotesk', system-ui, sans-serif;
+       font-weight: 700;
+       font-size: clamp(28px, 4vw, 40px);
+       line-height: 1;
+       letter-spacing: -0.03em;
+       color: var(--fg);
+       margin-bottom: 28px;
+       text-align: left;
+     }
+     .eyebrow {
+       font-family: 'JetBrains Mono', ui-monospace, monospace;
+       font-size: 11px;
+       letter-spacing: 0.18em;
+       text-transform: uppercase;
+       color: var(--fg-dim);
+       margin-bottom: 14px;
+     }
+     .input-group { margin-bottom: 18px; }
+     .input-group label {
+       font-family: 'JetBrains Mono', ui-monospace, monospace;
+       font-size: 11px;
+       letter-spacing: 0.12em;
+       text-transform: uppercase;
+       color: var(--fg-dim);
+       margin-bottom: 8px;
+     }
+     .input-group input {
+       width: 100%;
+       box-sizing: border-box;
+       padding: 12px 14px;
+       background-color: var(--bg-2);
+       border: 1px solid var(--line-2);
+       border-radius: 0;
+       color: var(--fg);
+       font-size: 15px;
+       font-family: 'Space Grotesk', system-ui, sans-serif;
+       transition: border-color 0.2s;
+     }
+     .input-group input::placeholder { color: var(--fg-mute); }
+     .input-group input:focus {
+       outline: none;
+       border-color: var(--accent);
+     }
+     .input-group.error input { border-color: var(--warn); }
+     .error-message { color: var(--warn); }
+
+     .checkbox-group { gap: 10px; }
+     .checkbox-group input {
+       width: 16px;
+       height: 16px;
+       accent-color: var(--accent);
+     }
+     .checkbox-group label {
+       font-family: 'JetBrains Mono', ui-monospace, monospace;
+       font-size: 12px;
+       letter-spacing: 0.06em;
+       text-transform: uppercase;
+       color: var(--fg-dim);
+       margin: 0;
+     }
+
+     .btn {
+       width: 100%;
+       padding: 13px;
+       border: none;
+       border-radius: 0;
+       cursor: pointer;
+       font-family: 'JetBrains Mono', ui-monospace, monospace;
+       font-size: 13px;
+       font-weight: 500;
+       letter-spacing: 0.1em;
+       text-transform: uppercase;
+       background-color: var(--line-2);
+       color: var(--fg);
+       transition: background-color 0.2s, color 0.2s;
+       margin-top: 6px;
+     }
+     .btn:hover { background-color: #555555; }
+     .btn:disabled { opacity: 0.5; cursor: default; }
      .btn-primary {
-       background-color: #7c5cff;
-       color: white;
+       background-color: var(--accent);
+       color: #0a0a0a;
      }
-     .btn-primary:hover {
-       background-color: #5a3fd6;
-     }
+     .btn-primary:hover { background-color: var(--accent-2); }
+
+     .footer { margin-top: 24px; }
      .footer a {
-       color: #7c5cff;
+       font-family: 'JetBrains Mono', ui-monospace, monospace;
+       font-size: 12px;
+       letter-spacing: 0.08em;
+       text-transform: uppercase;
+       color: var(--accent);
        text-decoration: none;
-       font-size: 14px;
+     }
+     .footer a:hover { color: var(--accent-2); text-decoration: none; }
+
+     .alert-box {
+       background-color: rgba(255, 91, 58, 0.12);
+       border: 1px solid var(--warn);
+       color: #ffb4a3;
+       border-radius: 0;
+     }
+     .annoucement {
+       background-color: var(--bg-2);
+       border: 1px solid var(--line-2);
+       border-radius: 0;
+       color: var(--fg-dim);
      }
     </style>
     {% block extra_css %}{% endblock %}
@@ -32,8 +203,9 @@
     <div class="container">
       <div class="column left-column">
         <a href="#" class="logo">
-          <img src="{% get_modoboa_logo %}" />
+          <img src="{% get_modoboa_logo %}" alt="Modoboa" />
         </a>
+        <p class="brand__eyebrow">{% trans "Secure mail platform" %}</p>
         {% block sub_content %}{% endblock %}
       </div>
       <div class="column right-column">

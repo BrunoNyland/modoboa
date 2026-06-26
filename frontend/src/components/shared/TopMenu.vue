@@ -160,11 +160,13 @@ onMounted(() => {
   z-index: 100;
 }
 
-/* Match the user-menu avatar to the top-bar trigger avatar (48px / 16px). */
+/* Match the user-menu avatar to the top-bar trigger avatar exactly:
+   JetBrains Mono, 16px / 500, 0.05em tracking (the .v-btn defaults). */
 .user-menu__initials {
+  font-family: var(--font-mono);
   font-size: 16px;
   font-weight: 500;
-  letter-spacing: 0.0892857143em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 

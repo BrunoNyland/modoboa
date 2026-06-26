@@ -300,7 +300,9 @@ body {
   opacity: 0;
 }
 .v-list-item--active {
-  color: var(--accent) !important;
+  /* Lighter accent + bold for stronger contrast on the near-black drawer. */
+  color: var(--accent-2) !important;
+  font-weight: 600;
 }
 .v-list-item--active::before {
   content: '';

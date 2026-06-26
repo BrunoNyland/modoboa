@@ -57,6 +57,7 @@ import {
   mdiEye,
   mdiEyeOutline,
   mdiFile,
+  mdiFileOutline,
   mdiFileExportOutline,
   mdiFileImportOutline,
   mdiFilter,
@@ -112,6 +113,7 @@ import {
   mdiTrashCan,
   mdiTrashCanOutline,
   mdiUndo,
+  mdiUpload,
   mdiViewDashboardOutline,
 } from '@mdi/js'
 
@@ -171,6 +173,7 @@ export const mdiIcons = {
   'mdi-eye': mdiEye,
   'mdi-eye-outline': mdiEyeOutline,
   'mdi-file': mdiFile,
+  'mdi-file-outline': mdiFileOutline,
   'mdi-file-export-outline': mdiFileExportOutline,
   'mdi-file-import-outline': mdiFileImportOutline,
   'mdi-filter': mdiFilter,
@@ -226,5 +229,6 @@ export const mdiIcons = {
   'mdi-trash-can': mdiTrashCan,
   'mdi-trash-can-outline': mdiTrashCanOutline,
   'mdi-undo': mdiUndo,
+  'mdi-upload': mdiUpload,
   'mdi-view-dashboard-outline': mdiViewDashboardOutline,
 }

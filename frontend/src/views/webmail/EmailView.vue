@@ -336,6 +336,18 @@ const editDraft = () => {
   height: 100%;
   min-height: 0;
 }
+/* Let the action toolbar wrap to a second line when the buttons don't fit
+   (e.g. longer labels in pt-BR like "RESPONDER") instead of forcing a
+   horizontal scrollbar. */
+.email-view .v-toolbar,
+.email-view .v-toolbar__content {
+  height: auto !important;
+}
+.email-view .v-toolbar__content {
+  flex-wrap: wrap;
+  row-gap: 8px;
+  padding-block: 8px;
+}
 .email-frame {
   flex: 1 1 auto;
   min-height: 0;

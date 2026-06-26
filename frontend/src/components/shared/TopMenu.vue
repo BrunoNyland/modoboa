@@ -67,7 +67,7 @@
         <v-card min-width="300" max-width="350">
           <v-list>
             <div class="text-center">
-              <v-avatar color="primary">
+              <v-avatar color="primary" rounded="0">
                 <span class="text-headline-medium">{{ userInitials }}</span>
               </v-avatar>
               <v-list-item :title="user.username" />

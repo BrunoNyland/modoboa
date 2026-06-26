@@ -11,7 +11,7 @@ export const currentUser = {
   first_name: 'Dev',
   last_name: 'Admin',
   role: 'SuperAdmins',
-  language: 'pt_br',
+  language: 'pt-br',
   phone_number: null,
   secondary_email: null,
   tfa_enabled: false,

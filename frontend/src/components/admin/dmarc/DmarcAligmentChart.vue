@@ -98,6 +98,9 @@
 </template>
 
 <script setup lang="js">
+// Local (lazy) registration: keeps ApexCharts out of the global plugins
+// chunk so it isn't shipped on the public login page.
+import apexchart from 'vue3-apexcharts'
 import colors from 'vuetify/lib/util/colors'
 import DmarcSourceTable from './DmarcSourceTable.vue'
 import domainsApi from '@/api/domains'

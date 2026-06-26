@@ -134,27 +134,27 @@
       :class="{ 'top-0': !inScheduledView, 'scheduling-top': inScheduledView }"
     >
       <template v-if="emails.results?.length">
-        <v-card
-          v-for="email in emails.results"
-          :key="email.imapid"
-          density="compact"
-          class="mb-2 mx-1"
-          draggable="true"
-          @dragstart="onDragStart(email)"
-        >
-          <v-card-text
-            class="d-flex align-center"
-            :class="{ 'font-weight-bold': email.style === 'unseen' }"
+        <div class="email-list">
+          <div
+            v-for="email in emails.results"
+            :key="email.imapid"
+            class="email-row"
+            :class="{ 'email-row--unseen': email.style === 'unseen' }"
+            draggable="true"
+            @dragstart="onDragStart(email)"
           >
             <v-checkbox
               v-model="webmailStore.selection"
               :value="email.imapid"
               color="primary"
+              density="compact"
               hide-details
             />
             <v-btn
               :icon="email.flagged ? 'mdi-star' : 'mdi-star-outline'"
-              variant="flat"
+              :color="email.flagged ? 'warning' : undefined"
+              variant="text"
+              size="small"
               @click="toggleFollowState(email)"
             />
             <v-menu v-if="inScheduledView" location="bottom">
@@ -170,34 +170,48 @@
               <MenuItems :items="getScheduledMessageActions()" :obj="email" />
             </v-menu>
 
-            <div class="ml-4 clickable" @click="openEmail(email.imapid)">
-              <div>{{ email.subject }}</div>
-              <div class="mt-1 text-grey">
+            <div
+              class="email-row__main clickable"
+              @click="openEmail(email.imapid)"
+            >
+              <div class="email-row__subject">{{ email.subject }}</div>
+              <div class="email-row__from">
                 <EmailAddressList :addresses="getEmailAddresses(email)" />
               </div>
             </div>
-            <v-spacer />
-            <div class="text-right">
-              <div v-if="!isScheduledDateOver(email)">
+
+            <div class="email-row__meta">
+              <div v-if="!isScheduledDateOver(email)" class="email-row__date">
                 {{ getEmailDate(email) }}
               </div>
               <div
                 v-else
-                class="text-error font-weight-bold"
-                style="cursor: pointer"
+                class="email-row__date email-row__date--error clickable"
                 @click="displaySchedulingError(email)"
               >
                 {{ getEmailDate(email) }}
               </div>
-              <div class="mt-1">
-                <v-icon v-if="email.answered" icon="mdi-reply-outline" />
-                <v-icon v-if="email.forwarded" icon="mdi-share-outline" />
-                <v-icon v-if="email.attachments" icon="mdi-paperclip" />
-                <span class="text-grey">{{ $filesize(email.size) }}</span>
+              <div class="email-row__flags">
+                <v-icon
+                  v-if="email.answered"
+                  icon="mdi-reply-outline"
+                  size="small"
+                />
+                <v-icon
+                  v-if="email.forwarded"
+                  icon="mdi-share-outline"
+                  size="small"
+                />
+                <v-icon
+                  v-if="email.attachments"
+                  icon="mdi-paperclip"
+                  size="small"
+                />
+                <span>{{ $filesize(email.size) }}</span>
               </div>
             </div>
-          </v-card-text>
-        </v-card>
+          </div>
+        </div>
       </template>
       <v-alert
         v-else
@@ -511,9 +525,6 @@ watch(page, () => {
 </script>
 
 <style lang="scss" scoped>
-.v-card-text {
-  padding: 0;
-}
 .emails {
   margin-top: 150px;
 }
@@ -522,5 +533,92 @@ watch(page, () => {
 }
 .scheduling-top {
   top: 45px;
+}
+
+/* Dense hairline message list (portfolio editorial rows). */
+.email-list {
+  margin: 0 4px 8px;
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  background: var(--bg);
+  overflow: hidden;
+}
+.email-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 16px 6px 6px;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.2s;
+}
+.email-row:last-child {
+  border-bottom: 0;
+}
+.email-row:hover {
+  background: var(--bg-2);
+}
+.email-row--unseen::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+}
+.email-row__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: 8px;
+}
+.email-row__subject {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.email-row--unseen .email-row__subject {
+  font-weight: 700;
+}
+.email-row__from {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--fg-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.email-row__meta {
+  flex: 0 0 auto;
+  padding-left: 16px;
+  text-align: right;
+}
+.email-row__date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+.email-row__date--error {
+  color: rgb(var(--v-theme-error));
+  font-weight: 700;
+}
+.email-row__flags {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-mute);
 }
 </style>

@@ -1,8 +1,16 @@
 <template>
   <div>
-    <div v-show="loaded" class="bg-background rounded-lg pa-4 position-relative h-100">
+    <div
+      v-show="loaded"
+      class="bg-background rounded-lg pa-4 position-relative h-100"
+    >
       <v-toolbar>
-        <v-btn icon="mdi-arrow-left" size="small" variant="flat" @click="close" />
+        <v-btn
+          icon="mdi-arrow-left"
+          size="small"
+          variant="flat"
+          @click="close"
+        />
 
         <v-btn-group color="primary" rounded="lg" density="compact" divided>
           <v-btn prepend-icon="mdi-reply" @click="() => replyToEmail()">
@@ -16,7 +24,10 @@
                   :title="$gettext('Reply all')"
                   @click="() => replyToEmail(true)"
                 />
-                <v-list-item :title="$gettext('Forward')" @click="forwardEmail" />
+                <v-list-item
+                  :title="$gettext('Forward')"
+                  @click="forwardEmail"
+                />
               </v-list>
             </v-menu>
           </v-btn>
@@ -87,7 +98,7 @@
         </v-btn>
       </v-toolbar>
 
-      <div v-if="email" ref="headers" class="bg-white pa-4">
+      <div v-if="email" ref="headers" class="email-header">
         <h2>{{ email.subject }}</h2>
         <div class="d-flex mt-2">
           <v-menu key="sender">
@@ -345,6 +356,35 @@ const editDraft = () => {
   left: 24px;
   overflow-y: auto;
   border: none;
+  /* The rendered email keeps a light canvas (messages assume white). */
   background-color: #fff;
+}
+
+/* Message header is app chrome, not email content: dark editorial panel. */
+.email-header {
+  padding: 20px clamp(16px, 2vw, 28px);
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+}
+.email-header h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(20px, 2.2vw, 30px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+.email-header h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+}
+.email-header .text-grey {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.03em;
 }
 </style>

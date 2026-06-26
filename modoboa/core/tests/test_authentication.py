@@ -406,8 +406,8 @@ class GetModoboaLogoTagTestCase(ModoTestCase):
 
     TEMPLATE = Template("{% load core_tags %}{% get_modoboa_logo %}")
 
-    def _render(self):
-        return self.TEMPLATE.render(Context({}))
+    def _render(self, context=None):
+        return self.TEMPLATE.render(Context(context or {}))
 
     def test_falls_back_to_custom_logo_setting(self):
         """``MODOBOA_CUSTOM_LOGO`` is used."""

@@ -8,6 +8,7 @@
 
 {% block main_content %}
   <div class="login-box">
+    <p class="eyebrow">{% translate "Welcome back" %}</p>
     <h2>{% translate "Identification" %}</h2>
     <form method="post" action="{% url 'core:login' %}" class="login-form form-horizontal">
       {% csrf_token %}

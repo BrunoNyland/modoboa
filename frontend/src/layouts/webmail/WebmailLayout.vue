@@ -11,48 +11,8 @@
       >
         <div class="resize-handle" @mousedown="startResize" />
         <template #prepend>
-          <div class="d-flex align-center folder-header">
-            <template v-if="!rail">
-              <span class="folder-title" :title="currentFolderLabel">{{
-                currentFolderLabel
-              }}</span>
-              <v-btn
-                icon
-                variant="text"
-                size="small"
-                :title="$gettext('Mailbox settings')"
-                :aria-label="$gettext('Mailbox settings')"
-                class="folder-header__settings"
-              >
-                <v-icon icon="mdi-cog-outline" />
-                <v-menu activator="parent" location="bottom">
-                  <v-list density="compact">
-                    <v-list-item
-                      :title="$gettext('Create a new mailbox')"
-                      prepend-icon="mdi-plus"
-                      @click="openMailboxForm"
-                    />
-                    <v-list-item
-                      :title="$gettext('Edit this mailbox')"
-                      prepend-icon="mdi-pencil"
-                      :disabled="readOnlyMailbox"
-                      @click="editMailbox"
-                    />
-                    <v-list-item
-                      :title="$gettext('Delete this mailbox')"
-                      prepend-icon="mdi-trash-can"
-                      :disabled="readOnlyMailbox"
-                      @click="deleteMailbox"
-                    />
-                    <v-list-item
-                      :title="$gettext('Compress this mailbox')"
-                      prepend-icon="mdi-folder-zip-outline"
-                      @click="compressMailbox"
-                    />
-                  </v-list>
-                </v-menu>
-              </v-btn>
-            </template>
+          <div class="d-flex align-center">
+            <span v-if="!rail" class="brand-wordmark">webmail</span>
             <v-spacer v-if="!rail" />
             <v-btn
               :icon="rail ? 'mdi-chevron-right' : 'mdi-chevron-left'"
@@ -119,43 +79,8 @@
             </div>
           </div>
 
-          <!-- Collapsed (rail) drawer: compact icon + thin bar. -->
+          <!-- Collapsed (rail) drawer: thin storage bar only. -->
           <div v-else class="quota-rail">
-            <v-btn
-              icon="mdi-cog-outline"
-              variant="text"
-              size="small"
-              :title="$gettext('Mailbox settings')"
-              :aria-label="$gettext('Mailbox settings')"
-            >
-              <v-icon icon="mdi-cog-outline" />
-              <v-menu activator="parent" location="top">
-                <v-list density="compact">
-                  <v-list-item
-                    :title="$gettext('Create a new mailbox')"
-                    prepend-icon="mdi-plus"
-                    @click="openMailboxForm"
-                  />
-                  <v-list-item
-                    :title="$gettext('Edit this mailbox')"
-                    prepend-icon="mdi-pencil"
-                    :disabled="readOnlyMailbox"
-                    @click="editMailbox"
-                  />
-                  <v-list-item
-                    :title="$gettext('Delete this mailbox')"
-                    prepend-icon="mdi-trash-can"
-                    :disabled="readOnlyMailbox"
-                    @click="deleteMailbox"
-                  />
-                  <v-list-item
-                    :title="$gettext('Compress this mailbox')"
-                    prepend-icon="mdi-folder-zip-outline"
-                    @click="compressMailbox"
-                  />
-                </v-list>
-              </v-menu>
-            </v-btn>
             <v-progress-linear
               v-if="mailboxQuota"
               :color="quotaColor"
@@ -171,16 +96,6 @@
       </v-navigation-drawer>
     </template>
   </ConnectedLayout>
-  <v-dialog v-model="showMailboxForm" max-width="800">
-    <MailboxForm
-      :user-mailboxes="userMailboxes"
-      :mailbox="editedMailbox"
-      :hdelimiter="hdelimiter"
-      @mailbox-renamed="navigateToMailbox"
-      @close="closeMailboxForm()"
-    />
-  </v-dialog>
-  <ConfirmDialog ref="confirm" />
   </div>
 </template>
 
@@ -192,9 +107,7 @@ import { filesize } from 'filesize'
 import { useBusStore } from '@/stores'
 import { localeToBCP47 } from '@/utils'
 import gettext from '@/plugins/gettext'
-import ConfirmDialog from '@/components/tools/ConfirmDialog.vue'
 import ConnectedLayout from '@/layouts/connected/ConnectedLayout.vue'
-import MailboxForm from '@/components/webmail/MailboxForm.vue'
 import MailboxList from '@/components/webmail/MailboxList.vue'
 import api from '@/api/webmail'
 
@@ -203,7 +116,6 @@ const route = useRoute()
 const router = useRouter()
 const busStore = useBusStore()
 
-const confirm = ref()
 const drawer = ref(true)
 const rail = ref(false)
 const drawerWidth = ref(256)
@@ -224,29 +136,10 @@ function startResize(e) {
   document.addEventListener('mousemove', onMouseMove)
   document.addEventListener('mouseup', onMouseUp)
 }
-const editedMailbox = ref(null)
 const hdelimiter = ref(null)
 const mailboxQuota = ref(null)
 const selectedMailbox = ref(route.query.mailbox || 'INBOX')
-const showMailboxForm = ref(false)
 const userMailboxes = ref([])
-
-const readOnlyMailbox = computed(() => {
-  const mailboxes = ['INBOX']
-  return mailboxes.includes(route.query.mailbox || 'INBOX')
-})
-
-// Name of the currently open folder, shown as the drawer title. Prefer the
-// (already translated) label coming from the backend; fall back to the last
-// path segment for nested mailboxes not present in the top-level list.
-const currentFolderLabel = computed(() => {
-  const name = route.query.mailbox || 'INBOX'
-  const found = userMailboxes.value.find((mb) => mb.name === name)
-  if (found) {
-    return found.label.split('/').pop()
-  }
-  return name.split(hdelimiter.value || '.').pop()
-})
 
 const quotaColor = computed(() => {
   if (!mailboxQuota.value || !hasQuotaLimit.value) {
@@ -312,52 +205,6 @@ const openComposeForm = () => {
   router.push({ name: 'ComposeEmailView' })
 }
 
-const closeMailboxForm = () => {
-  showMailboxForm.value = false
-  editedMailbox.value = null
-  fetchUserMailboxes()
-}
-
-const openMailboxForm = () => {
-  showMailboxForm.value = true
-}
-
-const editMailbox = () => {
-  editedMailbox.value = selectedMailbox.value
-  showMailboxForm.value = true
-}
-
-const navigateToMailbox = (mailbox) => {
-  selectedMailbox.value = mailbox
-  router.push({
-    name: 'MailboxView',
-    query: { mailbox },
-  })
-}
-
-const compressMailbox = async () => {
-  await api.compressUserMailbox({ name: selectedMailbox.value })
-  busStore.displayNotification({ msg: $gettext('Mailbox compressed') })
-}
-
-const deleteMailbox = async () => {
-  const confirmed = await confirm.value.open(
-    $gettext('Warning'),
-    $gettext('Delete this mailbox?'),
-    {
-      color: 'warning',
-      agreeLabel: $gettext('Yes'),
-      cancelLabel: $gettext('No'),
-    }
-  )
-  if (!confirmed) {
-    return
-  }
-  await api.deleteUserMailbox({ name: selectedMailbox.value })
-  busStore.displayNotification({ msg: $gettext('Mailbox deleted') })
-  navigateToMailbox('INBOX')
-}
-
 watch(dataKey, () => {
   fetchUserMailboxes()
 })
@@ -421,27 +268,6 @@ mailboxQuota.value = resp.data
 .quota-panel__detail strong {
   color: var(--fg);
   font-weight: 600;
-}
-
-/* Drawer header: open folder name + its settings menu. */
-.folder-header {
-  padding-left: 14px;
-  min-height: 48px;
-}
-.folder-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 20px;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  color: var(--fg);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.folder-header__settings {
-  margin-left: 4px;
-  flex-shrink: 0;
 }
 
 /* Compact variant when the drawer is collapsed to a rail. */

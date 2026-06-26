@@ -1,2 +1,8 @@
+# Allow only the public landing/login page ("/") to be indexed; keep the rest
+# of the private webmail/admin out of search results. Blocking the audited page
+# itself is what tanks the Lighthouse SEO score, so the entry page stays
+# crawlable while everything below it is disallowed.
+# `Allow: /$` anchors to the exact root path (supported by Google/Bing).
 User-Agent: *
+Allow: /$
 Disallow: /

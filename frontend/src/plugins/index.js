@@ -11,7 +11,6 @@ import gettext from './gettext'
 import filters from './filters'
 import permissions from './permissions'
 import pinia from '@/stores'
-import VueApexCharts from 'vue3-apexcharts'
 
 export function registerPlugins(app) {
   app
@@ -21,5 +20,4 @@ export function registerPlugins(app) {
     .use(router)
     .use(filters)
     .use(permissions)
-    .use(VueApexCharts)
 }

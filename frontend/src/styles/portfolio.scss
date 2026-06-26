@@ -207,7 +207,7 @@ body {
 }
 .v-card {
   border: 1px solid var(--line-2);
-  border-radius: 4px;
+  border-radius: 2px;
   box-shadow: none !important;
   background-image: none;
 }
@@ -230,7 +230,7 @@ body {
   font-family: var(--font-mono);
   font-weight: 500;
   letter-spacing: 0.06em;
-  border-radius: 4px;
+  border-radius: 2px;
   text-transform: uppercase;
 }
 .v-btn--variant-flat.bg-primary,
@@ -240,7 +240,7 @@ body {
 
 /* Inputs: square-ish, hairline outline that lights up in accent on focus. */
 .v-field {
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 /* Navigation drawer: deep panel with a single hairline divider. */
@@ -414,5 +414,3 @@ textarea::placeholder,
 .v-table .v-table__wrapper > table > tbody > tr:not(:last-child) > th {
   border-bottom: 1px solid var(--line) !important;
 }
-
-

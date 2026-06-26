@@ -34,7 +34,7 @@ export default {
     (value !== '' &&
       value != null &&
       value !== undefined &&
-      (!Array.isArray(value) || value.length)) ||
+      (!Array.isArray(value) || value.length > 0)) ||
     $gettext('Field is required'),
   email: (value) => validateEmail(value),
   emailOrNull: (value) => value != null || value !== '' || validateEmail(value),

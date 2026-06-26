@@ -12,7 +12,7 @@
           @click="close"
         />
 
-        <v-btn-group color="primary" rounded="lg" density="compact" divided>
+        <v-btn-group color="primary" rounded="lg" density="compact" divided class="flex-shrink-0">
           <v-btn prepend-icon="mdi-reply" @click="() => replyToEmail()">
             {{ $gettext('Reply') }}
           </v-btn>

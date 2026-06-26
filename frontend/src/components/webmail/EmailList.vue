@@ -539,7 +539,7 @@ watch(page, () => {
 .email-list {
   margin: 0 4px 8px;
   border: 1px solid var(--line-2);
-  border-radius: 2px;
+  border-radius: 0;
   background: var(--bg);
   overflow: hidden;
 }

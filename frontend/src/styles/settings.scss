@@ -10,8 +10,9 @@
 // );
 
 // Space Grotesk drives all Vuetify typography (self-hosted in
-// styles/portfolio.scss); near-square 2px corners replace Material's rounded
-// look, matching the editorial/brutalist feel of brunonyland.com.
+// styles/portfolio.scss); square corners (radius 0) replace Material's rounded
+// look, matching the editorial/brutalist feel of brunonyland.com. Circular
+// elements (avatars, progress) opt back in explicitly and are unaffected.
 @use 'vuetify/settings' with (
   $card-title-flex: 1 0 auto,
   $body-font-family: (
@@ -19,5 +20,5 @@
     system-ui,
     sans-serif,
   ),
-  $border-radius-root: 2px
+  $border-radius-root: 0px
 );

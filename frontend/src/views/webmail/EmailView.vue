@@ -237,7 +237,7 @@ const resizeEmailIframe = () => {
     rect = headers.value.getBoundingClientRect()
   }
   iframe.style.top = `${rect.bottom}px`
-  iframe.style.width = `${rect.width - 24}px`
+  iframe.style.width = `${rect.width}px`
   iframe.style.height = `${window.innerHeight - rect.bottom - 32}px`
 }
 
@@ -353,19 +353,20 @@ const editDraft = () => {
 <style>
 .email-frame {
   position: absolute !important;
-  left: 24px;
+  /* Aligns with the pa-4 content edge so the body lines up with the header. */
+  left: 16px;
   overflow-y: auto;
   border: none;
   /* The rendered email keeps a light canvas (messages assume white). */
   background-color: #fff;
 }
 
-/* Message header is app chrome, not email content: dark editorial panel. */
+/* Message header is app chrome, not email content. Flush with the content
+   edge (no side padding) so the subject lines up with the body below; a
+   single bottom rule separates it from the rendered email. */
 .email-header {
-  padding: 20px clamp(16px, 2vw, 28px);
-  background: var(--bg-2);
-  border: 1px solid var(--line-2);
-  border-radius: 2px;
+  padding: 4px 0 16px;
+  border-bottom: 1px solid var(--line-2);
 }
 .email-header h2 {
   font-family: var(--font-display);

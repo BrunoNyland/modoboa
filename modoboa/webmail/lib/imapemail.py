@@ -286,7 +286,7 @@ class ReplyModifier(Modifier):
             textheader = f"<p>{textheader}</p>"
         else:
             textheader = f"{textheader}\n"
-        self.body = textheader + self.body
+        self.body = textheader + (self.body or "")
 
     def _modify_plain(self):
         super()._modify_plain()

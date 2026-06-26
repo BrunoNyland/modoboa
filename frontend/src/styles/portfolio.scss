@@ -207,7 +207,7 @@ body {
 }
 .v-card {
   border: 1px solid var(--line-2);
-  border-radius: 4px;
+  border-radius: 0;
   box-shadow: none !important;
   background-image: none;
 }
@@ -225,12 +225,12 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* Buttons: flat, crisp, mono-ish uppercase (matches global default class). */
+/* Buttons: flat, square, mono uppercase (matches global default class). */
 .v-btn {
   font-family: var(--font-mono);
   font-weight: 500;
   letter-spacing: 0.06em;
-  border-radius: 4px;
+  border-radius: 0;
   text-transform: uppercase;
 }
 .v-btn--variant-flat.bg-primary,
@@ -238,9 +238,19 @@ body {
   box-shadow: none;
 }
 
-/* Inputs: square-ish, hairline outline that lights up in accent on focus. */
+/* Toolbar buttons get a consistent minimum gap and never run together.
+   Split button-groups (a single .v-btn-group child) stay internally joined. */
+.v-toolbar__content {
+  gap: 8px;
+}
+.v-toolbar__content > .v-btn,
+.v-toolbar__content > .v-btn-group {
+  margin-inline: 0 !important;
+}
+
+/* Inputs: square, hairline outline that lights up in accent on focus. */
 .v-field {
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 /* Navigation drawer: deep panel with a single hairline divider. */
@@ -414,5 +424,3 @@ textarea::placeholder,
 .v-table .v-table__wrapper > table > tbody > tr:not(:last-child) > th {
   border-bottom: 1px solid var(--line) !important;
 }
-
-

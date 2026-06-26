@@ -98,6 +98,7 @@
               return-object
               :label="$gettext('To')"
               :placeholder="$gettext('Provide one or more addresses')"
+              persistent-placeholder
               variant="outlined"
               density="compact"
               hide-details="auto"
@@ -130,6 +131,7 @@
             return-object
             :label="$gettext('Cc')"
             :placeholder="$gettext('Provide one or more addresses')"
+            persistent-placeholder
             variant="outlined"
             density="compact"
             hide-details="auto"
@@ -149,6 +151,7 @@
             return-object
             :label="$gettext('Bcc')"
             :placeholder="$gettext('Provide one or more addresses')"
+            persistent-placeholder
             variant="outlined"
             density="compact"
             hide-details="auto"

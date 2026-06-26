@@ -26,15 +26,12 @@
           <v-col cols="7">
             <v-row>
               <v-col v-for="box in boxes" :key="box.key" cols="6">
-                <v-sheet outlined :color="box.color" rounded>
-                  <v-card outlined class="pa-10 text-center">
-                    <span
-                      :class="'text-headline-large ' + getTextColors(box.color)"
-                      >{{ stats[box.key] }}</span
-                    ><br />
-                    <span class="text-subtitle-1">{{ box.label }}</span>
-                  </v-card>
-                </v-sheet>
+                <div class="dmarc-box">
+                  <div class="dmarc-box__n" :style="{ color: box.color }">
+                    {{ stats[box.key] }}
+                  </div>
+                  <div class="dmarc-box__l">{{ box.label }}</div>
+                </div>
               </v-col>
             </v-row>
           </v-col>
@@ -117,6 +114,14 @@ const props = defineProps({
 })
 
 const options = ref({
+  chart: {
+    background: 'transparent',
+    foreColor: '#a3a3a3',
+    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+  },
+  theme: {
+    mode: 'dark',
+  },
   colors: [
     colors.green.lighten2,
     colors.orange.lighten2,
@@ -129,27 +134,26 @@ const options = ref({
     $gettext('Forwarded'),
     $gettext('Failed'),
   ],
+  stroke: {
+    colors: ['#0a0a0a'],
+  },
+  tooltip: {
+    theme: 'dark',
+  },
   legend: {
     position: 'bottom',
+    labels: { colors: '#a3a3a3' },
   },
 })
 
 const alignments = ref(null)
 
 const boxes = ref([
-  { key: 'total', label: $gettext('Total'), color: 'primary lighten-2' },
-  {
-    key: 'aligned',
-    label: $gettext('Fully aligned'),
-    color: 'green lighten-2',
-  },
-  {
-    key: 'trusted',
-    label: $gettext('Partially aligned'),
-    color: 'orange lighten-2',
-  },
-  { key: 'forwarded', label: $gettext('Forwarded'), color: 'blue lighten-2' },
-  { key: 'failed', label: $gettext('Failed'), color: 'red lighten-2' },
+  { key: 'total', label: $gettext('Total'), color: '#7c5cff' },
+  { key: 'aligned', label: $gettext('Fully aligned'), color: '#3ddc84' },
+  { key: 'trusted', label: $gettext('Partially aligned'), color: '#ffb020' },
+  { key: 'forwarded', label: $gettext('Forwarded'), color: '#41d1cc' },
+  { key: 'failed', label: $gettext('Failed'), color: '#ff5b3a' },
 ])
 
 const now = DateTime.now()
@@ -176,17 +180,6 @@ const weekEnd = computed(() => {
   })
   return dt.endOf('week')
 })
-
-function getTextColors(value) {
-  let result = ''
-  for (const color of value.split(' ')) {
-    if (result !== '') {
-      result += ' '
-    }
-    result += 'text-' + color
-  }
-  return result
-}
 
 function nextWeek() {
   if (currentWeek.value === 52) {
@@ -243,3 +236,28 @@ watch(currentYear, () => {
   fetchAlignmentStats()
 })
 </script>
+
+<style scoped lang="scss">
+/* Editorial stat panels (hairline, big display number, mono label). */
+.dmarc-box {
+  padding: 20px 18px;
+  text-align: center;
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+}
+.dmarc-box__n {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(28px, 3vw, 44px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.dmarc-box__l {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+</style>

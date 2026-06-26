@@ -10,7 +10,7 @@
             <span v-if="period">: {{ period }}</span>
           </v-btn>
         </template>
-        <v-container class="bg-white" fluid>
+        <v-container class="bg-surface pa-4" fluid>
           <v-row no-gutters>
             <v-col cols="12" md="6" class="pr-2">
               <div class="text-subtitle-1">
@@ -80,10 +80,16 @@ const title = computed(() => {
 })
 
 const menu = ref(false)
+// Editorial dark chart: transparent canvas (the card shows through), mono
+// axis labels, hairline grid and a dark tooltip — matching the design tokens.
+const MONO = "'JetBrains Mono', ui-monospace, monospace"
 const options = ref({
   chart: {
     type: 'area',
     stacked: false,
+    background: 'transparent',
+    foreColor: '#a3a3a3',
+    fontFamily: MONO,
     zoom: {
       type: 'x',
       enabled: true,
@@ -93,12 +99,44 @@ const options = ref({
       autoSelected: 'zoom',
     },
   },
+  theme: {
+    mode: 'dark',
+  },
   dataLabels: {
     enabled: false,
   },
-  yaxis: {},
+  stroke: {
+    width: 2,
+    curve: 'smooth',
+  },
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shadeIntensity: 1,
+      opacityFrom: 0.35,
+      opacityTo: 0.05,
+      stops: [0, 90, 100],
+    },
+  },
+  grid: {
+    borderColor: '#2e2e2e',
+    strokeDashArray: 0,
+  },
+  tooltip: {
+    theme: 'dark',
+  },
+  legend: {
+    labels: { colors: '#a3a3a3' },
+    fontFamily: MONO,
+  },
+  yaxis: {
+    labels: { style: { fontFamily: MONO } },
+  },
   xaxis: {
     type: 'datetime',
+    axisBorder: { color: '#2e2e2e' },
+    axisTicks: { color: '#2e2e2e' },
+    labels: { style: { fontFamily: MONO } },
   },
 })
 
@@ -115,9 +153,9 @@ const periods = ref([
 
 function getColors() {
   if (_props.graphicName === 'averagetraffic') {
-    return ['#ff6347', '#ffff00', '#4682B4', '#7cfc00', '#ffa500', '#d3d3d3']
+    return ['#7c5cff', '#41d1cc', '#ff5b3a', '#3ddc84', '#ffb020', '#a594ff']
   }
-  return ['#ffa500', '#41d1cc']
+  return ['#7c5cff', '#41d1cc']
 }
 
 function setCustomPeriod() {
@@ -163,8 +201,5 @@ watch(
 <style scoped>
 .v-card {
   z-index: 5;
-}
-.v-menu__content {
-  background-color: white !important;
 }
 </style>

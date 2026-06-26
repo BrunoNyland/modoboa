@@ -1,12 +1,27 @@
 <template>
+  <!-- Mobile-only top bar: hosts the hamburger that toggles the drawer. -->
+  <v-app-bar v-if="mobile" flat density="comfortable" :color="color">
+    <v-app-bar-nav-icon
+      :aria-label="$gettext('Toggle navigation')"
+      @click="drawer = !drawer"
+    />
+    <v-img
+      :src="menuLogoPath"
+      max-width="150"
+      class="logo"
+      @click="router.push(props.logoRoute)"
+    />
+  </v-app-bar>
+
   <v-navigation-drawer
     v-model="drawer"
-    :rail="rail"
-    permanent
+    :rail="rail && !mobile"
+    :permanent="!mobile"
+    :temporary="mobile"
     :color="color"
     app
   >
-    <div class="d-flex align-center">
+    <div v-if="!mobile" class="d-flex align-center">
       <v-img
         :src="menuLogoPath"
         max-width="190"
@@ -94,8 +109,9 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ref, computed, watch } from 'vue'
+import { useDisplay } from 'vuetify'
 import { useLogos } from '@/composables/logos'
 import { useAuthStore, useLayoutStore } from '@/stores'
 
@@ -118,10 +134,29 @@ const props = defineProps({
 const authStore = useAuthStore()
 const layoutStore = useLayoutStore()
 const router = useRouter()
+const route = useRoute()
+const { mobile } = useDisplay()
 const { menuLogoPath } = useLogos()
 
 const rail = ref(false)
-const drawer = ref(true)
+// Open by default on desktop (permanent drawer); closed on mobile (the
+// hamburger in the app bar opens the temporary overlay drawer).
+const drawer = ref(!mobile.value)
+
+// Keep the drawer state sane when crossing the mobile breakpoint.
+watch(mobile, (isMobile) => {
+  drawer.value = !isMobile
+})
+
+// On mobile, dismiss the overlay drawer after navigating to a new view.
+watch(
+  () => route.fullPath,
+  () => {
+    if (mobile.value) {
+      drawer.value = false
+    }
+  }
+)
 
 const authUser = computed(() => authStore.authUser)
 const isAuthenticated = computed(() => authStore.isAuthenticated)

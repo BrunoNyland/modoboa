@@ -48,7 +48,7 @@
       />
     </v-toolbar>
 
-    <div v-if="currentFilterSet" class="bg-white mt-4 pa-2">
+    <div v-if="currentFilterSet" class="mt-4 pa-2">
       <template v-if="!rawMode">
         <div class="d-flex align-center">
           <v-btn

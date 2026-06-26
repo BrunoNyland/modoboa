@@ -178,7 +178,7 @@ defineExpose({
 
 <style lang="scss">
 .inner {
-  background-color: #fff;
+  background-color: rgb(var(--v-theme-surface));
 }
 .v-stepper {
   width: 100%;

@@ -16,7 +16,7 @@
         border="start"
         border-color="primary lighten-3"
         elevation="2"
-        color="white"
+        color="surface-light"
       >
         <div class="text-headline-small">MX</div>
         <pre>
@@ -29,7 +29,7 @@ mail.{{ domain.name }}. IN A <strong>[{{$gettext('IP address of your Modoboa ser
         border-color="primary lighten-3"
         elevation="2"
         density="compact"
-        color="white"
+        color="surface-light"
       >
         <div class="text-headline-small">SPF</div>
         <pre>@ IN TXT "v=spf1 mx ~all"</pre>
@@ -42,7 +42,7 @@ mail.{{ domain.name }}. IN A <strong>[{{$gettext('IP address of your Modoboa ser
         border-color="primary lighten-3"
         elevation="2"
         density="compact"
-        color="white"
+        color="surface-light"
       >
         <div class="text-headline-small">DKIM</div>
         <DKIMKeyViewer :domain="domain" />
@@ -53,7 +53,7 @@ mail.{{ domain.name }}. IN A <strong>[{{$gettext('IP address of your Modoboa ser
         border-color="primary lighten-3"
         elevation="2"
         density="compact"
-        color="white"
+        color="surface-light"
       >
         <div class="text-headline-small">DMARC</div>
         <pre>
@@ -66,7 +66,7 @@ _dmarc.{{ domain.name }}. IN TXT "v=DMARC1; p=quarantine; pct=100;"</pre
         border-color="primary lighten-3"
         elevation="2"
         density="compact"
-        color="white"
+        color="surface-light"
       >
         <div class="text-headline-small">
           {{ $gettext('Auto configuration') }}

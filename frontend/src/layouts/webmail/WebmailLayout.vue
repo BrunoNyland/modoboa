@@ -11,8 +11,47 @@
       >
         <div class="resize-handle" @mousedown="startResize" />
         <template #prepend>
-          <div class="d-flex align-center">
-            <span v-if="!rail" class="brand-wordmark">webmail</span>
+          <div class="d-flex align-center folder-header">
+            <template v-if="!rail">
+              <span class="folder-title" :title="currentFolderLabel">{{
+                currentFolderLabel
+              }}</span>
+              <v-btn
+                icon
+                variant="text"
+                size="small"
+                :title="$gettext('Mailbox settings')"
+                class="folder-header__settings"
+              >
+                <v-icon icon="mdi-cog-outline" />
+                <v-menu activator="parent" location="bottom">
+                  <v-list density="compact">
+                    <v-list-item
+                      :title="$gettext('Create a new mailbox')"
+                      prepend-icon="mdi-plus"
+                      @click="openMailboxForm"
+                    />
+                    <v-list-item
+                      :title="$gettext('Edit this mailbox')"
+                      prepend-icon="mdi-pencil"
+                      :disabled="readOnlyMailbox"
+                      @click="editMailbox"
+                    />
+                    <v-list-item
+                      :title="$gettext('Delete this mailbox')"
+                      prepend-icon="mdi-trash-can"
+                      :disabled="readOnlyMailbox"
+                      @click="deleteMailbox"
+                    />
+                    <v-list-item
+                      :title="$gettext('Compress this mailbox')"
+                      prepend-icon="mdi-folder-zip-outline"
+                      @click="compressMailbox"
+                    />
+                  </v-list>
+                </v-menu>
+              </v-btn>
+            </template>
             <v-spacer v-if="!rail" />
             <v-btn
               :icon="rail ? 'mdi-chevron-right' : 'mdi-chevron-left'"
@@ -73,41 +112,6 @@
                 {{ $gettext('used') }} · {{ $gettext('Unlimited') }}
               </template>
             </div>
-            <v-btn
-              block
-              variant="tonal"
-              size="small"
-              prepend-icon="mdi-cog-outline"
-              class="quota-panel__settings"
-            >
-              {{ $gettext('Settings') }}
-              <v-menu activator="parent" location="top">
-                <v-list density="compact">
-                  <v-list-item
-                    :title="$gettext('Create a new mailbox')"
-                    prepend-icon="mdi-plus"
-                    @click="openMailboxForm"
-                  />
-                  <v-list-item
-                    :title="$gettext('Edit this mailbox')"
-                    prepend-icon="mdi-pencil"
-                    :disabled="readOnlyMailbox"
-                    @click="editMailbox"
-                  />
-                  <v-list-item
-                    :title="$gettext('Delete this mailbox')"
-                    prepend-icon="mdi-trash-can"
-                    :disabled="readOnlyMailbox"
-                    @click="deleteMailbox"
-                  />
-                  <v-list-item
-                    :title="$gettext('Compress this mailbox')"
-                    prepend-icon="mdi-folder-zip-outline"
-                    @click="compressMailbox"
-                  />
-                </v-list>
-              </v-menu>
-            </v-btn>
           </div>
 
           <!-- Collapsed (rail) drawer: compact icon + thin bar. -->
@@ -222,6 +226,18 @@ const userMailboxes = ref([])
 const readOnlyMailbox = computed(() => {
   const mailboxes = ['INBOX']
   return mailboxes.includes(route.query.mailbox || 'INBOX')
+})
+
+// Name of the currently open folder, shown as the drawer title. Prefer the
+// (already translated) label coming from the backend; fall back to the last
+// path segment for nested mailboxes not present in the top-level list.
+const currentFolderLabel = computed(() => {
+  const name = route.query.mailbox || 'INBOX'
+  const found = userMailboxes.value.find((mb) => mb.name === name)
+  if (found) {
+    return found.label.split('/').pop()
+  }
+  return name.split(hdelimiter.value || '.').pop()
 })
 
 const quotaColor = computed(() => {
@@ -398,8 +414,26 @@ mailboxQuota.value = resp.data
   color: var(--fg);
   font-weight: 600;
 }
-.quota-panel__settings {
-  margin-top: 2px;
+
+/* Drawer header: open folder name + its settings menu. */
+.folder-header {
+  padding-left: 14px;
+  min-height: 48px;
+}
+.folder-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.folder-header__settings {
+  margin-left: 4px;
+  flex-shrink: 0;
 }
 
 /* Compact variant when the drawer is collapsed to a rail. */

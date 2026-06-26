@@ -10,15 +10,18 @@
           variant="flat"
           @click="close"
         />
-        <v-btn-group class="ml-2" color="primary" rounded="lg" density="compact" divided>
+        <div class="d-flex align-center ml-2">
           <v-btn
             prepend-icon="mdi-send"
+            size="small"
+            variant="tonal"
+            color="primary"
             :loading="working"
             :text="$gettext('Send')"
             @click="submit"
           >
           </v-btn>
-          <v-btn size="small" icon>
+          <v-btn size="small" icon variant="tonal" color="primary">
             <v-icon icon="mdi-chevron-down" />
             <v-menu activator="parent">
               <v-list>
@@ -30,7 +33,7 @@
               </v-list>
             </v-menu>
           </v-btn>
-        </v-btn-group>
+        </div>
 
         <v-menu :close-on-content-click="false">
           <template #activator="{ props: menuProps }">

@@ -12,11 +12,17 @@
           @click="close"
         />
 
-        <v-btn-group color="primary" rounded="lg" density="compact" divided class="flex-shrink-0">
-          <v-btn prepend-icon="mdi-reply" @click="() => replyToEmail()">
+        <div class="d-flex align-center flex-shrink-0">
+          <v-btn
+            prepend-icon="mdi-reply"
+            size="small"
+            variant="tonal"
+            color="primary"
+            @click="() => replyToEmail()"
+          >
             {{ $gettext('Reply') }}
           </v-btn>
-          <v-btn size="small" icon>
+          <v-btn size="small" icon variant="tonal" color="primary">
             <v-icon icon="mdi-chevron-down" />
             <v-menu activator="parent">
               <v-list>
@@ -31,7 +37,7 @@
               </v-list>
             </v-menu>
           </v-btn>
-        </v-btn-group>
+        </div>
         <template v-if="$route.query.mailbox !== 'Scheduled'">
           <v-btn
             class="ml-2"

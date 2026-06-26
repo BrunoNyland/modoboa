@@ -114,8 +114,8 @@
       </div>
     </v-toolbar>
   </v-card>
-  <v-skeleton-loader v-if="loading" type="card@2"></v-skeleton-loader>
-  <template v-else>
+  <transition name="fade" mode="out-in">
+    <div v-if="!loading" key="emails-content">
     <v-alert
       v-if="inScheduledView"
       type="info"
@@ -243,7 +243,8 @@
         </template>
       </v-card>
     </v-dialog>
-  </template>
+    </div>
+  </transition>
 </template>
 
 <script setup>

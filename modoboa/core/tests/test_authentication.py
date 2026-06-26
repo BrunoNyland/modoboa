@@ -51,6 +51,18 @@ class AuthenticationTestCase(ModoTestCase):
         )
         cls.account = mailbox.user
 
+    def test_login_page_allows_bfcache(self):
+        """The login page must not send `no-store` (it disables bfcache)."""
+        self.client.logout()
+        response = self.client.get(reverse("core:login"))
+        self.assertEqual(response.status_code, 200)
+        cache_control = response.headers.get("Cache-Control", "")
+        directives = {d.strip().lower() for d in cache_control.split(",")}
+        # `no-store` is the directive that disables the back/forward cache.
+        self.assertNotIn("no-store", directives)
+        # The page should still be uncacheable by shared/disk caches.
+        self.assertIn("no-cache", directives)
+
     def test_authentication(self):
         """Validate simple case."""
         self.client.logout()

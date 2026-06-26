@@ -79,6 +79,24 @@ class LoginView(LoginViewMixin, auth_views.LoginView):
     form_class = forms.AuthenticationForm
     template_name = "registration/login.html"
 
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+        # Django's LoginView is decorated with ``never_cache``, which emits a
+        # ``no-store`` directive. ``no-store`` is the one Cache-Control value
+        # that disables the browser's back/forward cache (bfcache) — costing a
+        # Lighthouse point and a snappier back navigation. Strip only that
+        # directive: the page stays uncacheable by shared/disk caches
+        # (``no-cache``, ``must-revalidate``, ``private`` remain), but bfcache
+        # — in-memory and same-session — is allowed again.
+        directives = [
+            directive.strip()
+            for directive in response.get("Cache-Control", "").split(",")
+            if directive.strip() and directive.strip().lower() != "no-store"
+        ]
+        if directives:
+            response["Cache-Control"] = ", ".join(directives)
+        return response
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         announcements = signals.get_announcements.send(

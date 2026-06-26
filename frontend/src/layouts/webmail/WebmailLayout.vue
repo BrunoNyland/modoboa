@@ -12,7 +12,8 @@
         <div class="resize-handle" @mousedown="startResize" />
         <template #prepend>
           <div class="d-flex align-center">
-            <v-img :src="menuLogoPath" max-width="190" class="logo" />
+            <span v-if="!rail" class="brand-wordmark">webmail</span>
+            <v-spacer v-if="!rail" />
             <v-btn
               :icon="rail ? 'mdi-chevron-right' : 'mdi-chevron-left'"
               variant="text"
@@ -177,7 +178,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useGettext } from 'vue3-gettext'
 import { filesize } from 'filesize'
 import { useBusStore } from '@/stores'
-import { useLogos } from '@/composables/logos'
 import { localeToBCP47 } from '@/utils'
 import gettext from '@/plugins/gettext'
 import ConfirmDialog from '@/components/tools/ConfirmDialog.vue'
@@ -190,7 +190,6 @@ const { $gettext } = useGettext()
 const route = useRoute()
 const router = useRouter()
 const busStore = useBusStore()
-const { menuLogoPath } = useLogos()
 
 const confirm = ref()
 const drawer = ref(true)

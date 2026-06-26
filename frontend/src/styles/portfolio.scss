@@ -195,6 +195,29 @@ body {
 .text-accent {
   color: var(--accent) !important;
 }
+
+/* Text wordmark used in the side panels in place of the logo image. */
+.brand-wordmark {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--accent);
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  padding: 10px 0 10px 18px;
+  transition: color 0.2s ease;
+}
+.brand-wordmark:hover {
+  color: var(--accent-2);
+}
+.brand-wordmark--sm {
+  font-size: 22px;
+  padding: 6px 0 6px 8px;
+}
 .text-outline {
   -webkit-text-stroke: 1.5px var(--fg);
   color: transparent;

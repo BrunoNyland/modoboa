@@ -48,10 +48,39 @@
           @update:model-value="openMailbox"
         />
         <template #append>
-          <div class="border-t-sm d-flex align-center">
-            <v-btn class="ml-2" variant="text" icon size="small">
-              <v-icon icon="mdi-cog" />
-              <v-menu activator="parent">
+          <!-- Expanded drawer: full storage panel. -->
+          <div v-if="!rail" class="quota-panel">
+            <div class="quota-panel__head">
+              <span class="quota-panel__eyebrow">{{ $gettext('Storage') }}</span>
+              <span v-if="mailboxQuota && hasQuotaLimit" class="quota-panel__pct">
+                {{ mailboxQuota.usage }}%
+              </span>
+            </div>
+            <v-progress-linear
+              v-if="mailboxQuota"
+              :color="quotaColor"
+              :model-value="hasQuotaLimit ? mailboxQuota.usage : 0"
+              height="8"
+              class="quota-panel__bar"
+            />
+            <div v-if="mailboxQuota" class="quota-panel__detail">
+              <template v-if="hasQuotaLimit">
+                <strong>{{ quotaUsedLabel }}</strong> / {{ quotaLimitLabel }}
+              </template>
+              <template v-else>
+                <strong>{{ quotaUsedLabel }}</strong>
+                {{ $gettext('used') }} · {{ $gettext('Unlimited') }}
+              </template>
+            </div>
+            <v-btn
+              block
+              variant="tonal"
+              size="small"
+              prepend-icon="mdi-cog-outline"
+              class="quota-panel__settings"
+            >
+              {{ $gettext('Settings') }}
+              <v-menu activator="parent" location="top">
                 <v-list density="compact">
                   <v-list-item
                     :title="$gettext('Create a new mailbox')"
@@ -78,11 +107,50 @@
                 </v-list>
               </v-menu>
             </v-btn>
+          </div>
 
+          <!-- Collapsed (rail) drawer: compact icon + thin bar. -->
+          <div v-else class="quota-rail">
+            <v-btn
+              icon="mdi-cog-outline"
+              variant="text"
+              size="small"
+              :title="$gettext('Mailbox settings')"
+            >
+              <v-icon icon="mdi-cog-outline" />
+              <v-menu activator="parent" location="top">
+                <v-list density="compact">
+                  <v-list-item
+                    :title="$gettext('Create a new mailbox')"
+                    prepend-icon="mdi-plus"
+                    @click="openMailboxForm"
+                  />
+                  <v-list-item
+                    :title="$gettext('Edit this mailbox')"
+                    prepend-icon="mdi-pencil"
+                    :disabled="readOnlyMailbox"
+                    @click="editMailbox"
+                  />
+                  <v-list-item
+                    :title="$gettext('Delete this mailbox')"
+                    prepend-icon="mdi-trash-can"
+                    :disabled="readOnlyMailbox"
+                    @click="deleteMailbox"
+                  />
+                  <v-list-item
+                    :title="$gettext('Compress this mailbox')"
+                    prepend-icon="mdi-folder-zip-outline"
+                    @click="compressMailbox"
+                  />
+                </v-list>
+              </v-menu>
+            </v-btn>
             <v-progress-linear
               v-if="mailboxQuota"
               :color="quotaColor"
-              :model-value="mailboxQuota.usage"
+              :model-value="hasQuotaLimit ? mailboxQuota.usage : 0"
+              height="6"
+              class="quota-rail__bar"
               :title="mailboxQuotaTitle"
             />
           </div>
@@ -107,8 +175,11 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useGettext } from 'vue3-gettext'
+import { filesize } from 'filesize'
 import { useBusStore } from '@/stores'
 import { useLogos } from '@/composables/logos'
+import { localeToBCP47 } from '@/utils'
+import gettext from '@/plugins/gettext'
 import ConfirmDialog from '@/components/tools/ConfirmDialog.vue'
 import ConnectedLayout from '@/layouts/connected/ConnectedLayout.vue'
 import MailboxForm from '@/components/webmail/MailboxForm.vue'
@@ -155,6 +226,9 @@ const readOnlyMailbox = computed(() => {
 })
 
 const quotaColor = computed(() => {
+  if (!mailboxQuota.value || !hasQuotaLimit.value) {
+    return 'info'
+  }
   if (mailboxQuota.value.usage < 50) {
     return 'info'
   }
@@ -164,8 +238,33 @@ const quotaColor = computed(() => {
   return 'error'
 })
 
+// IMAP STORAGE quota comes in KiB; render it as MB/GB with the locale's
+// numeric separators (pt-BR: 1000 -> 1.000).
+const formatStorage = (kib) => {
+  if (kib == null) {
+    return ''
+  }
+  return filesize(kib * 1024, {
+    standard: 'jedec',
+    round: 1,
+    locale: localeToBCP47(gettext.current),
+  })
+}
+
+const hasQuotaLimit = computed(
+  () => !!mailboxQuota.value && mailboxQuota.value.limit > 0
+)
+const quotaUsedLabel = computed(() => formatStorage(mailboxQuota.value?.current))
+const quotaLimitLabel = computed(() => formatStorage(mailboxQuota.value?.limit))
+
 const mailboxQuotaTitle = computed(() => {
-  return `${mailboxQuota.value.current} / ${mailboxQuota.value.limit} (${mailboxQuota.value.usage}%)`
+  if (!mailboxQuota.value) {
+    return ''
+  }
+  if (!hasQuotaLimit.value) {
+    return `${quotaUsedLabel.value} ${$gettext('used')}`
+  }
+  return `${quotaUsedLabel.value} / ${quotaLimitLabel.value} (${mailboxQuota.value.usage}%)`
 })
 
 const dataKey = computed(() => busStore.dataKey)
@@ -257,5 +356,63 @@ mailboxQuota.value = resp.data
 }
 .resize-handle:hover {
   background-color: rgba(0, 0, 0, 0.12);
+}
+
+/* Storage / quota panel at the bottom of the drawer. */
+.quota-panel {
+  margin: 8px;
+  padding: 14px;
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.quota-panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.quota-panel__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+.quota-panel__pct {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg);
+}
+.quota-panel__bar {
+  border-radius: 0;
+}
+.quota-panel__detail {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--fg-dim);
+}
+.quota-panel__detail strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+.quota-panel__settings {
+  margin-top: 2px;
+}
+
+/* Compact variant when the drawer is collapsed to a rail. */
+.quota-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 6px;
+}
+.quota-rail__bar {
+  width: 32px;
+  border-radius: 0;
 }
 </style>

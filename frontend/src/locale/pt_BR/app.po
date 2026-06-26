@@ -3263,3 +3263,12 @@ msgstr "Webmail"
 
 #~ msgid "Mailbox:"
 #~ msgstr "Caixa de correio:"
+
+msgid "Storage"
+msgstr "Armazenamento"
+
+msgid "used"
+msgstr "usado"
+
+msgid "Mailbox settings"
+msgstr "Configurações da caixa de correio"

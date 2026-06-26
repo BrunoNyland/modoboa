@@ -1,7 +1,7 @@
 <template>
   <div class="position-relative h-100">
     <div
-      class="bg-background rounded-lg pa-4 position-relative h-100 d-flex flex-column"
+      class="compose-view bg-background rounded-lg pa-4 position-relative h-100 d-flex flex-column"
     >
       <v-toolbar>
         <v-btn
@@ -460,3 +460,18 @@ api.getAllowedSenders().then((resp) => {
   allowedSenders.value = resp.data
 })
 </script>
+
+<style scoped>
+/* Let the action toolbar wrap to a second line when the buttons don't fit
+   (e.g. longer labels in pt-BR like "ENVIAR"/"ANEXOS") instead of forcing a
+   horizontal scrollbar. */
+.compose-view :deep(.v-toolbar),
+.compose-view :deep(.v-toolbar__content) {
+  height: auto !important;
+}
+.compose-view :deep(.v-toolbar__content) {
+  flex-wrap: wrap;
+  row-gap: 8px;
+  padding-block: 8px;
+}
+</style>

@@ -11,7 +11,7 @@ export const currentUser = {
   first_name: 'Dev',
   last_name: 'Admin',
   role: 'SuperAdmins',
-  language: 'pt_br',
+  language: 'pt-br',
   phone_number: null,
   secondary_email: null,
   tfa_enabled: false,
@@ -76,7 +76,8 @@ export const mailboxes = {
   ],
 }
 
-export const quota = { quota: 0, quota_usage: 12 }
+// /webmail/mailboxes/quota/  (current/limit in KiB, usage in %)
+export const quota = { usage: 25, current: 524288, limit: 2097152 }
 
 // /webmail/emails/?mailbox=INBOX&page=1
 export const emails = {

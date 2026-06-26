@@ -47,6 +47,11 @@
             size="x-small"
             variant="flat"
             color="transparent"
+            :aria-label="
+              getMailboxState(mailbox)
+                ? $gettext('Collapse folder')
+                : $gettext('Expand folder')
+            "
             @click.stop="toggleMailbox(mailbox)"
           />
         </template>

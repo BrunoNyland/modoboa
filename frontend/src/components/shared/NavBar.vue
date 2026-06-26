@@ -31,6 +31,7 @@
       <v-btn
         :icon="rail ? 'mdi-chevron-right' : 'mdi-chevron-left'"
         variant="text"
+        :aria-label="rail ? $gettext('Expand sidebar') : $gettext('Collapse sidebar')"
         @click.stop="rail = !rail"
       >
       </v-btn>

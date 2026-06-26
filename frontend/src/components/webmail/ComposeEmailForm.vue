@@ -8,6 +8,7 @@
           icon="mdi-arrow-left"
           size="small"
           variant="flat"
+          :aria-label="$gettext('Back')"
           @click="close"
         />
         <div class="d-flex align-center ml-2">
@@ -21,7 +22,13 @@
             @click="submit"
           >
           </v-btn>
-          <v-btn size="small" icon variant="tonal" color="primary">
+          <v-btn
+            size="small"
+            icon
+            variant="tonal"
+            color="primary"
+            :aria-label="$gettext('More send options')"
+          >
             <v-icon icon="mdi-chevron-down" />
             <v-menu activator="parent">
               <v-list>
@@ -82,6 +89,7 @@
           icon="mdi-content-save-outline"
           size="small"
           :title="$gettext('Save as draft')"
+          :aria-label="$gettext('Save as draft')"
           :loading="working"
           @click="saveDraft"
         />

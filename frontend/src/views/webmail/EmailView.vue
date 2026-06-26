@@ -9,6 +9,7 @@
           icon="mdi-arrow-left"
           size="small"
           variant="flat"
+          :aria-label="$gettext('Back')"
           @click="close"
         />
 
@@ -22,7 +23,13 @@
           >
             {{ $gettext('Reply') }}
           </v-btn>
-          <v-btn size="small" icon variant="tonal" color="primary">
+          <v-btn
+            size="small"
+            icon
+            variant="tonal"
+            color="primary"
+            :aria-label="$gettext('More reply options')"
+          >
             <v-icon icon="mdi-chevron-down" />
             <v-menu activator="parent">
               <v-list>
@@ -45,6 +52,7 @@
             variant="tonal"
             icon="mdi-trash-can"
             size="small"
+            :aria-label="$gettext('Delete')"
             :loading="working"
             @click="deleteEmail"
           >
@@ -56,6 +64,7 @@
             variant="tonal"
             icon="mdi-fire"
             size="small"
+            :aria-label="$gettext('Mark as junk')"
             :loading="working"
             @click="markEmailAsJunk"
           >
@@ -67,6 +76,7 @@
             variant="tonal"
             icon="mdi-thumb-up"
             size="small"
+            :aria-label="$gettext('Mark as not junk')"
             :loading="working"
             @click="markEmailAsNotJunk"
           >
@@ -77,11 +87,18 @@
             variant="tonal"
             icon="mdi-pencil"
             size="small"
+            :aria-label="$gettext('Edit draft')"
             @click="editDraft"
           >
           </v-btn>
         </template>
-        <v-btn class="ml-2" variant="tonal" icon size="small">
+        <v-btn
+          class="ml-2"
+          variant="tonal"
+          icon
+          size="small"
+          :aria-label="$gettext('More actions')"
+        >
           <v-icon icon="mdi-cog" />
           <v-menu activator="parent">
             <v-list density="compact">

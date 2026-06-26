@@ -21,6 +21,7 @@
                 variant="text"
                 size="small"
                 :title="$gettext('Mailbox settings')"
+                :aria-label="$gettext('Mailbox settings')"
                 class="folder-header__settings"
               >
                 <v-icon icon="mdi-cog-outline" />
@@ -56,6 +57,7 @@
             <v-btn
               :icon="rail ? 'mdi-chevron-right' : 'mdi-chevron-left'"
               variant="text"
+              :aria-label="rail ? $gettext('Expand sidebar') : $gettext('Collapse sidebar')"
               @click.stop="rail = !rail"
             >
             </v-btn>
@@ -76,6 +78,7 @@
               color="secondary"
               variant="flat"
               size="small"
+              :aria-label="$gettext('Compose')"
               @click="openComposeForm"
             />
           </div>
@@ -102,6 +105,8 @@
               :model-value="hasQuotaLimit ? mailboxQuota.usage : 0"
               height="8"
               class="quota-panel__bar"
+              :aria-label="$gettext('Storage usage')"
+              :aria-valuetext="mailboxQuotaTitle"
             />
             <div v-if="mailboxQuota" class="quota-panel__detail">
               <template v-if="hasQuotaLimit">
@@ -121,6 +126,7 @@
               variant="text"
               size="small"
               :title="$gettext('Mailbox settings')"
+              :aria-label="$gettext('Mailbox settings')"
             >
               <v-icon icon="mdi-cog-outline" />
               <v-menu activator="parent" location="top">
@@ -157,6 +163,8 @@
               height="6"
               class="quota-rail__bar"
               :title="mailboxQuotaTitle"
+              :aria-label="$gettext('Storage usage')"
+              :aria-valuetext="mailboxQuotaTitle"
             />
           </div>
         </template>

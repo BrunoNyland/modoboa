@@ -6,6 +6,7 @@
         class="mr-4"
         hide-details
         color="primary"
+        :aria-label="$gettext('Select all messages')"
         @update:model-value="toggleAllSelection"
       />
 
@@ -13,6 +14,7 @@
         v-model="search"
         prepend-inner-icon="mdi-magnify"
         :placeholder="$gettext('Search in messages')"
+        :aria-label="$gettext('Search in messages')"
         variant="outlined"
         single-line
         flat
@@ -30,6 +32,7 @@
         variant="tonal"
         icon="mdi-trash-can"
         size="small"
+        :aria-label="$gettext('Delete selection')"
         :loading="working"
         @click="deleteSelection"
       >
@@ -42,6 +45,7 @@
           variant="tonal"
           icon="mdi-fire"
           size="small"
+          :aria-label="$gettext('Mark selection as junk')"
           :loading="working"
           @click="markSelectionAsJunk"
         >
@@ -53,12 +57,19 @@
           variant="tonal"
           icon="mdi-thumb-up"
           size="small"
+          :aria-label="$gettext('Mark selection as not junk')"
           :loading="working"
           @click="markSelectionAsNotJunk"
         >
         </v-btn>
       </template>
-      <v-btn class="ml-2" variant="tonal" icon size="small">
+      <v-btn
+        class="ml-2"
+        variant="tonal"
+        icon
+        size="small"
+        :aria-label="$gettext('More actions')"
+      >
         <v-icon icon="mdi-cog" />
         <v-menu activator="parent">
           <v-list density="compact">
@@ -101,12 +112,14 @@
           <v-btn
             icon="mdi-chevron-left"
             size="x-small"
+            :aria-label="$gettext('Previous page')"
             :disabled="emails.prev_page === null"
             @click="page = emails.prev_page"
           />
           <v-btn
             icon="mdi-chevron-right"
             size="x-small"
+            :aria-label="$gettext('Next page')"
             :disabled="emails.next_page === null"
             @click="page = emails.next_page"
           />
@@ -149,12 +162,18 @@
               color="primary"
               density="compact"
               hide-details
+              :aria-label="$gettext('Select message: %{subject}', { subject: email.subject })"
             />
             <v-btn
               :icon="email.flagged ? 'mdi-star' : 'mdi-star-outline'"
               :color="email.flagged ? 'warning' : undefined"
               variant="text"
               size="small"
+              :aria-label="
+                email.flagged
+                  ? $gettext('Unfollow message')
+                  : $gettext('Follow message')
+              "
               @click="toggleFollowState(email)"
             />
             <v-menu v-if="inScheduledView" location="bottom">
@@ -164,6 +183,7 @@
                   v-bind="props"
                   size="small"
                   variant="text"
+                  :aria-label="$gettext('Message actions')"
                 >
                 </v-btn>
               </template>

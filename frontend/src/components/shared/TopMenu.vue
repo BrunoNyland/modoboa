@@ -7,6 +7,7 @@
       class="mr-4"
       variant="tonal"
       size="small"
+      :aria-label="$gettext('Notifications')"
     >
       <v-icon icon="mdi-bell" />
       <v-menu activator="parent" location="bottom">
@@ -33,7 +34,7 @@
       </v-menu>
     </v-btn>
 
-    <v-btn icon class="mr-4" variant="flat">
+    <v-btn icon class="mr-4" variant="flat" :aria-label="$gettext('Applications')">
       <v-icon icon="mdi-apps" />
       <v-menu activator="parent" location="bottom">
         <v-card min-width="350" max-width="400" class="pa-4">

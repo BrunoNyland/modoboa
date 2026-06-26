@@ -4,8 +4,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="color-scheme" content="dark" />
+    <meta name="description" content="{% trans 'Secure sign-in to the Modoboa mail platform.' %}" />
     <title>{% trans "Welcome to Modoboa" %}</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/offline.css' %}" />
@@ -115,13 +115,23 @@
        transition: background-color 0.2s, color 0.2s;
        margin-top: 6px;
      }
-     .btn:hover { background-color: #555555; }
+     /* Stronger hover contrast for accessibility (was #555 over #404). */
+     .btn:hover { background-color: #6e6e6e; color: #ffffff; }
      .btn:disabled { opacity: 0.5; cursor: default; }
      .btn-primary {
        background-color: var(--accent);
        color: #0a0a0a;
      }
      .btn-primary:hover { background-color: var(--accent-2); }
+
+     /* Visible keyboard focus indicator on all interactive elements. */
+     .btn:focus-visible,
+     .input-group input:focus-visible,
+     .footer a:focus-visible,
+     .checkbox-group input:focus-visible {
+       outline: 2px solid var(--accent-2);
+       outline-offset: 2px;
+     }
 
      .footer { margin-top: 24px; }
      .footer a {
@@ -151,10 +161,10 @@
   </head>
   <body>
     <div class="container">
-      <div class="column right-column">
+      <main id="main-content" class="column right-column" aria-label="{% trans 'Sign in' %}">
         {% block main_content %}{% endblock %}
         {% block sub_content %}{% endblock %}
-      </div>
+      </main>
     </div>
     {% block extra_js %}{% endblock %}
   </body>

@@ -4,7 +4,7 @@
       {{ $gettext('Message filters') }}
     </div>
 
-    <v-toolbar color="white" flat class="px-4">
+    <v-toolbar flat class="px-4">
       <v-autocomplete
         v-model="currentFilterSet"
         :label="$gettext('Select a filter set')"

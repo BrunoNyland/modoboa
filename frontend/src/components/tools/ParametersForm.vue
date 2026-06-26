@@ -1,5 +1,5 @@
 <template>
-  <v-tabs v-model="active" bg-color="white">
+  <v-tabs v-model="active" bg-color="transparent">
     <v-tab
       v-for="(element, index) in displayableElements"
       :key="index"

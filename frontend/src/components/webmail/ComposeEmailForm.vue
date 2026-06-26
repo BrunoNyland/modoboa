@@ -1,9 +1,9 @@
 <template>
   <div class="position-relative h-100">
     <div
-      class="bg-white rounded-lg pa-4 position-relative h-100 d-flex flex-column"
+      class="bg-background rounded-lg pa-4 position-relative h-100 d-flex flex-column"
     >
-      <v-toolbar color="white">
+      <v-toolbar>
         <v-btn
           icon="mdi-arrow-left"
           size="small"
@@ -77,130 +77,97 @@
         />
       </v-toolbar>
       <v-form ref="formRef" class="flex-grow-1 d-flex flex-column">
-        <div>
-          <v-row class="align-center">
-            <v-col cols="2">
-              <span>{{ $gettext('From') }}</span>
-            </v-col>
-            <v-col cols="8">
-              <v-select
-                v-model="form.sender"
-                :items="allowedSenders"
-                item-title="address"
-                item-value="address"
-                variant="outlined"
-                density="compact"
-                hide-details="auto"
-                :rules="[rules.required]"
-              />
-            </v-col>
-          </v-row>
-          <v-row class="align-center">
-            <v-col cols="2">
-              <span>{{ $gettext('To') }}</span>
-            </v-col>
-            <v-col cols="8">
-              <v-combobox
-                v-model="form.to"
-                :items="contacts"
-                :item-title="(item) => getItemTitle(item)"
-                return-object
-                :placeholder="$gettext('Provide one or more addresses')"
-                variant="outlined"
-                density="compact"
-                hide-details="auto"
-                chips
-                multiple
-                :rules="[rules.required]"
-                @update:search="lookForContacts"
-              />
-            </v-col>
-            <v-col cols="2">
+        <div class="d-flex flex-column gap-3 mb-4">
+          <v-select
+            v-model="form.sender"
+            :label="$gettext('From')"
+            :items="allowedSenders"
+            item-title="address"
+            item-value="address"
+            variant="outlined"
+            density="compact"
+            hide-details="auto"
+            :rules="[rules.required]"
+            class="mb-3 mt-4"
+          />
+          <div class="d-flex align-center mb-3">
+            <v-combobox
+              v-model="form.to"
+              :items="contacts"
+              :item-title="(item) => getItemTitle(item)"
+              return-object
+              :label="$gettext('To')"
+              :placeholder="$gettext('Provide one or more addresses')"
+              variant="outlined"
+              density="compact"
+              hide-details="auto"
+              chips
+              multiple
+              :rules="[rules.required]"
+              class="flex-grow-1 mr-2"
+              @update:search="lookForContacts"
+            />
+            <v-btn-group density="compact" variant="tonal" class="rounded">
               <v-btn
                 v-if="!showCcField"
                 :text="$gettext('Cc')"
-                prepend-icon="mdi-plus"
-                size="x-small"
-                variant="flat"
+                size="small"
                 @click="showCcField = true"
               />
               <v-btn
                 v-if="!showBccField"
                 :text="$gettext('Bcc')"
-                prepend-icon="mdi-plus"
-                size="x-small"
-                variant="flat"
+                size="small"
                 @click="showBccField = true"
               />
-            </v-col>
-          </v-row>
-          <v-row v-if="showCcField" class="align-center">
-            <v-col cols="2">
-              <span>{{ $gettext('Cc') }}</span>
-              <v-btn
-                icon="mdi-close"
-                variant="flat"
-                size="x-small"
-                @click="showCcField = false"
-              />
-            </v-col>
-            <v-col cols="8">
-              <v-combobox
-                v-model="form.cc"
-                :items="contacts"
-                item-title="display_name"
-                return-object
-                :placeholder="$gettext('Provide one or more addresses')"
-                variant="outlined"
-                density="compact"
-                hide-details="auto"
-                chips
-                multiple
-                :hide-no-data="false"
-                @update:search="lookForContacts"
-              />
-            </v-col>
-          </v-row>
-          <v-row v-if="showBccField" class="align-center">
-            <v-col cols="2">
-              <span>{{ $gettext('Bcc') }}</span>
-              <v-btn
-                icon="mdi-close"
-                variant="flat"
-                size="x-small"
-                @click="showBccField = false"
-              />
-            </v-col>
-            <v-col cols="8">
-              <v-combobox
-                v-model="form.bcc"
-                :items="contacts"
-                item-title="display_name"
-                return-object
-                :placeholder="$gettext('Provide one or more addresses')"
-                variant="outlined"
-                density="compact"
-                hide-details="auto"
-                chips
-                multiple
-                :hide-no-data="false"
-                @update:search="lookForContacts"
-              />
-            </v-col>
-          </v-row>
-          <v-row class="align-center">
-            <v-col cols="2">
-              <span>{{ $gettext('Subject') }}</span>
-            </v-col>
-            <v-col cols="8">
-              <v-text-field
-                v-model="form.subject"
-                variant="outlined"
-                density="compact"
-                hide-details="auto"
-              />
-            </v-col>
-          </v-row>
+            </v-btn-group>
+          </div>
+          <v-combobox
+            v-if="showCcField"
+            v-model="form.cc"
+            :items="contacts"
+            item-title="display_name"
+            return-object
+            :label="$gettext('Cc')"
+            :placeholder="$gettext('Provide one or more addresses')"
+            variant="outlined"
+            density="compact"
+            hide-details="auto"
+            chips
+            multiple
+            :hide-no-data="false"
+            class="mb-3"
+            append-inner-icon="mdi-close"
+            @click:append-inner="showCcField = false"
+            @update:search="lookForContacts"
+          />
+          <v-combobox
+            v-if="showBccField"
+            v-model="form.bcc"
+            :items="contacts"
+            item-title="display_name"
+            return-object
+            :label="$gettext('Bcc')"
+            :placeholder="$gettext('Provide one or more addresses')"
+            variant="outlined"
+            density="compact"
+            hide-details="auto"
+            chips
+            multiple
+            :hide-no-data="false"
+            class="mb-3"
+            append-inner-icon="mdi-close"
+            @click:append-inner="showBccField = false"
+            @update:search="lookForContacts"
+          />
+          <v-text-field
+            v-model="form.subject"
+            :label="$gettext('Subject')"
+            variant="outlined"
+            density="compact"
+            hide-details="auto"
+            class="mb-3"
+          />
         </div>
         <BodyEditor
           v-model="form.body"

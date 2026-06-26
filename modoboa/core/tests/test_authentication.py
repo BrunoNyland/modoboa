@@ -15,8 +15,7 @@ except ImportError:
 
 from django.template import Context, Template
 
-from modoboa.core import constants, signals as core_signals
-from modoboa.core.context_processors import theme
+from modoboa.core import constants
 from modoboa.core.password_hashers import get_password_hasher
 from modoboa.core.password_hashers.utils import get_dovecot_schemes
 from modoboa.lib.tests import NO_SMTP, ModoTestCase
@@ -402,81 +401,24 @@ class PasswordResetTestCase(ModoTestCase):
         self.assertIn("totp_secret", self.client.session)
 
 
-class ThemeContextProcessorTestCase(ModoTestCase):
-    """Test the theme template context processor."""
-
-    def test_returns_configured_colors(self):
-        """The processor exposes the global theme parameters."""
-        self.set_global_parameter("theme_primary_color", "#aabbcc", app="core")
-        self.set_global_parameter("theme_primary_color_dark", "#112233", app="core")
-        result = theme(request=None)
-        self.assertEqual(result["theme_primary_color"], "#aabbcc")
-        self.assertEqual(result["theme_primary_color_dark"], "#112233")
-
-    def test_django_builtin_auth_view_renders_theme(self):
-        """A Django built-in auth view inherits the theme via the processor.
-
-        ``PasswordResetCompleteView`` has no Modoboa mixin and is the
-        canonical case that motivated the context processor.
-        """
-        self.set_global_parameter("theme_primary_color", "#aabbcc", app="core")
-        self.set_global_parameter("theme_primary_color_dark", "#112233", app="core")
-        self.client.logout()
-        response = self.client.get(reverse("password_reset_complete"))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "#aabbcc")
-        self.assertContains(response, "#112233")
-
-    def test_get_theme_parameters_signal_overrides_values(self):
-        """A plugin receiver can override the values returned to templates."""
-        self.set_global_parameter("theme_primary_color", "#000000", app="core")
-
-        def handler(sender, current_values, **kwargs):
-            # Receiver sees the pre-override stored value.
-            self.assertEqual(current_values["theme_primary_color"], "#000000")
-            return {
-                "theme_primary_color": "#ff00ff",
-                "theme_login_logo_url": "https://cdn.example.com/login.png",
-            }
-
-        core_signals.get_theme_parameters.connect(handler)
-        try:
-            result = theme(request=None)
-        finally:
-            core_signals.get_theme_parameters.disconnect(handler)
-
-        self.assertEqual(result["theme_primary_color"], "#ff00ff")
-        self.assertEqual(
-            result["theme_login_logo_url"], "https://cdn.example.com/login.png"
-        )
-
-
 class GetModoboaLogoTagTestCase(ModoTestCase):
     """Test the ``get_modoboa_logo`` template tag."""
 
     TEMPLATE = Template("{% load core_tags %}{% get_modoboa_logo %}")
 
-    def _render(self, context_data):
-        return self.TEMPLATE.render(Context(context_data))
-
-    def test_theme_login_logo_url_wins(self):
-        """Theme parameter (via context) takes precedence over settings/static."""
-        with override_settings(MODOBOA_CUSTOM_LOGO="/media/never.png"):
-            result = self._render(
-                {"theme_login_logo_url": "https://cdn.example.com/login.png"}
-            )
-        self.assertEqual(result, "https://cdn.example.com/login.png")
+    def _render(self):
+        return self.TEMPLATE.render(Context({}))
 
     def test_falls_back_to_custom_logo_setting(self):
-        """Without a theme param, ``MODOBOA_CUSTOM_LOGO`` is used."""
+        """``MODOBOA_CUSTOM_LOGO`` is used."""
         with override_settings(MODOBOA_CUSTOM_LOGO="/media/custom.png"):
-            result = self._render({"theme_login_logo_url": ""})
+            result = self._render()
         self.assertEqual(result, "/media/custom.png")
 
     def test_falls_back_to_static_default(self):
-        """No theme param and no setting → bundled static asset."""
+        """No setting → bundled static asset."""
         # MODOBOA_CUSTOM_LOGO is unset by default in the test settings.
-        result = self._render({"theme_login_logo_url": ""})
+        result = self._render()
         self.assertTrue(result.endswith("css/modoboa-white.png"))
 
     def test_ignores_other_logo_context_keys(self):

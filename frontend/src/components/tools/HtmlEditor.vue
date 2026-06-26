@@ -5,7 +5,7 @@
       <v-btn-toggle
         v-if="editor"
         v-model="selection"
-        base-color="grey-lighten-3"
+        variant="tonal"
         color="primary"
         multiple
       >
@@ -75,7 +75,7 @@
           @click="editor.chain().focus().toggleOrderedList().run()"
         />
       </v-btn-toggle>
-      <v-btn-group v-if="editor" class="ml-2" color="grey-lighten-3">
+      <v-btn-group v-if="editor" class="ml-2" variant="tonal">
         <v-btn
           icon="mdi-undo"
           :disabled="!editor.can().chain().focus().undo().run()"

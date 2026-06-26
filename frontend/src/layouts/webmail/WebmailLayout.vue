@@ -6,7 +6,7 @@
         :rail="rail"
         :width="drawerWidth"
         permanent
-        color="primary"
+        color="background"
       >
         <div class="resize-handle" @mousedown="startResize" />
         <template #prepend>
@@ -47,7 +47,7 @@
           @update:model-value="openMailbox"
         />
         <template #append>
-          <div class="border-t-sm d-flex align-center bg-grey">
+          <div class="border-t-sm d-flex align-center">
             <v-btn class="ml-2" variant="text" icon size="small">
               <v-icon icon="mdi-cog" />
               <v-menu activator="parent">

@@ -11,7 +11,7 @@
       show-select
     >
       <template #top>
-        <v-toolbar color="white" flat>
+        <v-toolbar flat>
           <v-text-field
             v-model="search"
             prepend-inner-icon="mdi-magnify"

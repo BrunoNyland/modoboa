@@ -1,14 +1,15 @@
 <template>
-  <div>
+  <v-list nav density="compact" class="pa-0 bg-transparent">
     <div
       v-for="mailbox in props.mailboxes"
       :key="mailbox.name"
-      class="pl-3 text-body-medium"
-      :class="{ 'py-1': !props.compact }"
+      class="mailbox-wrapper"
     >
-      <div
-        :class="getBackgroundColorClass(mailbox)"
-        class="d-flex mailbox pa-1 align-center"
+      <v-list-item
+        :active="model === mailbox.name"
+        :prepend-icon="iconByMailboxType[mailbox.type]"
+        class="mailbox"
+        link
         @click="updateSelection(mailbox.name)"
         @mouseover="setHover(mailbox, true)"
         @mouseleave="setHover(mailbox, false)"
@@ -17,47 +18,51 @@
         @dragleave="setHover(mailbox, false)"
         @drop="onDrop(mailbox)"
       >
-        <v-icon :icon="iconByMailboxType[mailbox.type]" class="mr-4" />
-        <template v-if="!props.rail">
-          <template v-if="mailbox.name === route.query.mailbox">
-            <span v-if="currentMailboxUnseen > 0" class="font-weight-bold">
-              {{ getMailboxLabel(mailbox) }} ({{
-                getCurrentMailboxUnseen(mailbox)
-              }})
-            </span>
-            <span v-else>
-              {{ getMailboxLabel(mailbox) }}
-            </span>
+        <v-list-item-title>
+          <template v-if="!props.rail">
+            <template v-if="mailbox.name === route.query.mailbox">
+              <span v-if="currentMailboxUnseen > 0" class="font-weight-bold">
+                {{ getMailboxLabel(mailbox) }} ({{
+                  getCurrentMailboxUnseen(mailbox)
+                }})
+              </span>
+              <span v-else>
+                {{ getMailboxLabel(mailbox) }}
+              </span>
+            </template>
+            <template v-else>
+              <span v-if="mailbox.unseen > 0" class="font-weight-bold">
+                {{ getMailboxLabel(mailbox) }} ({{ mailbox.unseen }})
+              </span>
+              <span v-else>
+                {{ getMailboxLabel(mailbox) }}
+              </span>
+            </template>
           </template>
-          <template v-else>
-            <span v-if="mailbox.unseen > 0" class="font-weight-bold">
-              {{ getMailboxLabel(mailbox) }} ({{ mailbox.unseen }})
-            </span>
-            <span v-else>
-              {{ getMailboxLabel(mailbox) }}
-            </span>
-          </template>
-          <v-spacer />
+        </v-list-item-title>
+
+        <template #append v-if="!props.rail && mailbox.sub">
           <v-btn
-            v-if="mailbox.sub"
             :icon="getMailboxState(mailbox) ? 'mdi-minus' : 'mdi-plus'"
-            size="xsmall"
+            size="x-small"
             variant="flat"
             color="transparent"
-            @click="toggleMailbox(mailbox)"
+            @click.stop="toggleMailbox(mailbox)"
           />
         </template>
+      </v-list-item>
+
+      <div class="pl-4" v-if="getMailboxState(mailbox) && mailbox.sub && mailbox.sub.length">
+        <MailboxList
+          v-model="model"
+          :mailboxes="mailbox.sub"
+          class="mt-1"
+          :light-mode="props.lightMode"
+          :compact="props.compact"
+        />
       </div>
-      <MailboxList
-        v-if="getMailboxState(mailbox) && mailbox.sub && mailbox.sub.length"
-        v-model="model"
-        :mailboxes="mailbox.sub"
-        class="mt-1"
-        :light-mode="props.lightMode"
-        :compact="props.compact"
-      />
     </div>
-  </div>
+  </v-list>
 </template>
 
 <script setup>
@@ -130,18 +135,6 @@ function setHover(mailbox, value) {
   hoverStates.value[mailbox.name] = value
 }
 
-function getBackgroundColorClass(mailbox) {
-  if (model.value === mailbox.name) {
-    return `bg-primary-lighten-1`
-  }
-  if (!props.lightMode) {
-    return hoverStates.value[mailbox.name]
-      ? `bg-primary-lighten-1`
-      : `bg-primary`
-  }
-  return hoverStates.value[mailbox.name] ? 'bg-primary' : `bg-white`
-}
-
 function getMailboxState(mailbox) {
   return mailboxStates.value[mailbox.name]
 }
@@ -198,15 +191,5 @@ watch(
 <style scoped lang="scss">
 .mailbox {
   cursor: pointer;
-  &:hover {
-    border-radius: 5px;
-  }
-
-  i {
-    pointer-events: none;
-  }
-  span {
-    pointer-events: none;
-  }
 }
 </style>

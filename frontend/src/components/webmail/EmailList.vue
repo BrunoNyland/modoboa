@@ -1,6 +1,6 @@
 <template>
   <v-card class="mt-6 mb-2 mx-1">
-    <v-toolbar color="white" flat>
+    <v-toolbar flat>
       <v-checkbox
         v-model="selectAll"
         class="mr-4"

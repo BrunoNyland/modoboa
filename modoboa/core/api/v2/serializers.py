@@ -164,21 +164,7 @@ class CoreGlobalParametersSerializer(serializers.Serializer):
     show_rss_feed_to_superadmins = serializers.BooleanField(default=False)
     hide_features_widget = serializers.BooleanField(default=False)
 
-    # Theme settings
-    theme_primary_color = serializers.CharField(default="#046BF8")
-    theme_primary_color_dark = serializers.CharField(default="#0350BA")
-    theme_primary_color_light = serializers.CharField(default="#3688F9")
-    theme_secondary_color = serializers.CharField(default="#F18429")
-    theme_label_color = serializers.CharField(default="#616161")
-    theme_login_logo_url = serializers.CharField(
-        required=False, allow_blank=True, default=""
-    )
-    theme_menu_logo_url = serializers.CharField(
-        required=False, allow_blank=True, default=""
-    )
-    theme_creation_form_logo_url = serializers.CharField(
-        required=False, allow_blank=True, default=""
-    )
+
 
     # Notification settings
     sender_address = lib_fields.DRFEmailFieldUTF8(default="noreply@yourdomain.test")
@@ -688,25 +674,6 @@ class NewsFeedEntrySerializer(serializers.Serializer):
     link = serializers.CharField()
     published = serializers.DateTimeField()
 
-
-class ThemeSerializer(serializers.Serializer):
-
-    theme_primary_color = serializers.CharField(default="#046BF8")
-    theme_primary_color_dark = serializers.CharField(default="#0350BA")
-    theme_primary_color_light = serializers.CharField(default="#3688F9")
-    theme_secondary_color = serializers.CharField(default="#F18429")
-    theme_label_color = serializers.CharField(default="#616161")
-    theme_login_logo_url = serializers.CharField(default="", allow_blank=True)
-    theme_menu_logo_url = serializers.CharField(default="", allow_blank=True)
-    theme_creation_form_logo_url = serializers.CharField(default="", allow_blank=True)
-
-
-class ThemeLogoUploadSerializer(serializers.Serializer):
-
-    LOGO_TYPES = ("login", "menu", "creation_form")
-
-    logo_type = serializers.ChoiceField(choices=LOGO_TYPES)
-    image = serializers.ImageField()
 
 
 class StatisticsSerializer(serializers.Serializer):

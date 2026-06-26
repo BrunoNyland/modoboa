@@ -27,7 +27,6 @@
 import { ref, computed } from 'vue'
 import { useGettext } from 'vue3-gettext'
 import { useAuthStore, useBusStore } from '@/stores'
-import { useModoboaTheme } from '@/composables/theme'
 import ConnectedView from './ConnectedView.vue'
 import NavBar from '@/components/shared/NavBar.vue'
 import TopMenu from '@/components/shared/TopMenu.vue'
@@ -35,7 +34,6 @@ import TopMenu from '@/components/shared/TopMenu.vue'
 const authStore = useAuthStore()
 const busStore = useBusStore()
 const { $gettext } = useGettext()
-const { enableTheme } = useModoboaTheme()
 
 const props = defineProps({
   color: {
@@ -71,9 +69,7 @@ busStore.$onAction(({ name, after }) => {
   }
 }, true)
 
-if (props.loadTheme) {
-  await enableTheme()
-}
+
 </script>
 
 <style>

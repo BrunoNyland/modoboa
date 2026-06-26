@@ -24,18 +24,7 @@ export const handlers = [
       },
     })
   ),
-  http.get('*/theme/', () =>
-    json({
-      theme_primary_color: '#7c5cff',
-      theme_primary_color_light: '#a594ff',
-      theme_primary_color_dark: '#5a3fd6',
-      theme_secondary_color: '#a594ff',
-      theme_label_color: '#a3a3a3',
-      theme_login_logo_url: null,
-      theme_menu_logo_url: null,
-      theme_creation_form_logo_url: null,
-    })
-  ),
+
   http.get('*/admin/news_feed/', () => json([])),
   http.get('*/admin/statistics/', () =>
     json({
@@ -131,22 +120,7 @@ export const handlers = [
         {
           label: 'Geral',
           display: '',
-          parameters: [
-            {
-              name: 'theme_primary_color',
-              label: 'Cor Primária',
-              help_text: 'Cor principal da interface',
-              widget: 'ColorPicker',
-              display: '',
-            },
-            {
-              name: 'theme_secondary_color',
-              label: 'Cor Secundária',
-              help_text: 'Cor de destaque da interface',
-              widget: 'ColorPicker',
-              display: '',
-            },
-          ],
+          parameters: [],
         },
       ])
     }
@@ -185,10 +159,7 @@ export const handlers = [
     if (params.app === 'core') {
       return json({
         label: 'Geral',
-        params: {
-          theme_primary_color: '#046BF8',
-          theme_secondary_color: '#F18429',
-        },
+        params: {},
       })
     }
     return json({ label: 'Configurações', params: {} })

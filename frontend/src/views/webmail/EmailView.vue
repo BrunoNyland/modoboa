@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div v-show="loaded" class="bg-white rounded-lg pa-4 position-relative h-100">
-      <v-toolbar color="white">
+    <div v-show="loaded" class="bg-background rounded-lg pa-4 position-relative h-100">
+      <v-toolbar>
         <v-btn icon="mdi-arrow-left" size="small" variant="flat" @click="close" />
 
         <v-btn-group color="primary" rounded="lg" density="compact" divided>

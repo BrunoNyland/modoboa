@@ -3,8 +3,8 @@
     <div class="text-headline-medium ml-4">
       {{ $gettext('Quarantined message') }}
     </div>
-    <div class="bg-white rounded-lg pa-4 position-relative mt-6 h-100">
-      <v-toolbar color="white">
+    <div class="bg-background rounded-lg pa-4 position-relative mt-6 h-100">
+      <v-toolbar>
         <v-btn
           v-if="!selfServiceMode"
           icon="mdi-arrow-left"

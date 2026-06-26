@@ -76,8 +76,8 @@ $latin-ext:
   /* Lightened for WCAG AA contrast over --bg (#0a0a0a). */
   --fg-dim: #a3a3a3;
   --fg-mute: #7a7a7a;
-  --line: #1c1c1c;
-  --line-2: #2a2a2a;
+  --line: #2e2e2e;
+  --line-2: #404040;
   --accent: #7c5cff;
   --accent-2: #a594ff;
   --warn: #ff5b3a;
@@ -352,3 +352,67 @@ body {
   text-transform: uppercase;
   color: var(--fg-mute);
 }
+
+/* ============================================================
+   FONT VISIBILITY OVERRIDES — Ensuring all texts are legible
+   ============================================================ */
+
+/* Text inputs, selects, textareas and their placeholders */
+.v-field__input,
+.v-field__input input,
+input,
+textarea,
+select {
+  color: var(--fg) !important;
+}
+
+/* Specific placeholder visibility */
+.v-field__input input::placeholder,
+input::placeholder,
+textarea::placeholder,
+.v-placeholder {
+  color: var(--fg-dim) !important;
+  opacity: 1 !important;
+}
+
+/* Radio button, checkbox, and generic field labels */
+.v-label,
+.v-label--clickable,
+.v-field-label {
+  color: var(--fg-dim) !important;
+  opacity: 1 !important;
+}
+
+/* Active field labels/focus states */
+.v-field--focused .v-field-label {
+  color: var(--accent) !important;
+}
+
+/* Text field and select outlines */
+.v-field__outline {
+  --v-field-border-width: 1px;
+  --v-field-border-opacity: 0.38 !important; /* Brighter border */
+  color: var(--fg-dim) !important;
+}
+
+/* Checked/Active borders */
+.v-field--focused .v-field__outline {
+  --v-field-border-opacity: 1 !important;
+  color: var(--accent) !important;
+}
+
+/* Checkbox/Selection control borders and icons */
+.v-selection-control__input {
+  color: var(--fg-dim) !important;
+}
+.v-selection-control--selected .v-selection-control__input {
+  color: var(--accent) !important;
+}
+
+/* Table row borders */
+.v-table .v-table__wrapper > table > tbody > tr:not(:last-child) > td,
+.v-table .v-table__wrapper > table > tbody > tr:not(:last-child) > th {
+  border-bottom: 1px solid var(--line) !important;
+}
+
+

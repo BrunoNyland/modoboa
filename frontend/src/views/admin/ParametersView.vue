@@ -37,12 +37,10 @@
 
 <script setup>
 import parametersApi from '@/api/parameters'
-import themeApi from '@/api/theme'
 import { computed, reactive, ref, watch } from 'vue'
 import { useGettext } from 'vue3-gettext'
 import { useRoute } from 'vue-router'
 import { useGlobalStore, useParametersStore, useBusStore } from '@/stores'
-import { useModoboaTheme } from '@/composables/theme'
 import ParametersForm from '@/components/tools/ParametersForm'
 import ImageFieldWidget from '@/components/tools/ImageFieldWidget'
 
@@ -51,7 +49,6 @@ const globalStore = useGlobalStore()
 const { displayNotification } = useBusStore()
 const route = useRoute()
 const parametersStore = useParametersStore()
-const { enableTheme } = useModoboaTheme()
 
 const structure = ref([])
 const parameters = ref({})
@@ -62,56 +59,16 @@ const title = computed(() => $gettext('Settings: ' + label.value))
 // Per-parameter upload/clear status used by the ImageField widget slot.
 const imageState = reactive({})
 
-// Theme is currently the only consumer of ImageField. The naming convention
-// `theme_<type>_logo_url` carries the backend logo_type — keeping the glue
-// here means ParametersForm and the widget stay generic.
 function themeLogoType(paramName) {
-  const match = paramName.match(/^theme_(.+)_logo_url$/)
-  return match ? match[1] : null
+  return null
 }
 
 async function onImageUpload(paramName, file, updateModelValue) {
-  const logoType = themeLogoType(paramName)
-  if (!logoType) {
-    return
-  }
-  imageState[paramName] = { ...imageState[paramName], uploading: true }
-  try {
-    const response = await themeApi.uploadLogo(logoType, file)
-    updateModelValue(response.data.url)
-    // Refresh the shared theme so the menu / webmail / creation-form logos
-    // pick up the new URL without a page reload.
-    await enableTheme()
-    displayNotification({ msg: $gettext('Image uploaded') })
-  } catch (error) {
-    displayNotification({
-      msg: $gettext('Could not upload image'),
-      type: 'error',
-    })
-  } finally {
-    imageState[paramName] = { ...imageState[paramName], uploading: false }
-  }
+  // No-op: theme system removed
 }
 
 async function onImageClear(paramName, updateModelValue) {
-  const logoType = themeLogoType(paramName)
-  if (!logoType) {
-    return
-  }
-  imageState[paramName] = { ...imageState[paramName], clearing: true }
-  try {
-    await themeApi.clearLogo(logoType)
-    updateModelValue('')
-    await enableTheme()
-    displayNotification({ msg: $gettext('Image removed') })
-  } catch (error) {
-    displayNotification({
-      msg: $gettext('Could not remove image'),
-      type: 'error',
-    })
-  } finally {
-    imageState[paramName] = { ...imageState[paramName], clearing: false }
-  }
+  // No-op: theme system removed
 }
 
 function loadParams(app) {

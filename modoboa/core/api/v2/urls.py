@@ -53,10 +53,4 @@ urlpatterns += [
         views.NotificationsAPIView.as_view(),
         name="notifications",
     ),
-    path("theme/", views.ThemeAPIView.as_view(), name="theme"),
-    path(
-        "theme/logo/",
-        views.ThemeLogoUploadAPIView.as_view(),
-        name="theme-logo-upload",
-    ),
 ]

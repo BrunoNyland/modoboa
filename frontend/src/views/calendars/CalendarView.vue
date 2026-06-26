@@ -4,7 +4,7 @@
       {{ $gettext('Calendar') }}
     </div>
 
-    <v-toolbar v-if="calendarRef" color="white" flat>
+    <v-toolbar v-if="calendarRef" flat>
       <v-btn
         class="me-4"
         color="grey-darken-2"

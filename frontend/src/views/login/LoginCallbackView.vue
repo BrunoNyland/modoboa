@@ -1,16 +1,13 @@
 <script setup>
 import { useAuthStore } from '@/stores'
-import { useModoboaTheme } from '@/composables/theme'
 
 const props = defineProps({
   redirectUrl: String,
 })
 
 const authStore = useAuthStore()
-const { enableTheme } = useModoboaTheme()
 
 await authStore.completeLogin(props.redirectUrl)
-await enableTheme()
 </script>
 
 <template>

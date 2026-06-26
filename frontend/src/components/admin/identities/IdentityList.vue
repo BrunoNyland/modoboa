@@ -17,7 +17,7 @@
       @update:options="updatedOptions"
     >
       <template #top>
-        <v-toolbar flat color="white">
+        <v-toolbar flat>
           <v-text-field
             v-model="search"
             prepend-inner-icon="mdi-magnify"

@@ -543,7 +543,7 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, from) => {
   const config = useGlobalConfig()
 
   document.title = config.HTML_PAGE_TITLE
@@ -570,8 +570,7 @@ router.beforeEach(async (to, from, next) => {
           resolved.matched.length &&
           resolved.matched[0].path !== to.matched[0]?.path
         ) {
-          next({ ...resolved, replace: true })
-          return
+          return { ...resolved, replace: true }
         }
       }
       if (to.meta.allowedRoles !== undefined) {
@@ -580,20 +579,16 @@ router.beforeEach(async (to, from, next) => {
           const nextPage = globalStore.webmailEnabled
             ? 'MailboxView'
             : 'AccountSettings'
-          next({ name: nextPage })
-          return
+          return { name: nextPage }
         }
       }
       if (to.meta.requiresMailbox && !authStore.authUser.mailbox) {
-        next({ name: 'Dashboard' })
-        return
+        return { name: 'Dashboard' }
       }
     } else {
-      next({ name: 'Login' })
-      return
+      return { name: 'Login' }
     }
   }
-  next()
 })
 
 export default router

@@ -1,5 +1,6 @@
 <template>
-  <ConnectedLayout>
+  <div>
+    <ConnectedLayout>
     <template #navbar>
       <v-navigation-drawer
         v-model="drawer"
@@ -99,6 +100,7 @@
     />
   </v-dialog>
   <ConfirmDialog ref="confirm" />
+  </div>
 </template>
 
 <script setup>

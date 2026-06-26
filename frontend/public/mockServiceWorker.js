@@ -96,6 +96,36 @@ addEventListener('fetch', function (event) {
     return
   }
 
+  // Bypass all requests that are not API calls.
+  const url = new URL(event.request.url)
+  const pathname = url.pathname
+  const isApi =
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/account/') ||
+    pathname.startsWith('/capabilities/') ||
+    pathname.startsWith('/notifications/') ||
+    pathname.startsWith('/alarms/') ||
+    pathname.startsWith('/statistics/') ||
+    pathname.startsWith('/frontend/plugins/') ||
+    pathname.startsWith('/parameters/') ||
+    pathname.startsWith('/languages/') ||
+    pathname.startsWith('/webmail/') ||
+    pathname.startsWith('/domains/') ||
+    pathname.startsWith('/identities/') ||
+    pathname.startsWith('/accounts/') ||
+    pathname.startsWith('/logs/') ||
+    pathname.startsWith('/email-providers/') ||
+    pathname.startsWith('/migrations/') ||
+    pathname.startsWith('/fido/') ||
+    pathname.startsWith('/admin/news_feed/') ||
+    pathname.startsWith('/admin/statistics/') ||
+    pathname.startsWith('/admin/components/') ||
+    pathname.startsWith('/admin/notifications/')
+
+  if (!isApi) {
+    return
+  }
+
   // Opening the DevTools triggers the "only-if-cached" request
   // that cannot be handled by the worker. Bypass such requests.
   if (

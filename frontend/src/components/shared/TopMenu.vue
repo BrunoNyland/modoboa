@@ -7,6 +7,7 @@
       class="mr-4"
       variant="tonal"
       size="small"
+      :aria-label="$gettext('Notifications')"
     >
       <v-icon icon="mdi-bell" />
       <v-menu activator="parent" location="bottom">
@@ -33,7 +34,7 @@
       </v-menu>
     </v-btn>
 
-    <v-btn icon class="mr-4" variant="flat">
+    <v-btn icon class="mr-4" variant="flat" :aria-label="$gettext('Applications')">
       <v-icon icon="mdi-apps" />
       <v-menu activator="parent" location="bottom">
         <v-card min-width="350" max-width="400" class="pa-4">
@@ -67,8 +68,8 @@
         <v-card min-width="300" max-width="350">
           <v-list>
             <div class="text-center">
-              <v-avatar color="primary" rounded="0">
-                <span class="text-headline-medium">{{ userInitials }}</span>
+              <v-avatar color="primary" rounded="0" size="48">
+                <span class="user-menu__initials">{{ userInitials }}</span>
               </v-avatar>
               <v-list-item :title="user.username" />
             </div>
@@ -157,6 +158,14 @@ onMounted(() => {
   top: 10px;
   right: 10px;
   z-index: 100;
+}
+
+/* Match the user-menu avatar to the top-bar trigger avatar (48px / 16px). */
+.user-menu__initials {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.0892857143em;
+  text-transform: uppercase;
 }
 
 .application {

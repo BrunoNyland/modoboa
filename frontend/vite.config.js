@@ -273,7 +273,12 @@ export default defineConfig({
   build: {
     emptyOutDir: true,
     outDir: '../modoboa/frontend_dist',
+    // Modern-only target: no legacy transpilation, no injected polyfills.
+    // Browsers we serve support native ESM, so the bundle stays lean.
     target: 'esnext',
+    // Emit source maps so production JS stays debuggable (and readable by
+    // error-reporting tools) without shipping unminified code.
+    sourcemap: true,
     // Inject <link rel="modulepreload"> for the static module graph so the
     // browser fetches it in parallel instead of discovering each import
     // serially (a request waterfall). Polyfill off: target is esnext, so the

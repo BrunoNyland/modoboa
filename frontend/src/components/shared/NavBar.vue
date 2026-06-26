@@ -5,12 +5,11 @@
       :aria-label="$gettext('Toggle navigation')"
       @click="drawer = !drawer"
     />
-    <v-img
-      :src="menuLogoPath"
-      max-width="150"
-      class="logo"
+    <span
+      class="brand-wordmark brand-wordmark--sm"
       @click="router.push(props.logoRoute)"
-    />
+      >webmail</span
+    >
   </v-app-bar>
 
   <v-navigation-drawer
@@ -22,15 +21,17 @@
     app
   >
     <div v-if="!mobile" class="d-flex align-center">
-      <v-img
-        :src="menuLogoPath"
-        max-width="190"
-        class="logo"
+      <span
+        v-if="!rail"
+        class="brand-wordmark"
         @click="router.push(props.logoRoute)"
-      />
+        >webmail</span
+      >
+      <v-spacer v-if="!rail" />
       <v-btn
         :icon="rail ? 'mdi-chevron-right' : 'mdi-chevron-left'"
         variant="text"
+        :aria-label="rail ? $gettext('Expand sidebar') : $gettext('Collapse sidebar')"
         @click.stop="rail = !rail"
       >
       </v-btn>
@@ -112,7 +113,6 @@
 import { useRoute, useRouter } from 'vue-router'
 import { ref, computed, watch } from 'vue'
 import { useDisplay } from 'vuetify'
-import { useLogos } from '@/composables/logos'
 import { useAuthStore, useLayoutStore } from '@/stores'
 
 const props = defineProps({
@@ -136,7 +136,6 @@ const layoutStore = useLayoutStore()
 const router = useRouter()
 const route = useRoute()
 const { mobile } = useDisplay()
-const { menuLogoPath } = useLogos()
 
 const rail = ref(false)
 // Open by default on desktop (permanent drawer); closed on mobile (the
@@ -174,8 +173,3 @@ function displayMenuItem(item) {
 }
 </script>
 
-<style lang="scss" scoped>
-.logo {
-  cursor: pointer;
-}
-</style>

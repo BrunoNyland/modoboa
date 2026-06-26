@@ -9,14 +9,27 @@
           icon="mdi-arrow-left"
           size="small"
           variant="flat"
+          :aria-label="$gettext('Back')"
           @click="close"
         />
 
-        <v-btn-group color="primary" rounded="lg" density="compact" divided class="flex-shrink-0">
-          <v-btn prepend-icon="mdi-reply" @click="() => replyToEmail()">
+        <div class="d-flex align-center flex-shrink-0">
+          <v-btn
+            prepend-icon="mdi-reply"
+            size="small"
+            variant="tonal"
+            color="primary"
+            @click="() => replyToEmail()"
+          >
             {{ $gettext('Reply') }}
           </v-btn>
-          <v-btn size="small" icon>
+          <v-btn
+            size="small"
+            icon
+            variant="tonal"
+            color="primary"
+            :aria-label="$gettext('More reply options')"
+          >
             <v-icon icon="mdi-chevron-down" />
             <v-menu activator="parent">
               <v-list>
@@ -31,7 +44,7 @@
               </v-list>
             </v-menu>
           </v-btn>
-        </v-btn-group>
+        </div>
         <template v-if="$route.query.mailbox !== 'Scheduled'">
           <v-btn
             class="ml-2"
@@ -39,6 +52,7 @@
             variant="tonal"
             icon="mdi-trash-can"
             size="small"
+            :aria-label="$gettext('Delete')"
             :loading="working"
             @click="deleteEmail"
           >
@@ -50,6 +64,7 @@
             variant="tonal"
             icon="mdi-fire"
             size="small"
+            :aria-label="$gettext('Mark as junk')"
             :loading="working"
             @click="markEmailAsJunk"
           >
@@ -61,6 +76,7 @@
             variant="tonal"
             icon="mdi-thumb-up"
             size="small"
+            :aria-label="$gettext('Mark as not junk')"
             :loading="working"
             @click="markEmailAsNotJunk"
           >
@@ -71,11 +87,18 @@
             variant="tonal"
             icon="mdi-pencil"
             size="small"
+            :aria-label="$gettext('Edit draft')"
             @click="editDraft"
           >
           </v-btn>
         </template>
-        <v-btn class="ml-2" variant="tonal" icon size="small">
+        <v-btn
+          class="ml-2"
+          variant="tonal"
+          icon
+          size="small"
+          :aria-label="$gettext('More actions')"
+        >
           <v-icon icon="mdi-cog" />
           <v-menu activator="parent">
             <v-list density="compact">

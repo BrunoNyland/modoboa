@@ -64,7 +64,7 @@ msgstr "Token API creato"
 #: src/components/admin/identities/IdentityList.vue:482
 #: src/components/admin/identities/IdentityList.vue:522
 #: src/components/tools/CreationForm.vue:135
-#: src/layouts/webmail/WebmailLayout.vue:221
+#: src/layouts/webmail/WebmailLayout.vue:345
 #: src/views/calendars/CalendarView.vue:535
 msgid "Warning"
 msgstr "Attenzione"
@@ -114,7 +114,7 @@ msgstr "Abilitato"
 #: src/components/account/AutoReplyForm.vue:12
 #: src/components/quarantine/QuarantineList.vue:49
 #: src/components/quarantine/QuarantineList.vue:235
-#: src/components/webmail/ComposeEmailForm.vue:193
+#: src/components/webmail/ComposeEmailForm.vue:186
 msgid "Subject"
 msgstr "Oggetto"
 
@@ -125,19 +125,19 @@ msgstr "Contenuto"
 #: src/components/account/AutoReplyForm.vue:24
 msgid ""
 "The content of your answer. You can use the following variables, which will "
-"be automatically replaced by the appropriate value: %(name)s, %(fromdate)s, %"
-"(untildate)s"
+"be automatically replaced by the appropriate value: %(name)s, %(fromdate)s, "
+"%(untildate)s"
 msgstr ""
 "Il contenuto della tua risposta. Puoi utilizzare le seguenti variabili, che "
-"verranno automaticamente sostituite dal valore appropriato: %(name)s, %"
-"(fromdate)s, %(untildate)s"
+"verranno automaticamente sostituite dal valore appropriato: %(name)s, "
+"%(fromdate)s, %(untildate)s"
 
 #: src/components/account/AutoReplyForm.vue:36
 #: src/components/admin/logs/MessageList.vue:50
 #: src/components/calendars/EventForm.vue:24
 #: src/components/quarantine/QuarantineList.vue:234
 #: src/components/tools/TimeSerieChart.vue:19
-#: src/components/webmail/ComposeEmailForm.vue:83
+#: src/components/webmail/ComposeEmailForm.vue:101
 msgid "From"
 msgstr "Da"
 
@@ -173,18 +173,18 @@ msgstr ""
 "Hai già generato dei codici di backup per questo account. Se non li ricordi "
 "o li hai usati tutti, puoi generarne di nuovi."
 
-#: src/components/account/BackupCodeAuthForm.vue:19
+#: src/components/account/BackupCodeAuthForm.vue:20
 #: src/components/account/ProfileForm.vue:69
-#: src/components/account/TotpAuthForm.vue:84
-#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:54
+#: src/components/account/TotpAuthForm.vue:85
+#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:55
 msgid "Password"
 msgstr "Password"
 
-#: src/components/account/BackupCodeAuthForm.vue:35
+#: src/components/account/BackupCodeAuthForm.vue:36
 msgid "Reset recovery codes"
 msgstr "Reimposta codici di recupero"
 
-#: src/components/account/BackupCodeAuthForm.vue:43
+#: src/components/account/BackupCodeAuthForm.vue:44
 msgid "No two-factor authentificator is yet set for your account."
 msgstr ""
 "Nessun autenticatore a due fattori è ancora impostato per il tuo account."
@@ -292,7 +292,7 @@ msgstr "Vuoi davvero eliminare questo dispositivo WebAuthN?"
 #: src/components/admin/identities/IdentityList.vue:487
 #: src/components/admin/identities/IdentityList.vue:527
 #: src/components/tools/CreationForm.vue:142
-#: src/layouts/webmail/WebmailLayout.vue:226
+#: src/layouts/webmail/WebmailLayout.vue:350
 msgid "No"
 msgstr "No"
 
@@ -303,7 +303,7 @@ msgstr "No"
 #: src/components/admin/identities/IdentityList.vue:486
 #: src/components/admin/identities/IdentityList.vue:526
 #: src/components/tools/CreationForm.vue:141
-#: src/layouts/webmail/WebmailLayout.vue:225
+#: src/layouts/webmail/WebmailLayout.vue:349
 msgid "Yes"
 msgstr "Sì"
 
@@ -505,15 +505,15 @@ msgstr "Aggiorna impostazioni"
 msgid "Update Password"
 msgstr "Aggiorna Password"
 
-#: src/components/account/ProfileForm.vue:130
+#: src/components/account/ProfileForm.vue:129
 msgid "Profile updated"
 msgstr "Profilo aggiornato"
 
-#: src/components/account/ProfileForm.vue:132
+#: src/components/account/ProfileForm.vue:131
 msgid "Language does no exist"
 msgstr "La lingua non esiste"
 
-#: src/components/account/ProfileForm.vue:149
+#: src/components/account/ProfileForm.vue:148
 msgid "Password updated"
 msgstr "Password aggiornata"
 
@@ -550,12 +550,12 @@ msgstr ""
 #: src/components/contacts/ContactCategoriesForm.vue:21
 #: src/components/contacts/ContactForm.vue:148
 #: src/components/tools/ImportForm.vue:51
-#: src/components/webmail/AttachmentsDialog.vue:41
-#: src/components/webmail/EmailList.vue:226
+#: src/components/webmail/AttachmentsDialog.vue:87
+#: src/components/webmail/EmailList.vue:260
 #: src/components/webmail/EmailSchedulingForm.vue:28
 #: src/components/webmail/MailboxForm.vue:29
 #: src/layouts/connected/ConnectedLayout.vue:19
-#: src/views/webmail/EmailView.vue:167
+#: src/views/webmail/EmailView.vue:201
 msgid "Close"
 msgstr "Chiudi"
 
@@ -599,11 +599,11 @@ msgstr ""
 "L'autenticazione a due fattori tramite password monouso è abilitata per il "
 "tuo account."
 
-#: src/components/account/TotpAuthForm.vue:101
+#: src/components/account/TotpAuthForm.vue:102
 msgid "Disable 2FA"
 msgstr "Disabilita 2FA"
 
-#: src/components/account/TotpAuthForm.vue:109
+#: src/components/account/TotpAuthForm.vue:110
 msgid ""
 "Two-factor authentication (2FA) using one-time passwords is not yet "
 "activated for your account."
@@ -611,7 +611,7 @@ msgstr ""
 "L'autenticazione a due fattori (2FA) tramite password monouso non è ancora "
 "attivata per il tuo account."
 
-#: src/components/account/TotpAuthForm.vue:115
+#: src/components/account/TotpAuthForm.vue:116
 msgid "Register authenticator"
 msgstr "Registra autenticatore"
 
@@ -674,9 +674,9 @@ msgstr "Messaggio"
 #: src/components/calendars/EventForm.vue:90
 #: src/components/contacts/CategoryForm.vue:18
 #: src/components/contacts/ContactList.vue:237
-#: src/components/webmail/EmailList.vue:286
+#: src/components/webmail/EmailList.vue:321
 #: src/views/account/FiltersView.vue:351
-#: src/views/calendars/CalendarView.vue:209
+#: src/views/calendars/CalendarView.vue:209 src/views/webmail/EmailView.vue:55
 msgid "Delete"
 msgstr "Elimina"
 
@@ -708,28 +708,38 @@ msgstr "Allarme chiuso"
 msgid "Alarm re-opened"
 msgstr "Allarme riaperto"
 
-#: src/components/admin/dashboard/GlobalStatisticsWidget.vue:2
+#: src/components/admin/dashboard/GlobalStatisticsWidget.vue:3
 #: src/layouts/admin/AdminLayout.vue:80
 #: src/views/admin/domains/DomainView.vue:25
-#: src/views/admin/monitoring/StatisticsView.vue:3
+#: src/views/admin/monitoring/StatisticsView.vue:4
 msgid "Statistics"
 msgstr "Statistiche"
 
 #: src/components/admin/dashboard/GlobalStatisticsWidget.vue:7
-msgid "Domain count"
-msgstr "Numero di domini"
+#: src/layouts/admin/AdminLayout.vue:46
+#: src/views/admin/domains/DomainsView.vue:4
+msgid "Domains"
+msgstr "Domini"
 
 #: src/components/admin/dashboard/GlobalStatisticsWidget.vue:11
-msgid "Domain alias count"
-msgstr "Numero di alias di dominio"
+#, fuzzy
+msgid "Domain aliases"
+msgstr "Alias di dominio eliminato"
 
 #: src/components/admin/dashboard/GlobalStatisticsWidget.vue:15
-msgid "Account count"
-msgstr "Numero di account"
+#: src/components/admin/identities/IdentityList.vue:70
+msgid "Accounts"
+msgstr "Account"
 
 #: src/components/admin/dashboard/GlobalStatisticsWidget.vue:19
-msgid "Alias count"
-msgstr "Numero di alias"
+#: src/components/admin/domains/DomainList.vue:213
+#: src/components/admin/domains/DomainSummary.vue:64
+#: src/components/admin/identities/AccountAliases.vue:4
+#: src/components/admin/identities/AccountCreationForm.vue:146
+#: src/components/admin/identities/AccountCreationForm.vue:149
+#: src/components/admin/identities/AccountCreationForm.vue:180
+msgid "Aliases"
+msgstr "Alias"
 
 #: src/components/admin/dashboard/NewsFeedWidget.vue:2
 msgid "Latest news"
@@ -743,31 +753,31 @@ msgstr "Visita il blog ufficiale per maggiori informazioni"
 msgid "Alignment"
 msgstr "Allineamento"
 
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:45
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:42
 msgid "Detail"
 msgstr "Dettaglio"
 
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:48
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:45
 msgid "Trusted sources"
 msgstr "Fonti attendibili"
 
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:54
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:51
 msgid "Partially trusted sources / Forwarders"
 msgstr "Fonti parzialmente attendibili / Inoltratori"
 
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:61
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:58
 msgid "Forwarders with ARC"
 msgstr "Inoltratori con ARC"
 
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:68
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:65
 msgid "Unknown sources / Threats"
 msgstr "Fonti sconosciute / Minaccie"
 
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:89
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:86
 msgid "DMARC support does not seem to be enabled for this domain."
 msgstr "Il supporto DMARC non sembra essere abilitato per questo dominio."
 
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:94
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:91
 msgid ""
 "If you configured it recently, please wait for the first report to be "
 "received and processed."
@@ -775,27 +785,27 @@ msgstr ""
 "Se lo hai configurato di recente, attendi che il primo rapporto venga "
 "ricevuto ed elaborato."
 
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:127
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:143
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:132
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:153
 msgid "Fully aligned"
 msgstr "Completamente allineato"
 
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:128
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:148
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:133
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:154
 msgid "Partially aligned"
 msgstr "Parzialmente allineato"
 
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:129
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:151
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:134
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:155
 msgid "Forwarded"
 msgstr "Inoltrato"
 
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:130
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:152
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:135
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:156
 msgid "Failed"
 msgstr "Fallito"
 
-#: src/components/admin/dmarc/DmarcAligmentChart.vue:140
+#: src/components/admin/dmarc/DmarcAligmentChart.vue:152
 #: src/components/admin/dmarc/DmarcSourceTable.vue:12
 msgid "Total"
 msgstr "Totale"
@@ -1030,7 +1040,7 @@ msgstr "Nuovo dominio"
 
 #: src/components/admin/domains/DomainCreationForm.vue:67
 #: src/components/admin/identities/AccountCreationForm.vue:43
-#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:44
+#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:45
 msgid "Copy to clipboard"
 msgstr "Copia negli appunti"
 
@@ -1064,7 +1074,7 @@ msgstr "Limitazioni"
 
 #: src/components/admin/domains/DomainCreationForm.vue:172
 #: src/components/admin/domains/DomainCreationForm.vue:298
-#: src/components/webmail/ComposeEmailForm.vue:42
+#: src/components/webmail/ComposeEmailForm.vue:51
 msgid "Options"
 msgstr "Opzioni"
 
@@ -1140,7 +1150,7 @@ msgstr "Nome amministratore"
 
 #: src/components/admin/domains/DomainCreationForm.vue:315
 #: src/components/admin/identities/AccountCreationForm.vue:107
-#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:21
+#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:22
 msgid "Random password"
 msgstr "Password casuale"
 
@@ -1155,7 +1165,7 @@ msgstr "Crea alias"
 
 #: src/components/admin/domains/DomainCreationForm.vue:343
 #: src/components/admin/identities/AccountCreationForm.vue:214
-#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:104
+#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:106
 msgid "Password copied to clipboard"
 msgstr "Password copiata negli appunti"
 
@@ -1248,21 +1258,13 @@ msgstr "Relay"
 #: src/components/admin/identities/IdentityList.vue:139
 #: src/components/admin/identities/IdentityList.vue:168
 #: src/components/tools/ResourcesView.vue:9
+#: src/layouts/webmail/WebmailLayout.vue:117
 msgid "Unlimited"
 msgstr "Illimitato"
 
 #: src/components/admin/domains/DomainList.vue:168
 msgid "Do not delete domain folder"
 msgstr "Non eliminare la cartella del dominio"
-
-#: src/components/admin/domains/DomainList.vue:213
-#: src/components/admin/domains/DomainSummary.vue:64
-#: src/components/admin/identities/AccountAliases.vue:4
-#: src/components/admin/identities/AccountCreationForm.vue:146
-#: src/components/admin/identities/AccountCreationForm.vue:149
-#: src/components/admin/identities/AccountCreationForm.vue:180
-msgid "Aliases"
-msgstr "Alias"
 
 #: src/components/admin/domains/DomainList.vue:215
 msgid "DNS status"
@@ -1510,7 +1512,7 @@ msgstr "Account creato"
 
 #: src/components/admin/identities/AccountEditForm.vue:31
 #: src/components/calendars/CalendarAccessRulesForm.vue:42
-#: src/components/shared/TopMenu.vue:130
+#: src/components/shared/TopMenu.vue:131
 #: src/views/admin/identities/AccountView.vue:4
 #: src/views/admin/identities/IdentitiesView.vue:23
 msgid "Account"
@@ -1732,15 +1734,15 @@ msgstr "Usa il valore predefinito"
 msgid "unlimited"
 msgstr "senza limiti"
 
-#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:4
+#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:5
 msgid "Current password"
 msgstr "Password attuale"
 
-#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:65
+#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:67
 msgid "Confirmation"
 msgstr "Conferma"
 
-#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:99
+#: src/components/admin/identities/form_steps/AccountPasswordSubForm.vue:101
 msgid "Password mismatch"
 msgstr "Le password non corrispondono"
 
@@ -1815,10 +1817,6 @@ msgstr "Per favore aggiungi almeno un destinatario."
 #: src/components/admin/identities/IdentityList.vue:36
 msgid "Customize displayed columns"
 msgstr "Personalizza le colonne visualizzate"
-
-#: src/components/admin/identities/IdentityList.vue:70
-msgid "Accounts"
-msgstr "Account"
 
 #: src/components/admin/identities/IdentityList.vue:143
 #: src/components/admin/identities/IdentityList.vue:172
@@ -2001,8 +1999,8 @@ msgstr "ID Coda"
 #: src/components/quarantine/QuarantineList.vue:52
 #: src/components/quarantine/QuarantineList.vue:233
 #: src/components/tools/TimeSerieChart.vue:20
-#: src/components/webmail/ComposeEmailForm.vue:100
-#: src/views/webmail/EmailView.vue:112
+#: src/components/webmail/ComposeEmailForm.vue:117
+#: src/views/webmail/EmailView.vue:147
 msgid "To"
 msgstr "A"
 
@@ -2118,7 +2116,7 @@ msgid "Select an ICS file"
 msgstr "Seleziona un file ICS"
 
 #: src/components/calendars/ImportEventsForm.vue:30
-#: src/components/webmail/ComposeEmailForm.vue:18
+#: src/components/webmail/ComposeEmailForm.vue:21
 msgid "Send"
 msgstr "Invia"
 
@@ -2241,7 +2239,8 @@ msgid "Synchronization started"
 msgstr "Sincronizzazione avviata"
 
 #: src/components/quarantine/QuarantineList.vue:27
-#: src/components/webmail/EmailList.vue:15
+#: src/components/webmail/EmailList.vue:16
+#: src/components/webmail/EmailList.vue:17
 msgid "Search in messages"
 msgstr "Cerca nei messaggi"
 
@@ -2258,6 +2257,7 @@ msgid "Release selection"
 msgstr "Rilascia selezione"
 
 #: src/components/quarantine/QuarantineList.vue:84
+#: src/components/webmail/EmailList.vue:35
 msgid "Delete selection"
 msgstr "Elimina selezione"
 
@@ -2320,11 +2320,28 @@ msgstr "Quale database deve essere utilizzato per questo apprendimento:"
 msgid "Selection is being processed..."
 msgstr "Selezione in elaborazione..."
 
-#: src/components/shared/TopMenu.vue:15
+#: src/components/shared/NavBar.vue:5
+msgid "Toggle navigation"
+msgstr ""
+
+#: src/components/shared/NavBar.vue:34 src/layouts/webmail/WebmailLayout.vue:60
+msgid "Expand sidebar"
+msgstr ""
+
+#: src/components/shared/NavBar.vue:34 src/layouts/webmail/WebmailLayout.vue:60
+msgid "Collapse sidebar"
+msgstr ""
+
+#: src/components/shared/TopMenu.vue:10 src/components/shared/TopMenu.vue:16
 msgid "Notifications"
 msgstr "Notifiche"
 
-#: src/components/shared/TopMenu.vue:137
+#: src/components/shared/TopMenu.vue:37
+#, fuzzy
+msgid "Applications"
+msgstr "Azioni"
+
+#: src/components/shared/TopMenu.vue:138
 msgid "Logout"
 msgstr "Esci"
 
@@ -2342,6 +2359,8 @@ msgid "Summary"
 msgstr "Sommario"
 
 #: src/components/tools/CreationForm.vue:66
+#: src/components/webmail/ComposeEmailForm.vue:11
+#: src/views/webmail/EmailView.vue:12
 msgid "Back"
 msgstr "Indietro"
 
@@ -2451,86 +2470,129 @@ msgstr "Intervallo di tempo assoluto"
 msgid "Relative time ranges"
 msgstr "Intervalli di tempo relativi"
 
-#: src/components/tools/TimeSerieChart.vue:110
+#: src/components/tools/TimeSerieChart.vue:148
 #: src/views/calendars/CalendarView.vue:46
 #: src/views/calendars/CalendarView.vue:172
 msgid "Day"
 msgstr "Giorno"
 
-#: src/components/tools/TimeSerieChart.vue:111
+#: src/components/tools/TimeSerieChart.vue:149
 #: src/views/calendars/CalendarView.vue:49
 #: src/views/calendars/CalendarView.vue:173
 msgid "Week"
 msgstr "Settimana"
 
-#: src/components/tools/TimeSerieChart.vue:112
+#: src/components/tools/TimeSerieChart.vue:150
 #: src/views/calendars/CalendarView.vue:52
 #: src/views/calendars/CalendarView.vue:174
 msgid "Month"
 msgstr "Mese"
 
-#: src/components/tools/TimeSerieChart.vue:113
+#: src/components/tools/TimeSerieChart.vue:151
 msgid "Year"
 msgstr "Anno"
 
-#: src/components/tools/YesNoDefaultField.vue:3 src/plugins/filters.js:10
+#: src/components/tools/YesNoDefaultField.vue:3 src/plugins/filters.js:11
 msgid "yes"
 msgstr "sì"
 
-#: src/components/tools/YesNoDefaultField.vue:4 src/plugins/filters.js:10
+#: src/components/tools/YesNoDefaultField.vue:4 src/plugins/filters.js:11
 msgid "no"
 msgstr "no"
 
-#: src/components/webmail/AttachmentsDialog.vue:3
-#: src/components/webmail/ComposeEmailForm.vue:67
+#: src/components/webmail/AttachmentsDialog.vue:4
+#: src/layouts/webmail/WebmailLayout.vue:69
+#: src/layouts/webmail/WebmailLayout.vue:81
+msgid "Compose"
+msgstr "Scrivi"
+
+#: src/components/webmail/AttachmentsDialog.vue:6
+#: src/components/webmail/ComposeEmailForm.vue:83
 msgid "Attachments"
 msgstr "Allegati"
 
-#: src/components/webmail/AttachmentsDialog.vue:16
+#: src/components/webmail/AttachmentsDialog.vue:21
+#, fuzzy
+msgid "Choose a file"
+msgstr "Scegli un ruolo"
+
+#: src/components/webmail/AttachmentsDialog.vue:30
 msgid "Attach"
 msgstr "Allega"
 
-#: src/components/webmail/ComposeEmailForm.vue:28
+#: src/components/webmail/AttachmentsDialog.vue:47
+msgid "Attached successfully:"
+msgstr ""
+
+#: src/components/webmail/AttachmentsDialog.vue:53
+#, fuzzy
+msgid "Attached files"
+msgstr "Filtri contenuti vietati"
+
+#: src/components/webmail/AttachmentsDialog.vue:74
+#, fuzzy
+msgid "Remove"
+msgstr "Rimuovi questo indirizzo"
+
+#: src/components/webmail/AttachmentsDialog.vue:81
+#, fuzzy
+msgid "No attachments yet."
+msgstr "Allegati"
+
+#: src/components/webmail/AttachmentsDialog.vue:147
+msgid "Attachment added: %{name}"
+msgstr ""
+
+#: src/components/webmail/BodyEditor.vue:25
+msgid "Write your message here..."
+msgstr ""
+
+#: src/components/webmail/ComposeEmailForm.vue:30
+msgid "More send options"
+msgstr ""
+
+#: src/components/webmail/ComposeEmailForm.vue:37
 msgid "Schedule sending"
 msgstr "Pianifica invio"
 
-#: src/components/webmail/ComposeEmailForm.vue:49
+#: src/components/webmail/ComposeEmailForm.vue:58
 msgid "Request delivery status notification"
 msgstr ""
 
-#: src/components/webmail/ComposeEmailForm.vue:56
+#: src/components/webmail/ComposeEmailForm.vue:65
 msgid "Request read receipt"
 msgstr ""
 
-#: src/components/webmail/ComposeEmailForm.vue:74
+#: src/components/webmail/ComposeEmailForm.vue:91
+#: src/components/webmail/ComposeEmailForm.vue:92
 msgid "Save as draft"
 msgstr ""
 
-#: src/components/webmail/ComposeEmailForm.vue:108
-#: src/components/webmail/ComposeEmailForm.vue:153
-#: src/components/webmail/ComposeEmailForm.vue:180
+#: src/components/webmail/ComposeEmailForm.vue:118
+#: src/components/webmail/ComposeEmailForm.vue:151
+#: src/components/webmail/ComposeEmailForm.vue:171
 msgid "Provide one or more addresses"
 msgstr "Fornisci uno o più indirizzi"
 
-#: src/components/webmail/ComposeEmailForm.vue:121
-#: src/components/webmail/ComposeEmailForm.vue:139
+#: src/components/webmail/ComposeEmailForm.vue:132
+#: src/components/webmail/ComposeEmailForm.vue:150
 msgid "Cc"
 msgstr "Cc"
 
-#: src/components/webmail/ComposeEmailForm.vue:129
-#: src/components/webmail/ComposeEmailForm.vue:166
+#: src/components/webmail/ComposeEmailForm.vue:138
+#: src/components/webmail/ComposeEmailForm.vue:170
 msgid "Bcc"
 msgstr "Ccn"
 
-#: src/components/webmail/ComposeEmailForm.vue:348
+#: src/components/webmail/ComposeEmailForm.vue:337
 msgid "Email scheduled"
 msgstr "Email pianificata"
 
-#: src/components/webmail/ComposeEmailForm.vue:349
+#: src/components/webmail/ComposeEmailForm.vue:338
 msgid "Email sent"
 msgstr "Email inviata"
 
-#: src/components/webmail/ComposeEmailForm.vue:426
+#: src/components/webmail/ComposeEmailForm.vue:415
 msgid "You must provide one recipient at least"
 msgstr "Devi fornire almeno un destinatario"
 
@@ -2546,31 +2608,59 @@ msgstr "Aggiorna contatto"
 msgid "Contact added to address book"
 msgstr "Contatto aggiunto alla rubrica"
 
-#: src/components/webmail/EmailList.vue:66
+#: src/components/webmail/EmailList.vue:9
+#, fuzzy
+msgid "Select all messages"
+msgstr "Elimina messaggio"
+
+#: src/components/webmail/EmailList.vue:48
+msgid "Mark selection as junk"
+msgstr ""
+
+#: src/components/webmail/EmailList.vue:60
+#, fuzzy
+msgid "Mark selection as not junk"
+msgstr "Messaggio segnato come non spam"
+
+#: src/components/webmail/EmailList.vue:71 src/views/webmail/EmailView.vue:100
+#, fuzzy
+msgid "More actions"
+msgstr "Migrazioni"
+
+#: src/components/webmail/EmailList.vue:77
 msgid "Mark as read"
 msgstr "Segna come letto"
 
-#: src/components/webmail/EmailList.vue:71
+#: src/components/webmail/EmailList.vue:82
 msgid "Mark as unread"
 msgstr "Segna come non letto"
 
-#: src/components/webmail/EmailList.vue:76
+#: src/components/webmail/EmailList.vue:87
 msgid "Mark as followed"
 msgstr "Segna come seguito"
 
-#: src/components/webmail/EmailList.vue:81
+#: src/components/webmail/EmailList.vue:92
 msgid "Mark as unfollowed"
 msgstr "Segna come non seguito"
 
-#: src/components/webmail/EmailList.vue:87
+#: src/components/webmail/EmailList.vue:98
 msgid "Empty mailbox"
 msgstr "Svuota casella di posta"
 
-#: src/components/webmail/EmailList.vue:97
+#: src/components/webmail/EmailList.vue:108
 msgid "on"
 msgstr "il"
 
-#: src/components/webmail/EmailList.vue:127
+#: src/components/webmail/EmailList.vue:115
+msgid "Previous page"
+msgstr ""
+
+#: src/components/webmail/EmailList.vue:122
+#, fuzzy
+msgid "Next page"
+msgstr "Successivo"
+
+#: src/components/webmail/EmailList.vue:140
 msgid ""
 "Scheduled messages will be sent at the specified date and time. (visible on "
 "the right)"
@@ -2578,43 +2668,63 @@ msgstr ""
 "I messaggi pianificati verranno inviati alla data e all'ora specificate. "
 "(visibile sulla destra)"
 
-#: src/components/webmail/EmailList.vue:206
+#: src/components/webmail/EmailList.vue:165
+#, fuzzy
+msgid "Select message: %{subject}"
+msgstr "Elimina messaggio"
+
+#: src/components/webmail/EmailList.vue:174
+#, fuzzy
+msgid "Unfollow message"
+msgstr "Tutti i messaggi"
+
+#: src/components/webmail/EmailList.vue:175
+#, fuzzy
+msgid "Follow message"
+msgstr "Tutti i messaggi"
+
+#: src/components/webmail/EmailList.vue:186
+#, fuzzy
+msgid "Message actions"
+msgstr "Messaggi"
+
+#: src/components/webmail/EmailList.vue:240
 msgid "No message yet in this mailbox"
 msgstr "Ancora nessun messaggio in questa casella di posta"
 
-#: src/components/webmail/EmailList.vue:221
+#: src/components/webmail/EmailList.vue:255
 msgid "Sending failure"
 msgstr "Invio fallito"
 
-#: src/components/webmail/EmailList.vue:281
+#: src/components/webmail/EmailList.vue:316
 msgid "Reschedule"
 msgstr "Ripianifica"
 
-#: src/components/webmail/EmailList.vue:328
+#: src/components/webmail/EmailList.vue:363
 msgid "Scheduling updated"
 msgstr "Pianificazione aggiornata"
 
-#: src/components/webmail/EmailList.vue:339
+#: src/components/webmail/EmailList.vue:374
 msgid "Scheduled canceled and message moved to trash folder"
 msgstr "Pianificazione annullata e messaggio spostato nel cestino"
 
-#: src/components/webmail/EmailList.vue:393
+#: src/components/webmail/EmailList.vue:428
 msgid "Message(s) deleted"
 msgstr "Messaggio(i) eliminato(i)"
 
-#: src/components/webmail/EmailList.vue:408
+#: src/components/webmail/EmailList.vue:443
 msgid "Message(s) marked as junk"
 msgstr "Messaggio(i) segnato(i) come spam"
 
-#: src/components/webmail/EmailList.vue:422
+#: src/components/webmail/EmailList.vue:457
 msgid "Message(s) marked as not junk"
 msgstr "Messaggio(i) segnato(i) come non spam"
 
-#: src/components/webmail/EmailList.vue:437
+#: src/components/webmail/EmailList.vue:472
 msgid "Message(s) flagged"
 msgstr "Messaggio(i) contrassegnato(i)"
 
-#: src/components/webmail/EmailList.vue:464
+#: src/components/webmail/EmailList.vue:499
 msgid "%{count} message"
 msgid_plural "%{count} messages"
 msgstr[0] "%{count} messaggio"
@@ -2657,7 +2767,15 @@ msgstr "Casella di posta rinominata"
 msgid "Mailbox created"
 msgstr "Casella di posta creata"
 
-#: src/components/webmail/MailboxList.vue:172
+#: src/components/webmail/MailboxList.vue:52
+msgid "Collapse folder"
+msgstr ""
+
+#: src/components/webmail/MailboxList.vue:53
+msgid "Expand folder"
+msgstr ""
+
+#: src/components/webmail/MailboxList.vue:170
 msgid "Moving selection..."
 msgstr "Spostamento selezione..."
 
@@ -2673,23 +2791,18 @@ msgstr "Database del dominio"
 msgid "User's database"
 msgstr "Database dell'utente"
 
-#: src/layouts/account/AccountLayout.vue:29
+#: src/layouts/account/AccountLayout.vue:30
 #: src/layouts/admin/AdminLayout.vue:130
 msgid "Settings"
 msgstr "Impostazioni"
 
-#: src/layouts/account/AccountLayout.vue:35
+#: src/layouts/account/AccountLayout.vue:37
 msgid "Filters"
 msgstr "Filtri"
 
-#: src/layouts/admin/AdminLayout.vue:40
+#: src/layouts/admin/AdminLayout.vue:40 src/views/DashboardView.vue:5
 msgid "Dashboard"
 msgstr "Bacheca"
-
-#: src/layouts/admin/AdminLayout.vue:46
-#: src/views/admin/domains/DomainsView.vue:4
-msgid "Domains"
-msgstr "Domini"
 
 #: src/layouts/admin/AdminLayout.vue:56
 #: src/views/admin/identities/IdentitiesView.vue:4
@@ -2701,7 +2814,7 @@ msgid "Monitoring"
 msgstr "Monitoraggio"
 
 #: src/layouts/admin/AdminLayout.vue:85
-#: src/views/admin/monitoring/AuditTrailView.vue:3
+#: src/views/admin/monitoring/AuditTrailView.vue:4
 msgid "Audit trail"
 msgstr "Audit trail"
 
@@ -2727,35 +2840,58 @@ msgstr "Migrazioni"
 msgid "Information"
 msgstr "Informazioni"
 
-#: src/layouts/webmail/WebmailLayout.vue:26
-msgid "Compose"
-msgstr "Scrivi"
+#: src/layouts/webmail/WebmailLayout.vue:23
+#: src/layouts/webmail/WebmailLayout.vue:24
+#: src/layouts/webmail/WebmailLayout.vue:128
+#: src/layouts/webmail/WebmailLayout.vue:129
+#, fuzzy
+msgid "Mailbox settings"
+msgstr "Caselle di posta"
 
-#: src/layouts/webmail/WebmailLayout.vue:56
+#: src/layouts/webmail/WebmailLayout.vue:31
+#: src/layouts/webmail/WebmailLayout.vue:135
 msgid "Create a new mailbox"
 msgstr "Crea una nuova casella di posta"
 
-#: src/layouts/webmail/WebmailLayout.vue:61
+#: src/layouts/webmail/WebmailLayout.vue:36
+#: src/layouts/webmail/WebmailLayout.vue:140
 msgid "Edit this mailbox"
 msgstr "Modifica questa casella di posta"
 
-#: src/layouts/webmail/WebmailLayout.vue:67
+#: src/layouts/webmail/WebmailLayout.vue:42
+#: src/layouts/webmail/WebmailLayout.vue:146
 msgid "Delete this mailbox"
 msgstr "Elimina questa casella di posta"
 
-#: src/layouts/webmail/WebmailLayout.vue:73
+#: src/layouts/webmail/WebmailLayout.vue:48
+#: src/layouts/webmail/WebmailLayout.vue:152
 msgid "Compress this mailbox"
 msgstr "Comprimi questa casella di posta"
 
-#: src/layouts/webmail/WebmailLayout.vue:216
+#: src/layouts/webmail/WebmailLayout.vue:97
+msgid "Storage"
+msgstr ""
+
+#: src/layouts/webmail/WebmailLayout.vue:108
+#: src/layouts/webmail/WebmailLayout.vue:166
+#, fuzzy
+msgid "Storage usage"
+msgstr "Utilizzo risorse"
+
+#: src/layouts/webmail/WebmailLayout.vue:117
+#: src/layouts/webmail/WebmailLayout.vue:288
+msgid "used"
+msgstr ""
+
+#: src/layouts/webmail/WebmailLayout.vue:340
 msgid "Mailbox compressed"
 msgstr "Casella di posta compressa"
 
-#: src/layouts/webmail/WebmailLayout.vue:222
+#: src/layouts/webmail/WebmailLayout.vue:346
 msgid "Delete this mailbox?"
 msgstr "Eliminare questa casella di posta?"
 
-#: src/layouts/webmail/WebmailLayout.vue:233
+#: src/layouts/webmail/WebmailLayout.vue:357
 msgid "Mailbox deleted"
 msgstr "Casella di posta eliminata"
 
@@ -2888,7 +3024,7 @@ msgid "Deactivate filter set"
 msgstr "Disattiva set di filtri"
 
 #: src/views/account/ParametersView.vue:30
-#: src/views/admin/ParametersView.vue:60
+#: src/views/admin/ParametersView.vue:57
 msgid "Settings: "
 msgstr "Impostazioni: "
 
@@ -2900,7 +3036,7 @@ msgstr "Impostazioni account"
 msgid "Two-factor auth"
 msgstr "Autenticazione a due fattori"
 
-#: src/views/account/SettingsView.vue:15 src/views/webmail/EmailView.vue:18
+#: src/views/account/SettingsView.vue:15 src/views/webmail/EmailView.vue:41
 msgid "Forward"
 msgstr "Inoltra"
 
@@ -3066,27 +3202,9 @@ msgstr "Versione installata"
 msgid "Latest version"
 msgstr "Ultima versione"
 
-#: src/views/admin/monitoring/MessagesView.vue:3
+#: src/views/admin/monitoring/MessagesView.vue:4
 msgid "Message history"
 msgstr "Cronologia messaggi"
-
-#: src/views/admin/ParametersView.vue:85
-msgid "Image uploaded"
-msgstr ""
-
-#: src/views/admin/ParametersView.vue:88
-msgid "Could not upload image"
-msgstr ""
-
-#: src/views/admin/ParametersView.vue:106
-#, fuzzy
-msgid "Image removed"
-msgstr "Filtro rimosso"
-
-#: src/views/admin/ParametersView.vue:109
-#, fuzzy
-msgid "Could not remove image"
-msgstr "Impossibile salvare i parametri"
 
 #: src/views/calendars/CalendarView.vue:14
 msgid "Today"
@@ -3116,13 +3234,17 @@ msgstr "Contatti"
 msgid "Add a category"
 msgstr "Aggiungi una categoria"
 
-#: src/views/DashboardView.vue:40
+#: src/views/DashboardView.vue:34
 msgid "Welcome to Modoboa"
 msgstr "Benvenuti in Modoboa"
 
-#: src/views/login/LoginCallbackView.vue:20 src/views/login/LoginView.vue:17
-msgid "Attempting to log you in."
-msgstr "Tentativo di accesso."
+#: src/views/login/LoginCallbackView.vue:15
+msgid "Finishing sign-in…"
+msgstr ""
+
+#: src/views/login/LoginView.vue:12
+msgid "Signing you in…"
+msgstr ""
 
 #: src/views/quarantine/MessageView.vue:4
 msgid "Quarantined message"
@@ -3148,7 +3270,7 @@ msgstr "Visualizza le intestazioni complete"
 msgid "Hide full headers"
 msgstr "Nascondi le intestazioni complete"
 
-#: src/views/quarantine/MessageView.vue:201 src/views/webmail/EmailView.vue:277
+#: src/views/quarantine/MessageView.vue:201 src/views/webmail/EmailView.vue:291
 msgid "Message deleted"
 msgstr "Messaggio eliminato"
 
@@ -3160,42 +3282,84 @@ msgstr "Quarantena"
 msgid "release requests"
 msgstr "richieste di rilascio"
 
-#: src/views/webmail/EmailView.vue:8
+#: src/views/webmail/EmailView.vue:24
 msgid "Reply"
 msgstr "Rispondi"
 
-#: src/views/webmail/EmailView.vue:15
+#: src/views/webmail/EmailView.vue:31
+msgid "More reply options"
+msgstr ""
+
+#: src/views/webmail/EmailView.vue:37
 msgid "Reply all"
 msgstr "Rispondi a tutti"
 
-#: src/views/webmail/EmailView.vue:72
+#: src/views/webmail/EmailView.vue:67
+#, fuzzy
+msgid "Mark as junk"
+msgstr "Segna come non letto"
+
+#: src/views/webmail/EmailView.vue:79
+#, fuzzy
+msgid "Mark as not junk"
+msgstr "Messaggio segnato come non spam"
+
+#: src/views/webmail/EmailView.vue:90
+#, fuzzy
+msgid "Edit draft"
+msgstr "Modifica dominio"
+
+#: src/views/webmail/EmailView.vue:107
 msgid "Enable links"
 msgstr "Abilita collegamenti"
 
-#: src/views/webmail/EmailView.vue:77
+#: src/views/webmail/EmailView.vue:112
 msgid "Disable links"
 msgstr "Disabilita collegamenti"
 
-#: src/views/webmail/EmailView.vue:81
+#: src/views/webmail/EmailView.vue:116
 msgid "Display source"
 msgstr "Visualizza sorgente"
 
-#: src/views/webmail/EmailView.vue:154
+#: src/views/webmail/EmailView.vue:188
 msgid "Message scheduled at:"
 msgstr "Messaggio pianificato il:"
 
-#: src/views/webmail/EmailView.vue:160
+#: src/views/webmail/EmailView.vue:194
 msgid "Message source"
 msgstr "Sorgente messaggio"
 
-#: src/views/webmail/EmailView.vue:291
+#: src/views/webmail/EmailView.vue:305
 msgid "Message marked as junk"
 msgstr "Messaggio segnato come spam"
 
-#: src/views/webmail/EmailView.vue:305
+#: src/views/webmail/EmailView.vue:319
 msgid "Message marked as not junk"
 msgstr "Messaggio segnato come non spam"
 
 #: src/views/webmail/MailboxView.vue:4
 msgid "Webmail"
 msgstr "Webmail"
+
+#~ msgid "Domain count"
+#~ msgstr "Numero di domini"
+
+#~ msgid "Domain alias count"
+#~ msgstr "Numero di alias di dominio"
+
+#~ msgid "Account count"
+#~ msgstr "Numero di account"
+
+#~ msgid "Alias count"
+#~ msgstr "Numero di alias"
+
+#, fuzzy
+#~ msgid "Image removed"
+#~ msgstr "Filtro rimosso"
+
+#, fuzzy
+#~ msgid "Could not remove image"
+#~ msgstr "Impossibile salvare i parametri"
+
+#~ msgid "Attempting to log you in."
+#~ msgstr "Tentativo di accesso."

@@ -99,6 +99,11 @@ export default createVuetify({
           'high-emphasis-opacity': 0.95,
           'medium-emphasis-opacity': 0.68,
           'disabled-opacity': 0.4,
+          // Stronger hover/focus overlays than the Vuetify defaults
+          // (0.04 / 0.12) so interactive states are clearly perceivable —
+          // better contrast for accessibility.
+          'hover-opacity': 0.12,
+          'focus-opacity': 0.16,
         },
       },
       // Legacy light theme kept available for opt-in.

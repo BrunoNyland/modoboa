@@ -59,13 +59,21 @@
             />
           </v-card>
         </v-menu>
-        <v-btn
+        <v-badge
           class="ml-2"
-          variant="tonal"
-          prepend-icon="mdi-paperclip"
-          :text="$gettext('Attachments') + ` (${attachmentCount})`"
-          @click="openAttachmentsDialog"
-        />
+          :content="attachmentCount"
+          :model-value="attachmentCount > 0"
+          color="primary"
+          offset-x="6"
+          offset-y="2"
+        >
+          <v-btn
+            variant="tonal"
+            prepend-icon="mdi-paperclip"
+            :text="$gettext('Attachments')"
+            @click="openAttachmentsDialog"
+          />
+        </v-badge>
         <v-btn
           class="ml-2"
           icon="mdi-content-save-outline"
@@ -181,6 +189,7 @@
     <v-dialog v-model="showAttachmentsDialog" max-width="800">
       <AttachmentsDialog
         :session-uid="route.query.uid"
+        @change="(count) => (attachmentCount = count)"
         @close="closeAttachmentDialog"
       />
     </v-dialog>

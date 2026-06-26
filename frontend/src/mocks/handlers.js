@@ -12,6 +12,9 @@ import * as fx from './fixtures'
 
 const json = (data, init) => HttpResponse.json(data, init)
 
+// In-memory attachments per compose session (mock mode only).
+const composeSessions = {}
+
 export const handlers = [
   // ----- bootstrap (necessário para a app subir "logada") -----
   http.get('*/account/me/', () => json(fx.currentUser)),
@@ -300,6 +303,49 @@ export const handlers = [
 
     return json(emailContent)
   }),
+
+  // ----- webmail: compose sessions + attachments -----
+  // Estado em memória por sessão, só para o modo mock.
+  http.get('*/webmail/compose-sessions/allowed_senders/', () =>
+    json([{ address: fx.currentUser.email }])
+  ),
+  http.post('*/webmail/compose-sessions/', () => {
+    const uid = `mock-${Date.now()}`
+    composeSessions[uid] = []
+    return json({ uid, attachments: [], editor_format: 'plain', signature: '' })
+  }),
+  http.get('*/webmail/compose-sessions/:uid/', ({ params }) =>
+    json({
+      uid: params.uid,
+      attachments: composeSessions[params.uid] || [],
+      editor_format: 'plain',
+      signature: '',
+    })
+  ),
+  http.post(
+    '*/webmail/compose-sessions/:uid/attachments/',
+    async ({ params, request }) => {
+      const fd = await request.formData()
+      const fileEntry = fd.get('attachment')
+      const fname = (fileEntry && fileEntry.name) || 'arquivo.bin'
+      const attachment = { fname, tmpname: `tmp-${Date.now()}` }
+      composeSessions[params.uid] = composeSessions[params.uid] || []
+      composeSessions[params.uid].push(attachment)
+      return json(attachment)
+    }
+  ),
+  http.delete(
+    '*/webmail/compose-sessions/:uid/attachments/:name/',
+    ({ params }) => {
+      const list = composeSessions[params.uid] || []
+      composeSessions[params.uid] = list.filter(
+        (a) => a.tmpname !== params.name
+      )
+      return new HttpResponse(null, { status: 204 })
+    }
+  ),
+  http.post('*/webmail/compose-sessions/:uid/send/', () => json({ status: 'ok' })),
+  http.post('*/webmail/compose-sessions/:uid/save/', () => json({ status: 'ok' })),
 
   // ----- admin (amostras) -----
   http.get('*/domains/', () => json(fx.domains)),

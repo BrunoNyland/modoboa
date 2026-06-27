@@ -83,6 +83,10 @@ cd frontend && yarn install && yarn dev:mock   # cross-env VITE_MOCK_API=true vi
 
 ## Convenções
 
+- **Antes de implementar qualquer proposta do Bruno, apresentar primeiro as
+  desvantagens / trade-offs / riscos** (custo, manutenção, segurança, UX) e só
+  seguir após o ok. Ser honesto quando o ganho for cosmético ou marginal —
+  recomendar não fazer quando não compensar.
 - **CI:** `modoboa.yml` (matriz Python) tem `paths-ignore: frontend/**` →
   mudanças só-frontend não rodam os testes Python, só o `frontend.yml` (`build`).
 - **Gerenciador:** **yarn** (clássico, com `yarn.lock`). Não versionar

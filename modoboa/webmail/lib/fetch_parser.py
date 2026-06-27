@@ -97,6 +97,12 @@ class FetchResponseParser:
     def __reset_parser(self):
         """Reset parser states."""
         self.result = {}
+        # Data items are accumulated per message *sequence number* because a
+        # server may split one message's FETCH response across several untagged
+        # lines (e.g. ``36 (FLAGS (\\Seen))`` then ``36 (UID 36 BODYSTRUCTURE
+        # …)``). They are re-keyed by UID at the end of ``parse()``.
+        self.__messages_by_seq = {}
+        self.__current_seqnum = None
         self.__current_message = {}
         self.__next_literal_len = 0
         self.__cur_data_item = None
@@ -198,13 +204,12 @@ class FetchResponseParser:
         elif ttype == "right_parenthesis":
             self.__depth -= 1
             assert self.__depth == 0
-            # FIXME: sometimes, FLAGS are returned outside the UID
-            # scope (see sample 1 in tests). For now, we just ignore
-            # them but we need a better solution!
-            if "UID" in self.__current_message:
-                self.result[int(self.__current_message.pop("UID"))] = (
-                    self.__current_message
-                )
+            # Merge this line's data items into the message identified by its
+            # sequence number. The UID may live on a different untagged line
+            # (e.g. FLAGS arrive separately), so we accumulate here and re-key
+            # by UID once everything is parsed — nothing is dropped anymore.
+            message = self.__messages_by_seq.setdefault(self.__current_seqnum, {})
+            message.update(self.__current_message)
             self.__current_message = {}
             return
         raise ParseError(
@@ -260,7 +265,8 @@ class FetchResponseParser:
                 continue
             elif self.__depth == 0:
                 if ttype == "number":
-                    # We should start here with a message ID
+                    # Message sequence number that prefixes each untagged line.
+                    self.__current_seqnum = int(tvalue)
                     self.set_expected("left_parenthesis")
                 if ttype == "left_parenthesis":
                     self.__depth += 1
@@ -279,4 +285,9 @@ class FetchResponseParser:
                     self.parse_chunk(schunk)
             else:
                 self.parse_chunk(chunk)
+        # Re-key the accumulated messages by UID (falling back to the sequence
+        # number when a message has no UID, so data is never silently lost).
+        for seqnum, message in self.__messages_by_seq.items():
+            key = int(message.pop("UID")) if "UID" in message else seqnum
+            self.result[key] = message
         return self.result

@@ -239,8 +239,11 @@ class IMAPconnector:
         self.criterions = []
         self.quota_usage = -1
         self.quota_limit = self.quota_current = None
-        if hasattr(self, "current_mailbox"):
-            del self.current_mailbox
+        # Force the next select to re-issue SELECT/EXAMINE on the pooled
+        # connection (state is per-connection, not carried in the session).
+        for attr in ("current_mailbox", "current_readonly"):
+            if hasattr(self, attr):
+                delattr(self, attr)
 
     def _cmd(self, name: str, *args, **kwargs) -> list | None:
         """IMAP command wrapper.
@@ -403,10 +406,10 @@ class IMAPconnector:
             criterion = "REVERSE DATE"
         mbox = kwargs.get("mbox")
 
-        # FIXME: pourquoi suis je obligé de faire un SELECT ici?  un
-        # EXAMINE plante mais je pense que c'est du à une mauvaise
-        # lecture des réponses de ma part...
-        self.select_mailbox(mbox, readonly=False)
+        # Listing/sorting is read-only: EXAMINE avoids touching \Recent and
+        # mailbox state. It works now that select_mailbox resets the untagged
+        # responses correctly (was forced to SELECT before — see git history).
+        self.select_mailbox(mbox, readonly=True)
         cmdname = "SORT"
         data = self._cmd(
             cmdname,
@@ -427,18 +430,31 @@ class IMAPconnector:
         The given name is first 'imap-utf7' encoded.
 
         :param name: mailbox's name
-        :param readonly:
+        :param readonly: open read-only (EXAMINE) instead of read-write (SELECT)
         """
-        if hasattr(self, "current_mailbox"):
-            if self.current_mailbox == name and not force:
-                return
+        # The cache must track the access mode too: an EXAMINE (read-only)
+        # followed by a write op on the same mailbox must re-issue a SELECT,
+        # otherwise the STORE/COPY would hit a read-only mailbox.
+        if (
+            getattr(self, "current_mailbox", None) == name
+            and getattr(self, "current_readonly", None) == readonly
+            and not force
+        ):
+            return
         self.current_mailbox = name
+        self.current_readonly = readonly
         name = self._encode_mbox_name(name)
+        # Reset the untagged responses before (re)selecting, exactly like
+        # imaplib's own select()/examine() do. The previous code skipped this,
+        # leaving stale responses around — the "mauvaise lecture des réponses"
+        # that forced a SELECT where an EXAMINE was wanted.
+        self.m.untagged_responses = {}
         if readonly:
             self._cmd("EXAMINE", name)
             self.m.is_readonly = True
         else:
             self._cmd("SELECT", name)
+            self.m.is_readonly = False
         self.m.state = "SELECTED"
 
     def unseen_messages(self, mailbox: str) -> int:

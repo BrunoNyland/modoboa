@@ -27,9 +27,19 @@ Design notes:
 """
 
 import atexit
+import imaplib
+import logging
 import time
 
 from django.conf import settings
+
+logger = logging.getLogger("modoboa.webmail")
+
+#: Errors that mean "the pooled IMAP connection is dead, drop it and reconnect"
+#: — socket/SSL errors (OSError), a server-closed connection (EOFError) and
+#: IMAP protocol errors. Caught narrowly on purpose so real bugs (NameError,
+#: TypeError, …) surface instead of being silently swallowed.
+_CONNECTION_ERRORS = (OSError, EOFError, imaplib.IMAP4.error)
 
 #: ``{username: (session_dict, last_used_monotonic)}`` — private to the worker.
 _pool: dict = {}
@@ -57,7 +67,8 @@ def _close_session(session: dict) -> None:
     """Best-effort logout/close of a pooled connection."""
     try:
         session["m"].logout()
-    except Exception:
+    except _CONNECTION_ERRORS:
+        # The socket is probably already gone; nothing to clean up.
         pass
 
 
@@ -82,7 +93,9 @@ def acquire(connector) -> bool:
         typ, _ = connector.m.noop()
         if typ != "OK":
             raise OSError("NOOP not OK")
-    except Exception:  # any IMAP/socket error => drop and reconnect
+    except _CONNECTION_ERRORS as exc:
+        # Dead/stale connection => drop it and let the caller reconnect.
+        logger.debug("Dropping pooled IMAP connection: %s", exc)
         _close_session(session)
         connector.m = None
         return False

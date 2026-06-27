@@ -6,27 +6,29 @@
       <v-toolbar>
         <v-btn
           icon="mdi-arrow-left"
-          size="small"
           variant="flat"
+          height="36"
+          width="36"
           :aria-label="$gettext('Back')"
           @click="close"
         />
         <div class="d-flex align-center ml-2">
           <v-btn
             prepend-icon="mdi-send"
-            size="small"
             variant="tonal"
             color="primary"
+            height="36"
             :loading="working"
             :text="$gettext('Send')"
             @click="submit"
           >
           </v-btn>
           <v-btn
-            size="small"
             icon
             variant="tonal"
             color="primary"
+            height="36"
+            width="24"
             :aria-label="$gettext('More send options')"
           >
             <v-icon icon="mdi-chevron-down" />
@@ -48,6 +50,7 @@
               class="ml-2"
               variant="tonal"
               prepend-icon="mdi-cog-outline"
+              height="36"
               :text="$gettext('Options')"
               v-bind="menuProps"
             />
@@ -80,6 +83,7 @@
           <v-btn
             variant="tonal"
             prepend-icon="mdi-paperclip"
+            height="36"
             :text="$gettext('Attachments')"
             @click="openAttachmentsDialog"
           />
@@ -87,7 +91,7 @@
         <v-btn
           class="ml-2"
           icon="mdi-content-save-outline"
-          size="small"
+          height="36"
           :title="$gettext('Save as draft')"
           :aria-label="$gettext('Save as draft')"
           :loading="working"

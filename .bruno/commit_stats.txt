@@ -1,0 +1,1687 @@
+﻿commit 0af84e8fec8fcb2de42405bb60ead2589a1492a1
+Author: Claude <noreply@anthropic.com>
+Date:   Fri Jun 26 19:14:18 2026 +0000
+
+    perf(frontend): tira o ApexCharts (e seu polyfill) do bundle inicial
+    
+    O vue3-apexcharts era registrado globalmente em plugins/index.js, então o
+    ApexCharts — que embute um polyfill de Object.assign — caía no chunk "plugins"
+    carregado em toda página, inclusive na de login. O Lighthouse apontava esse
+    "JavaScript legado" em assets/plugins...js.
+    
+    Agora o componente é registrado localmente só onde há gráficos
+    (DmarcAligmentChart e TimeSerieChart, ambos do admin), via import no
+    <script setup>. O ApexCharts passa a um chunk sob demanda, fora do bundle
+    inicial/da página de login.
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ frontend/src/components/admin/dmarc/DmarcAligmentChart.vue | 3 +++
+ frontend/src/components/tools/TimeSerieChart.vue           | 3 +++
+ frontend/src/plugins/index.js                              | 2 --
+ 3 files changed, 6 insertions(+), 2 deletions(-)
+
+commit 4350f8d072d8f2d358b6f2bbda0a916e69a6b652
+Author: Claude <noreply@anthropic.com>
+Date:   Fri Jun 26 19:01:45 2026 +0000
+
+    fix(seo): robots.txt indexa só a página inicial (login)
+    
+    Em vez de bloquear tudo (Disallow: /), libera apenas o caminho raiz "/"
+    (Allow: /$) e mantém o restante do webmail/admin fora dos buscadores. Bloquear
+    a própria página auditada é o que derruba a nota de SEO do Lighthouse; assim a
+    página de entrada fica indexável e o resto continua privado. Aplicado nos dois
+    robots.txt (SPA servido pelo nginx na raiz e o template do Django).
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ frontend/public/robots.txt             | 6 ++++++
+ modoboa/core/templates/core/robots.txt | 4 ++++
+ 2 files changed, 10 insertions(+)
+
+commit 7543823ea91f4764a61d9cdb109c7916b6ce8a63
+Author: Claude <noreply@anthropic.com>
+Date:   Fri Jun 26 18:58:17 2026 +0000
+
+    fix(webmail): título da pasta no cabeçalho, fonte do avatar e contraste do item ativo
+    
+    - Move o nome da pasta aberta + o menu de configurações da caixa para o
+      cabeçalho do conteúdo (onde ficava "Webmail"), em MailboxView. O painel
+      lateral volta a exibir o wordmark "webmail" (e o rail mostra só a barra de
+      armazenamento). A lógica de criar/editar/excluir/compactar caixa migra junto
+      para o MailboxView, com refresh do drawer via busStore.reloadData().
+    - Avatar do menu de usuário agora idêntico ao do top bar de verdade: usa
+      JetBrains Mono (var(--font-mono)) e tracking 0.05em — antes herdava Space
+      Grotesk com tracking diferente.
+    - Item de lista ativo (ex.: pasta selecionada) passa a usar o accent mais
+      claro (--accent-2) em negrito, melhorando o contraste no fundo quase preto.
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ frontend/src/components/shared/TopMenu.vue     |   6 +-
+ frontend/src/layouts/webmail/WebmailLayout.vue | 180 +------------------------
+ frontend/src/styles/portfolio.scss             |   4 +-
+ frontend/src/views/webmail/MailboxView.vue     | 139 ++++++++++++++++++-
+ 4 files changed, 147 insertions(+), 182 deletions(-)
+
+commit 40a45eebac3514b98e695b0583f4659c0b4dbf66
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Fri Jun 26 14:34:36 2026 -0400
+
+    Polimento da UI do webmail + acessibilidade/SEO (#39)
+    
+    Wordmark "webmail" no painel admin; cabeçalho do webmail mostra a pasta aberta com o menu de configurações ao lado; avatar do menu de usuário igual ao do top bar; botões Responder/Enviar sem barra de rolagem; e um pacote de acessibilidade/SEO (landmark de login, meta descriptions, robots.txt, source maps, ARIA em progress bars/checkboxes/botões, contraste de hover, CSS de login unificado).
+
+ frontend/index.html                                |   4 +
+ frontend/public/robots.txt                         |   2 +
+ frontend/src/components/shared/NavBar.vue          |  28 +-
+ frontend/src/components/shared/TopMenu.vue         |  15 +-
+ .../src/components/webmail/ComposeEmailForm.vue    |  17 +-
+ frontend/src/components/webmail/EmailList.vue      |  22 +-
+ frontend/src/components/webmail/MailboxList.vue    |   5 +
+ frontend/src/layouts/webmail/WebmailLayout.vue     | 123 +++--
+ frontend/src/locale/br/app.po                      | 499 +++++++++++------
+ frontend/src/locale/cs/app.po                      | 450 ++++++++++------
+ frontend/src/locale/de/app.po                      | 510 ++++++++++++------
+ frontend/src/locale/el/app.po                      | 450 ++++++++++------
+ frontend/src/locale/en/app.po                      | 450 ++++++++++------
+ frontend/src/locale/es/app.po                      | 498 +++++++++++------
+ frontend/src/locale/fi/app.po                      | 503 ++++++++++++------
+ frontend/src/locale/fr/app.po                      | 590 +++++++++++++--------
+ frontend/src/locale/it/app.po                      | 510 ++++++++++++------
+ frontend/src/locale/ja/app.po                      | 450 ++++++++++------
+ frontend/src/locale/messages.pot                   | 449 ++++++++++------
+ frontend/src/locale/nl/app.po                      | 450 ++++++++++------
+ frontend/src/locale/pl/app.po                      | 450 ++++++++++------
+ frontend/src/locale/pt_BR/app.po                   | 578 ++++++++++++--------
+ frontend/src/locale/ru/app.po                      | 570 +++++++++++++-------
+ frontend/src/locale/sv/app.po                      | 516 +++++++++++-------
+ frontend/src/locale/tr/app.po                      | 476 +++++++++++------
+ frontend/src/locale/translations.json              |   2 +-
+ frontend/src/locale/zh/app.po                      | 450 ++++++++++------
+ frontend/src/plugins/vuetify.js                    |   5 +
+ frontend/src/styles/portfolio.scss                 |  23 +
+ frontend/src/views/webmail/EmailView.vue           |  33 +-
+ frontend/vite.config.js                            |   5 +
+ modoboa/static/css/login.css                       |  13 -
+ modoboa/static/css/offline.css                     |  15 +
+ modoboa/templates/layout_simple.html               |   6 +-
+ modoboa/templates/registration/base.html           |  18 +-
+ modoboa/templates/registration/login.html          |   4 -
+ 36 files changed, 5942 insertions(+), 3247 deletions(-)
+
+commit 02e5eae425874ef4112e4c3903144f1136846664
+Author: Claude <noreply@anthropic.com>
+Date:   Fri Jun 26 14:09:03 2026 +0000
+
+    feat(webmail): painel de armazenamento (quota) com texto, unidades e %
+    
+    Reformula a barra de quota no rodapé do drawer do webmail, que antes não
+    mostrava texto e ficava espremida sem margem ao lado do botão de engrenagem.
+    
+    - Painel com borda hairline, padding e espaçamento; eyebrow "ARMAZENAMENTO"
+      + percentual, barra de progresso, e "usado / total".
+    - Capacidade em MB/GB (filesize, base 1024/JEDEC) com separadores numéricos
+      do locale (pt-BR: 1000 -> 1.000). O backend manda KiB; converto p/ bytes.
+    - Botão de configurações da caixa redesenhado (rótulo "Configurações" +
+      ícone) no modo expandido; ícone compacto no modo rail, com a barra fina.
+    - Caso "ilimitado" (sem limite de quota) tratado.
+    - i18n: traduções pt-BR para "Storage"/"used"/"Mailbox settings" + recompila
+      translations.json.
+    - mock: fixture de quota no shape real ({ usage, current, limit } em KiB).
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ frontend/src/layouts/webmail/WebmailLayout.vue | 169 ++++++++++++++++++++++++-
+ frontend/src/locale/pt_BR/app.po               |   9 ++
+ frontend/src/locale/translations.json          |   2 +-
+ frontend/src/mocks/fixtures.js                 |   3 +-
+ 4 files changed, 175 insertions(+), 8 deletions(-)
+
+commit 4cd6ba89846906efa37ac9dad63a74426366f82d
+Author: Claude <noreply@anthropic.com>
+Date:   Fri Jun 26 13:51:10 2026 +0000
+
+    fix(frontend): avatar quadrado no menu e toolbars que não estouram em pt-BR
+    
+    - Avatar da conta (menu de sair) agora é quadrado (rounded="0"), igual ao
+      resto da interface. Atinge TopMenu e UserMenu.
+    - Toolbars do e-mail (EmailView) e do compose passam a quebrar para uma
+      segunda linha quando os botões não cabem, em vez de gerar barra de
+      rolagem horizontal — o caso aparece em pt-BR, onde rótulos como
+      "RESPONDER"/"ENVIAR"/"ANEXOS" são mais longos que em inglês.
+    - mock: fixture de idioma corrigida de 'pt_br' para 'pt-br' (formato do
+      Django), que o toGettextLocale resolve para pt_BR — assim o dev:mock
+      renreriza de fato em português e pega esse tipo de bug de layout i18n.
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ frontend/src/components/shared/TopMenu.vue           |  2 +-
+ frontend/src/components/shared/UserMenu.vue          |  2 +-
+ frontend/src/components/webmail/ComposeEmailForm.vue | 17 ++++++++++++++++-
+ frontend/src/mocks/fixtures.js                       |  2 +-
+ frontend/src/views/webmail/EmailView.vue             | 12 ++++++++++++
+ 5 files changed, 31 insertions(+), 4 deletions(-)
+
+commit 1af081c48eba7950a8539d350f91179754a58d8d
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Fri Jun 26 09:32:20 2026 -0400
+
+    feat(webmail): UI de anexos no padrão editorial, com contagem e feedback (#37)
+    
+    Reestiliza o diálogo de anexos (tema escuro editorial), adiciona contagem (badge no diálogo + badge accent na toolbar, atualizada ao vivo) e feedback de sucesso (loading, alerta, snackbar, linha animada, input limpo). Adiciona mdi-file-outline/mdi-upload ao mapa de ícones e handlers de compose-sessions só no modo mock.
+
+ .../src/components/webmail/AttachmentsDialog.vue   | 262 ++++++++++++++++++---
+ .../src/components/webmail/ComposeEmailForm.vue    |  21 +-
+ frontend/src/mocks/handlers.js                     |  46 ++++
+ frontend/src/plugins/icons.js                      |   4 +
+ 4 files changed, 297 insertions(+), 36 deletions(-)
+
+commit 395d132427e6f8b700d983a794bc7aed2b87fb22
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Fri Jun 26 09:30:18 2026 -0400
+
+    feat(auth): centraliza o formulário de login (remove coluna da logo) (#36)
+    
+    Remove a coluna esquerda (logo + eyebrow) da página de login do Django, deixando o formulário centralizado. Corrige overflow horizontal no mobile (box-sizing + login-box min(380px,100%)) e remove CSS morto.
+
+ modoboa/templates/registration/base.html | 34 +++++++-------------------------
+ 1 file changed, 7 insertions(+), 27 deletions(-)
+
+commit 3b1f82cfaf653ee24ea4faf2adab0f8df5539698
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Fri Jun 26 08:59:39 2026 -0400
+
+    fix(frontend): inputs, posicionamento do corpo do e-mail e transições suaves (#35)
+    
+    - Inputs: suprime o anel de foco nativo dentro do .v-field (borda accent única, sem colidir com placeholder).
+    - Corpo do e-mail: layout flex em coluna no lugar do posicionamento absoluto calculado em JS; sem glitch, fade-in suave.
+    - Loading/transições: remove v-skeleton-loader e adiciona blur+fade entre páginas, com guarda de prefers-reduced-motion.
+
+ frontend/src/components/webmail/EmailList.vue    |  7 +--
+ frontend/src/layouts/connected/ConnectedView.vue |  2 +-
+ frontend/src/styles/portfolio.scss               | 38 ++++++++++++++-
+ frontend/src/views/webmail/EmailView.vue         | 61 +++++++++++++-----------
+ 4 files changed, 73 insertions(+), 35 deletions(-)
+
+commit fc77fd8aeef949becaca1ce21bbcbeedf6928ee8
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Fri Jun 26 00:17:20 2026 -0400
+
+    feat: classe flex-shrink-0 ao v-btn-group no arquivo EmailView.vue
+
+ frontend/src/views/webmail/EmailView.vue | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit c49e644397c9d34f41861bb3aa90743f4360afab
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Thu Jun 25 23:48:04 2026 -0400
+
+    style: Fix scrollbar on send button group in ComposeEmailForm
+
+ frontend/src/components/webmail/ComposeEmailForm.vue | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+commit 198944fc96d0d748df4fecfcb7dd255464b7b85c
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Thu Jun 25 23:47:09 2026 -0400
+
+    fix: Vuetify required rule returning 1 instead of boolean true
+
+ frontend/src/plugins/rules.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 5f258c691ff308e19113da82e5feec7103b2b7b8
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Thu Jun 25 23:44:42 2026 -0400
+
+    fix: Webmail reply body NoneType error and restore context_processors.py
+
+ modoboa/core/context_processors.py | 30 ++++++++++++++++++++++++++++++
+ modoboa/webmail/lib/imapemail.py   |  2 +-
+ 2 files changed, 31 insertions(+), 1 deletion(-)
+
+commit ca5d431286dc5c43bf86bf461a374d8b68a670c9
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Thu Jun 25 23:26:16 2026 -0400
+
+    feat: correção fontes derrubando o django
+
+ modoboa/templates/registration/base.html | 40 ++------------------------------
+ 1 file changed, 2 insertions(+), 38 deletions(-)
+
+commit c77089b9638008c200feb156c0f06d22ffebe863
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Thu Jun 25 23:05:10 2026 -0400
+
+    feat: ajustes para corrigir erros e warnings no devtools
+
+ frontend/public/mockServiceWorker.js           | 30 ++++++++++++++++++++++++++
+ frontend/src/layouts/webmail/WebmailLayout.vue |  4 +++-
+ frontend/src/router/index.js                   | 15 +++++--------
+ 3 files changed, 38 insertions(+), 11 deletions(-)
+
+commit f2104d13bf1e2841dfc1d8eb7ab9f4643691bbdf
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Thu Jun 25 22:53:51 2026 -0400
+
+    feat(auth): tela de login (Django) no tema escuro editorial (#34)
+    
+    A página de login/auth servida pelo Django (provedor OIDC) seguia o tema
+    claro padrão; agora combina com o SPA (look de brunonyland.com).
+    
+    - registration/base.html: tema escuro editorial — fundo preto, colunas
+      separadas por filete, logo branca + eyebrow mono, tipografia Space Grotesk
+      (display) + JetBrains Mono (rótulos), inputs quadrados com foco accent,
+      botão "Log in" accent quadrado em mono, links em mono accent. Cascateia
+      para todas as páginas de auth (reset de senha, verificação 2FA).
+    - registration/login.html: eyebrow "Welcome back" acima do título.
+    - Fontes auto-hospedadas em static/fonts/ (woff2 latin + latin-ext),
+      referenciadas via {% static %}; sem request externo.
+    - test_authentication: conserta GetModoboaLogoTagTestCase._render() que não
+      aceitava context (bug pré-existente — chamada passava um dict mas a
+      assinatura não recebia), deixando a suíte verde.
+    
+    Verificado: 23 testes de core.tests.test_authentication passam; página
+    renderizada em navegador headless (desktop + mobile).
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ modoboa/core/tests/test_authentication.py          |   4 +-
+ .../static/fonts/jetbrains-mono-latin-400.woff2    | Bin 0 -> 21168 bytes
+ .../fonts/jetbrains-mono-latin-ext-400.woff2       | Bin 0 -> 7336 bytes
+ modoboa/static/fonts/space-grotesk-latin-400.woff2 | Bin 0 -> 13388 bytes
+ modoboa/static/fonts/space-grotesk-latin-700.woff2 | Bin 0 -> 12840 bytes
+ .../static/fonts/space-grotesk-latin-ext-400.woff2 | Bin 0 -> 12256 bytes
+ .../static/fonts/space-grotesk-latin-ext-700.woff2 | Bin 0 -> 11992 bytes
+ modoboa/templates/registration/base.html           | 190 ++++++++++++++++++++-
+ modoboa/templates/registration/login.html          |   1 +
+ 9 files changed, 184 insertions(+), 11 deletions(-)
+
+commit bd70245fefb52abea25a70c4c8683c0f7a453f2f
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Thu Jun 25 22:24:09 2026 -0400
+
+    feat(frontend): troca o loader de login por um fade suave (#33)
+    
+    A tela de loading (wordmark + barra) aparecia por uma fração de segundo no
+    redirect/callback OIDC e dava só um flash/glitch. Removida.
+    
+    - LoginView / LoginCallbackView: agora renderizam só uma tela escura
+      (.auth-screen) com texto de status apenas para leitores de tela (sr-only),
+      sem conteúdo visível que pisque.
+    - App.vue: router-view envolto em <transition name="fade" mode="out-in">, então
+      a passagem login -> app (e troca de layout) faz cross-fade suave.
+    - Define de fato o CSS .fade-* (a transition "fade" do ConnectedView era
+      no-op por falta de CSS) — as trocas de página dentro do app também suavizam.
+    - Remove o CSS morto do antigo loader (.login-gate*); respeita
+      prefers-reduced-motion.
+    
+    Build e testes (13/13) verdes; app verificado no dev:mock.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ frontend/src/App.vue                           | 10 +++-
+ frontend/src/styles/portfolio.scss             | 77 ++++++++++----------------
+ frontend/src/views/login/LoginCallbackView.vue | 19 +------
+ frontend/src/views/login/LoginView.vue         | 21 +------
+ 4 files changed, 41 insertions(+), 86 deletions(-)
+
+commit f6800bb41a9629880818909d42784f3d99c3c070
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Thu Jun 25 22:10:53 2026 -0400
+
+    feat(frontend): tema escuro editorial — dashboard, webmail, gráficos, wizards (#32)
+    
+    * fix(frontend): varre cores claras restantes que quebravam o tema escuro
+    
+    Continua a correção de aparência (após a remoção da theme API): elimina os
+    blocos brancos que sobraram no modo escuro e atualiza um comentário obsoleto.
+    
+    - AuditTrailList / MessageList: remove `color="white"` das toolbars (mesmo
+      ajuste já feito nas outras listas).
+    - DomainDNSConfig: os 5 `v-alert color="white"` (registros DNS) viram
+      `surface-light` — painel escuro em vez de bloco branco.
+    - CreationForm: `.inner` deixa de ser `#fff` e passa a usar a superfície do
+      tema (assistentes de criação de conta/domínio).
+    - FiltersView: remove `bg-white` do container do conjunto de filtros.
+    - vuetify.js: atualiza o comentário do tema (a aparência agora é 100%
+      frontend; a theme API/composable foram removidas).
+    
+    Mantidos de propósito os brancos intencionais: corpo do e-mail renderizado
+    (EmailView), callouts coloridos (#515d78), ícone branco sobre alert primary.
+    
+    Build e testes (13/13) verdes localmente (vuetify 4.0.7; a CI valida contra
+    o lockfile atualizado).
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    * feat(frontend): dashboard editorial + drawer responsivo (mais perto do portfólio)
+    
+    Aproxima a UI do design de brunonyland.com e conserta a responsividade do
+    menu lateral.
+    
+    - SectionHeader.vue: cabeçalho editorial reutilizável (eyebrow mono numerada
+      em accent + título display Space Grotesk + subtítulo opcional).
+    - DashboardView: vira "landing" do painel — SectionHeader "00 / Dashboard"
+      com o título de boas-vindas grande, grid de estatísticas e notícias.
+    - GlobalStatisticsWidget: grid hairline 2x2 de números display + rótulos mono
+      (porta o `.about__stats` do portfólio), com hover de fundo.
+    - NavBar: drawer agora é responsivo — permanente no desktop, temporário
+      (overlay) no mobile, com app bar + hambúrguer e fecho automático ao navegar.
+      Resolve o drawer fixo que esmagava o conteúdo no celular.
+    - Cantos mais retos (raiz 4px -> 2px; cards/botões/inputs 2px) para o ar
+      editorial/brutalista.
+    
+    Verificado em navegador headless (Playwright/Chromium) no dev:mock: dashboard
+    desktop e mobile, e a lista de domínios. Build e testes (13/13) verdes.
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    * feat(frontend): webmail editorial — lista hairline e cabeçalho de leitura escuro
+    
+    Aproxima o webmail do design do portfólio.
+    
+    - EmailList: a lista de mensagens deixa de ser cards empilhados e vira uma
+      lista hairline densa (linhas separadas por filete, hover de fundo, marca
+      accent à esquerda para não-lidas). Assunto em Space Grotesk, remetente e
+      data/tamanho em mono; estrela "seguida" em dourado.
+    - EmailView: o cabeçalho da mensagem (assunto/remetente/destino/data) era um
+      bloco branco — agora é um painel escuro editorial (assunto display, data
+      mono). O corpo do e-mail renderizado segue em fundo claro de propósito
+      (mensagens assumem fundo branco).
+    
+    Compose já estava coerente no escuro (sem alteração). Verificado em navegador
+    headless (Playwright) no dev:mock: lista, leitura e composição. Build e
+    testes (13/13) verdes.
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    * style(frontend): cantos retos, espaçamento de botões e alinhamento (mais editorial)
+    
+    Responde ao feedback: deixar tudo mais reto e moderno, como o portfólio.
+    
+    - Cantos quadrados (radius 0): raiz do Vuetify, cards, botões, campos, chips e
+      a lista de e-mails. Avatares/progress circulares não são afetados.
+    - Botões de toolbar com gap mínimo consistente (8px) e nunca colados; os
+      split button-groups continuam internamente unidos.
+    - EmailView: cabeçalho da mensagem fica rente à borda de conteúdo (sem padding
+      lateral, só um filete embaixo) e o iframe do corpo alinha no mesmo eixo —
+      assunto e corpo passam a compartilhar a mesma margem esquerda.
+    - Compose: campos To/Cc/Bcc ganham persistent-placeholder, então o rótulo
+      flutua e não sobrepõe mais o placeholder.
+    
+    Verificado em navegador headless (Playwright) no dev:mock: leitura, composição
+    e listas. Build e testes (13/13) verdes.
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    * feat(frontend): completa o mapa de ícones e tema escuro nos gráficos
+    
+    - icons.js: adiciona mdi-code-tags (usado no BodyEditor), que faltava no mapa
+      SVG e gerava erro de path no console / ícone ausente. Varredura confirma que
+      era o único nome de ícone realmente faltando.
+    - TimeSerieChart (apexcharts area): tema escuro — canvas transparente (o card
+      aparece atrás), rótulos de eixo em mono, grade hairline, tooltip escuro,
+      legenda clara e séries com gradiente; cor primária passa ao accent (#7c5cff).
+      Remove o seletor de período branco (bg-surface).
+    - DmarcAligmentChart (pie): mesmo tema escuro (fundo transparente, mono,
+      tooltip escuro, borda das fatias no fundo da página).
+    
+    Verificado em navegador headless (Playwright) no dev:mock: tela de estatísticas
+    com os dois gráficos. Build e testes (13/13) verdes.
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    * feat(frontend): wizards e DMARC no tema escuro (contatos/calendário já ok)
+    
+    Fecha as 3 áreas restantes da reformulação.
+    
+    - ChoiceField (cartões de seleção dos assistentes — ex.: tipo de domínio,
+      papel de conta): eram brancos fixos (#f2f5f7 / borda clara / azul legado).
+      Viram painéis escuros hairline; selecionado ganha borda + leve tinta accent
+      e rótulo em mono uppercase. Conserta todos os wizards de uma vez.
+    - DmarcAligmentChart: as caixas de estatística usavam strings de cor estilo
+      Vuetify 2 ("green lighten-2", text-...) que não resolvem no v4. Viram
+      painéis hairline com número display na cor semântica + rótulo mono; remove
+      o helper getTextColors morto.
+    - Contatos e Calendário: já estavam coerentes no escuro por herança do tema
+      (verificado em navegador) — sem mudanças necessárias.
+    
+    Verificado no dev:mock: assistente de novo domínio (cartões de tipo escuros).
+    Build e testes (13/13) verdes.
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    ---------
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ .../admin/dashboard/GlobalStatisticsWidget.vue     |  90 ++++++++----
+ .../components/admin/dmarc/DmarcAligmentChart.vue  |  84 ++++++-----
+ .../components/admin/domains/DomainDNSConfig.vue   |  10 +-
+ .../src/components/admin/logs/AuditTrailList.vue   |   2 +-
+ frontend/src/components/admin/logs/MessageList.vue |   2 +-
+ frontend/src/components/shared/NavBar.vue          |  47 +++++-
+ frontend/src/components/shared/SectionHeader.vue   |  64 +++++++++
+ frontend/src/components/tools/ChoiceField.vue      |  25 +++-
+ frontend/src/components/tools/CreationForm.vue     |   2 +-
+ frontend/src/components/tools/TimeSerieChart.vue   |  49 ++++++-
+ .../src/components/webmail/ComposeEmailForm.vue    |   3 +
+ frontend/src/components/webmail/EmailList.vue      | 158 +++++++++++++++++----
+ frontend/src/plugins/icons.js                      |   2 +
+ frontend/src/plugins/vuetify.js                    |   8 +-
+ frontend/src/styles/portfolio.scss                 |  22 ++-
+ frontend/src/styles/settings.scss                  |   6 +-
+ frontend/src/views/DashboardView.vue               |  41 +++---
+ frontend/src/views/account/FiltersView.vue         |   2 +-
+ frontend/src/views/webmail/EmailView.vue           |  53 ++++++-
+ 19 files changed, 513 insertions(+), 157 deletions(-)
+
+commit 421f088e3ef16bcfd8e56c19f7445d96d941ae63
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Thu Jun 25 20:30:53 2026 -0400
+
+    feat: Remove theme api e deixa a aparencia por conta do frontend. Mais correções no design
+
+ frontend/package.json                              |   49 +-
+ frontend/src/api/theme.js                          |   20 -
+ frontend/src/components/admin/alarms/AlarmList.vue |    2 +-
+ .../src/components/admin/domains/DomainList.vue    |    2 +-
+ .../components/admin/identities/IdentityList.vue   |    2 +-
+ .../admin/imap_migration/MigrationsList.vue        |    2 +-
+ .../admin/imap_migration/ProvidersList.vue         |    2 +-
+ frontend/src/components/contacts/ContactList.vue   |    2 +-
+ frontend/src/components/tools/HtmlEditor.vue       |    4 +-
+ frontend/src/components/tools/ParametersForm.vue   |    2 +-
+ frontend/src/components/webmail/BodyEditor.vue     |   55 +-
+ .../src/components/webmail/ComposeEmailForm.vue    |  199 +-
+ frontend/src/components/webmail/EmailList.vue      |    2 +-
+ frontend/src/components/webmail/MailboxList.vue    |  103 +-
+ frontend/src/composables/logos.js                  |    8 -
+ frontend/src/composables/theme.js                  |   44 -
+ frontend/src/layouts/connected/ConnectedLayout.vue |    6 +-
+ frontend/src/layouts/webmail/WebmailLayout.vue     |    4 +-
+ frontend/src/mocks/handlers.js                     |   35 +-
+ frontend/src/styles/portfolio.scss                 |   68 +-
+ frontend/src/views/account/FiltersView.vue         |    2 +-
+ frontend/src/views/admin/ParametersView.vue        |   49 +-
+ frontend/src/views/calendars/CalendarView.vue      |    2 +-
+ frontend/src/views/login/LoginCallbackView.vue     |    3 -
+ frontend/src/views/quarantine/MessageView.vue      |    4 +-
+ frontend/src/views/webmail/EmailView.vue           |    4 +-
+ frontend/yarn.lock                                 | 2270 ++++++++++++--------
+ modoboa/core/api/v2/serializers.py                 |   35 +-
+ modoboa/core/api/v2/tests.py                       |  153 --
+ modoboa/core/api/v2/urls.py                        |    6 -
+ modoboa/core/api/v2/views.py                       |   71 -
+ modoboa/core/app_settings.py                       |  115 +-
+ modoboa/core/commands/templates/settings.py.tpl    |    1 -
+ modoboa/core/context_processors.py                 |   30 -
+ modoboa/core/signals.py                            |    2 +-
+ modoboa/core/templatetags/core_tags.py             |   11 +-
+ modoboa/core/tests/test_authentication.py          |   72 +-
+ modoboa/templates/registration/base.html           |    8 +-
+ test_project/test_project/settings.py              |    1 -
+ 39 files changed, 1704 insertions(+), 1746 deletions(-)
+
+commit 63045dbf78391f35d7c7de152a9d7c9e3f2a766e
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Thu Jun 25 14:33:04 2026 -0400
+
+    feat(frontend): nova identidade visual — tema escuro editorial do portfólio (#31)
+    
+    * feat(frontend): nova identidade visual (tema escuro editorial do portfólio)
+    
+    Reformula a interface seguindo o design de brunonyland.com: tema escuro
+    editorial, tipografia Space Grotesk + JetBrains Mono e detalhes "hairline".
+    
+    - Fontes auto-hospedadas em src/assets/fonts (woff2 latin + latin-ext, sem
+      dependência nova nem mexer no yarn.lock); o Vite faz hash de conteúdo.
+    - src/styles/portfolio.scss: tokens CSS, base, scrollbar/seleção, classes
+      utilitárias e overrides do Vuetify (cards hairline, botões flat/mono,
+      drawer com item ativo em destaque accent, tabelas com header mono).
+    - Tema Vuetify "modoboaDark" como padrão; primary continua sobrescrito pelo
+      backend (composables/theme.js), espelhando o accent picker do portfólio.
+    - settings.scss: $body-font-family Space Grotesk e cantos de 4px.
+    - Login/callback viram um loader editorial (wordmark + barra accent), com
+      role=progressbar e respeito a prefers-reduced-motion.
+    - Mapeia o cinza fixo #f7f8fa para rgb(var(--v-theme-background)) nas views,
+      que passam a seguir o tema ativo.
+    - index.html: color-scheme dark + CSS crítico p/ evitar flash branco.
+    - Mock do tema devolve o accent #7c5cff (preview fiel ao portfólio).
+    
+    Acessibilidade: foco visível accent, contraste AA sobre #0a0a0a e
+    reduced-motion. Build e testes (13/13) verdes.
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    * ci(frontend): restaura cache-dependency-path do yarn.lock
+    
+    O commit 2807e9e removeu `cache-dependency-path: frontend/yarn.lock` do
+    setup-node. Como o lockfile fica em frontend/ (não na raiz), o passo de
+    cache do `actions/setup-node` falha com "Dependencies lock file is not
+    found". Restaura a linha; mantém node 24 e `yarn install`.
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    ---------
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ .github/workflows/frontend.yml                     |   1 +
+ frontend/index.html                                |  12 +
+ .../assets/fonts/jetbrains-mono-latin-400.woff2    | Bin 0 -> 21168 bytes
+ .../assets/fonts/jetbrains-mono-latin-500.woff2    | Bin 0 -> 21832 bytes
+ .../fonts/jetbrains-mono-latin-ext-400.woff2       | Bin 0 -> 7336 bytes
+ .../fonts/jetbrains-mono-latin-ext-500.woff2       | Bin 0 -> 7528 bytes
+ .../src/assets/fonts/space-grotesk-latin-400.woff2 | Bin 0 -> 13388 bytes
+ .../src/assets/fonts/space-grotesk-latin-500.woff2 | Bin 0 -> 13312 bytes
+ .../src/assets/fonts/space-grotesk-latin-600.woff2 | Bin 0 -> 13284 bytes
+ .../src/assets/fonts/space-grotesk-latin-700.woff2 | Bin 0 -> 12840 bytes
+ .../assets/fonts/space-grotesk-latin-ext-400.woff2 | Bin 0 -> 12256 bytes
+ .../assets/fonts/space-grotesk-latin-ext-500.woff2 | Bin 0 -> 12272 bytes
+ .../assets/fonts/space-grotesk-latin-ext-600.woff2 | Bin 0 -> 12288 bytes
+ .../assets/fonts/space-grotesk-latin-ext-700.woff2 | Bin 0 -> 11992 bytes
+ frontend/src/components/shared/NavBar.vue          |  12 +-
+ frontend/src/layouts/connected/ConnectedLayout.vue |   4 +-
+ frontend/src/layouts/connected/ConnectedView.vue   |   2 +-
+ frontend/src/mocks/handlers.js                     | 192 ++++++-----
+ frontend/src/plugins/vuetify.js                    |  38 ++-
+ frontend/src/styles/main.scss                      |  11 +-
+ frontend/src/styles/portfolio.scss                 | 354 +++++++++++++++++++++
+ frontend/src/styles/settings.scss                  |  10 +-
+ frontend/src/views/DashboardView.vue               |   4 +-
+ frontend/src/views/account/ParametersView.vue      |   2 +-
+ frontend/src/views/account/SettingsView.vue        |   2 +-
+ frontend/src/views/admin/InformationView.vue       |   2 +-
+ frontend/src/views/admin/ParametersView.vue        |   2 +-
+ frontend/src/views/admin/alarms/AlarmsView.vue     |   2 +-
+ .../src/views/admin/domains/DomainEditView.vue     |   2 +-
+ frontend/src/views/admin/domains/DomainView.vue    |   4 +-
+ frontend/src/views/admin/domains/DomainsView.vue   |   4 +-
+ .../src/views/admin/identities/AccountEditView.vue |   2 +-
+ .../src/views/admin/identities/AccountView.vue     |   2 +-
+ .../src/views/admin/identities/AliasEditView.vue   |   2 +-
+ frontend/src/views/admin/identities/AliasView.vue  |   2 +-
+ .../src/views/admin/identities/IdentitiesView.vue  |   4 +-
+ .../views/admin/imap_migration/MigrationsView.vue  |   4 +-
+ .../views/admin/imap_migration/ProvidersView.vue   |   4 +-
+ .../src/views/admin/monitoring/AuditTrailView.vue  |   2 +-
+ .../src/views/admin/monitoring/MessagesView.vue    |   2 +-
+ .../src/views/admin/monitoring/StatisticsView.vue  |   2 +-
+ frontend/src/views/login/LoginCallbackView.vue     |  28 +-
+ frontend/src/views/login/LoginView.vue             |  29 +-
+ 43 files changed, 602 insertions(+), 141 deletions(-)
+
+commit 2807e9eb0eb56b0b15301b1f818b7e1bac9fbf1b
+Author: Bruno <bruno-nyland@hotmail.com>
+Date:   Thu Jun 25 12:36:39 2026 -0400
+
+    fix(workflows): ajusta formatação e versões no frontend e modoboa.yml
+
+ .github/workflows/frontend.yml |  9 ++++----
+ .github/workflows/modoboa.yml  | 47 +++++++++++++++++++++---------------------
+ 2 files changed, 28 insertions(+), 28 deletions(-)
+
+commit 883efac32c48b64d8ff673fe012f0e38046ecbd6
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Thu Jun 25 12:01:59 2026 -0400
+
+    chore(frontend): adiciona .gitignore próprio do subprojeto (#30)
+    
+    Ignore self-contido para o frontend (Vite + Vue + Storybook, yarn):
+    node_modules/caches, saída de build, .__mf__temp, storybook-static,
+    cobertura do vitest, envs locais, *.har (tokens/cookies) e o
+    package-lock.json do npm (projeto usa yarn). Complementa o .gitignore raiz.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ frontend/.gitignore | 50 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 50 insertions(+)
+
+commit ce1c00025f89788428e2c0a3d6590c39290bc1d8
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Thu Jun 25 11:52:42 2026 -0400
+
+    perf(frontend): gate de login no index.html antes dos mf-entry-bootstrap (#29)
+    
+    Gera um gate inline no <head> do index.html (no relocateMfBootstrap, durante
+    o writeBundle) que decide ANTES de baixar o SPA pesado:
+    
+    - rota /login* (callback OIDC, login server-rendered) -> carrega o app;
+    - já autenticado (varre localStorage por oidc.user:* válido) -> carrega o app;
+    - caso contrário -> import dinâmico do chunk leve @/auth-gate (só
+      oidc-client-ts, sem Vuetify/Module Federation) e signinRedirect();
+    - qualquer dúvida/erro -> carrega o app (pior caso == comportamento atual).
+    
+    As tags <script type=module> dos mf-entry-bootstrap são removidas do HTML e
+    reinjetadas dinamicamente (async=false, crossOrigin=anonymous) só quando o
+    gate decide carregar o app, preservando a ordem/init do Module Federation.
+    
+    main.js mantém uma referência morta a @/auth-gate (sob window.__forceAuthGateChunk__)
+    só para o bundler emitir o chunk que o gate inline importa.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ frontend/src/auth-gate.js | 20 +++++++++++++++
+ frontend/src/main.js      |  8 ++++++
+ frontend/vite.config.js   | 63 +++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 91 insertions(+)
+
+commit 3149c3cf4e7d31205903a67907419fb67a5f1d81
+Author: Claude <noreply@anthropic.com>
+Date:   Thu Jun 25 14:13:31 2026 +0000
+
+    fix(ui): favicon único em /favicon.ico (login e app)
+    
+    As páginas server-rendered (login, layouts simples) apontavam para
+    `{% static 'css/favicon.ico' %}` (/sitestatic/css/favicon.ico), enquanto o SPA
+    usa `/favicon.ico` (servido na raiz a partir do frontend). Eram duas fontes
+    para o mesmo ícone.
+    
+    Agora os templates `registration/base.html` e `layout_simple.html` referenciam
+    `/favicon.ico`, e o estático `modoboa/static/css/favicon.ico` foi removido.
+    Resultado: fonte única, cache compartilhado entre login e app, e branding
+    consistente. O `/favicon.ico` é servido na raiz pelo nginx (frontend_dist).
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ modoboa/static/css/favicon.ico           | Bin 10127 -> 0 bytes
+ modoboa/templates/layout_simple.html     |   2 +-
+ modoboa/templates/registration/base.html |   2 +-
+ 3 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 67b38df36772835005156b6cbc8af25369c79fe5
+Author: Claude <noreply@anthropic.com>
+Date:   Thu Jun 25 10:49:18 2026 +0000
+
+    perf(frontend): redireciona p/ login antes de montar o SPA (boot dinâmico)
+    
+    Para um visitante não autenticado, o `main.js` agora checa a sessão OIDC e
+    dispara o `signinRedirect()` ANTES de montar o app — com `App.vue` e os
+    plugins em import dinâmico, então os chunks do shell/Vuetify não são baixados
+    por quem só vai parar na tela de login.
+    
+    - Novo `src/oidc.js` (`createUserManager`) compartilhado entre o `main.js` e o
+      `auth.store`, garantindo clientes OIDC idênticos (o state do redirect
+      antecipado é lido no callback).
+    - Defensivo: modo mock, rotas `/login*` (incl. callback) e qualquer erro caem
+      no boot normal — pior caso = comportamento atual.
+    
+    Nota: os `mf-entry-bootstrap` ainda carregam pelo index.html antes do main.js,
+    então o ganho completo exige mover o gate pro index.html (follow-up). Este
+    passo já corta a cauda (boot do app + descoberta OIDC) e os chunks do shell.
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ frontend/src/main.js              | 90 +++++++++++++++++++++++++++++----------
+ frontend/src/oidc.js              | 26 +++++++++++
+ frontend/src/stores/auth.store.js | 20 ++-------
+ 3 files changed, 96 insertions(+), 40 deletions(-)
+
+commit 46303c3cbad6e2e54f8e00f1cc82866cd9a48aa1
+Author: Claude <noreply@anthropic.com>
+Date:   Thu Jun 25 10:49:18 2026 +0000
+
+    perf(frontend): habilita modulePreload (paraleliza o waterfall de módulos)
+    
+    A análise do HAR da carga inicial mostrou uma cadeia serial de ~10 módulos
+    (runtime do Module Federation), cada um só baixado depois que o anterior é
+    parseado (~335ms). Com `modulePreload`, o Vite injeta
+    `<link rel="modulepreload">` para o grafo estático, fazendo o browser buscar
+    em paralelo. Polyfill off (target esnext).
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ frontend/vite.config.js | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+commit 2b77dc9a3f2acbc5fcf3db3627ccdd37829251b5
+Author: Claude <noreply@anthropic.com>
+Date:   Thu Jun 25 05:01:51 2026 +0000
+
+    fix(frontend): detecção de modo mock robusta + docs
+    
+    O bypass do OIDC no modo mock checava só `import.meta.env.VITE_MOCK_API`, que
+    não é injetado de forma confiável nos módulos expostos via Module Federation
+    (o `auth.store`) — por isso a app caía no login/OIDC. O `main.js` passa a expor
+    `globalThis.__MODOBOA_MOCK_API__` no boot, e `validateAccess`/`login`/`$reset`
+    checam o env OU esse global. Mantém o restante da implementação (cross-env,
+    refator `@/config`, vite HTTP no mock, mocks expandidos, branches de
+    login/logout).
+    
+    Adiciona docs: CLAUDE.md (memória de projeto) e reescreve frontend/README.md
+    (dev com/sem backend, build, i18n, mocks, Module Federation).
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ CLAUDE.md                         |  98 ++++++++++++++
+ frontend/README.md                | 270 ++++++++++++++++++++++++++++++++------
+ frontend/src/main.js              |   4 +
+ frontend/src/stores/auth.store.js |   6 +-
+ 4 files changed, 337 insertions(+), 41 deletions(-)
+
+commit e3f0f44da9a7a8c928e86566956f47e7c4f5c332
+Author: Claude <noreply@anthropic.com>
+Date:   Thu Jun 25 05:01:51 2026 +0000
+
+    chore: remove captura HAR + lockfile do npm e ignora ambos
+    
+    - Remove `mail.sintraffms.com.har`: captura de rede da produção, com headers e
+      corpos (tokens OAuth/Bearer, cookies de sessão, possivelmente conteúdo de
+      e-mail). Não deve ser versionada.
+    - Remove `frontend/package-lock.json`: o projeto usa yarn (yarn.lock); o
+      lockfile do npm confunde e pode divergir do que o CI usa
+      (`yarn install --frozen-lockfile`).
+    - `.gitignore` passa a ignorar `*.har` e `frontend/package-lock.json`.
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ .gitignore                 |    6 +
+ frontend/package-lock.json | 5686 --------------------------
+ mail.sintraffms.com.har    | 9609 --------------------------------------------
+ 3 files changed, 6 insertions(+), 15295 deletions(-)
+
+commit 06c3da2e902a1a599c478f6a42ed817fb2f8bf65
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Wed Jun 24 23:41:55 2026 -0400
+
+    chore: add HAR network capture file for mail.sintraffms.com debugging
+
+ mail.sintraffms.com.har | 9609 +++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 9609 insertions(+)
+
+commit c69338f6f4cd32e9786d82d944b1242beca6c39a
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Wed Jun 24 23:40:46 2026 -0400
+
+    feat: scaffold frontend project with core architecture, UI components, authentication store, and MSW mocking support
+
+ frontend/package-lock.json                         | 5686 ++++++++++++++++++++
+ frontend/package.json                              |    9 +-
+ .../src/components/account/BackupCodeAuthForm.vue  |    3 +-
+ frontend/src/components/account/TotpAuthForm.vue   |    3 +-
+ .../form_steps/AccountPasswordSubForm.vue          |    4 +-
+ frontend/src/components/shared/NavBar.vue          |   16 +-
+ frontend/src/components/tools/ParametersForm.vue   |    2 +-
+ frontend/src/composables/logos.js                  |    2 +-
+ frontend/src/config.js                             |    9 +
+ frontend/src/layouts/account/AccountLayout.vue     |    3 +
+ frontend/src/main.js                               |    9 +-
+ frontend/src/mocks/fixtures.js                     |  211 +-
+ frontend/src/mocks/handlers.js                     |  552 +-
+ frontend/src/plugins/icons.js                      |    2 +
+ frontend/src/router/index.js                       |    2 +-
+ frontend/src/stores/auth.store.js                  |   11 +-
+ .../src/views/admin/monitoring/AuditTrailView.vue  |   10 +-
+ .../src/views/admin/monitoring/MessagesView.vue    |   10 +-
+ .../src/views/admin/monitoring/StatisticsView.vue  |   52 +-
+ frontend/src/views/webmail/EmailView.vue           |  312 +-
+ frontend/vite.config.js                            |    6 +-
+ frontend/yarn.lock                                 | 1294 ++---
+ 22 files changed, 7177 insertions(+), 1031 deletions(-)
+
+commit 436bdb89062edd33de64ae379396a10bda13d835
+Author: Claude <noreply@anthropic.com>
+Date:   Wed Jun 24 20:46:06 2026 +0000
+
+    feat(frontend): dev sem backend — API mockada (MSW) + scaffold de Storybook
+    
+    Permite mexer na interface sem subir Django/Dovecot.
+    
+    MSW (app completo, verificado):
+    - src/mocks/{fixtures,handlers,browser}.js — intercepta /api com dados falsos;
+      handlers de bootstrap (account/me, applications, plugins, parameters) +
+      catch-all que devolve lista vazia e avisa no console.
+    - main.js inicia o worker só quando VITE_MOCK_API está ligado (import dinâmico
+      → msw não entra no bundle de produção; verificado).
+    - auth.store validateAccess() pula o OIDC no modo mock.
+    - script `dev:mock` (VITE_MOCK_API=true vite); public/mockServiceWorker.js.
+    
+    Storybook (componentes isolados, scaffold):
+    - .storybook/{main,preview}.js + história de exemplo. Preview instala
+      Vuetify + i18n + Pinia + router em memória; main remove os plugins de
+      Module Federation do vite.config. Scripts storybook/build-storybook.
+    - NÃO verificado no CI: o ambiente não conseguiu baixar o Storybook (rede).
+      Instalar com `yarn add -D storybook@^10 @storybook/vue3-vite@^10`.
+    
+    Doc: frontend/DEV_SEM_BACKEND.md. Tudo atrás de flags de dev — build de
+    produção e testes (13 passando) intactos.
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ frontend/.storybook/Welcome.stories.js |  31 +++
+ frontend/.storybook/main.js            |  41 ++++
+ frontend/.storybook/preview.js         |  43 ++++
+ frontend/DEV_SEM_BACKEND.md            |  70 +++++++
+ frontend/package.json                  |  13 +-
+ frontend/public/mockServiceWorker.js   | 349 +++++++++++++++++++++++++++++++++
+ frontend/src/main.js                   |  43 ++--
+ frontend/src/mocks/browser.js          |  11 ++
+ frontend/src/mocks/fixtures.js         | 126 ++++++++++++
+ frontend/src/mocks/handlers.js         |  41 ++++
+ frontend/src/stores/auth.store.js      |   9 +
+ frontend/yarn.lock                     | 345 +++++++++++++++++++++++++++++++-
+ 12 files changed, 1104 insertions(+), 18 deletions(-)
+
+commit edc3e6eb094d2d414dca740b661541a489d23562
+Author: Claude <noreply@anthropic.com>
+Date:   Wed Jun 24 17:20:39 2026 +0000
+
+    perf(webmail): pool de conexões IMAP por usuário (atrás de flag)
+    
+    Cada requisição do webmail abria uma conexão IMAP nova e autenticava do
+    zero. Contra o Dovecot, o AUTHENTICATE domina a latência (medido: ~80 ms
+    mesmo com auth_cache; ~320 ms sem) e é pago de novo na requisição seguinte.
+    
+    Como o uWSGI roda com vários processos worker e SEM threads, as requisições
+    dentro de um worker são serializadas — dá pra manter uma conexão autenticada
+    por usuário por worker e reusá-la entre requisições, sem locks.
+    
+    - Novo módulo `imap_pool`: estado por-processo `{username: (sessão, last_used)}`,
+      criação lazy (pós-fork, nunca compartilha fd), health-check via NOOP no
+      checkout, expiração por ociosidade, teto de entradas (LRU) e cleanup no
+      shutdown (atexit).
+    - `IMAPconnector.__enter__/__exit__` consultam o pool: enter reusa (pula o
+      login) ou loga; exit devolve ao pool em saída limpa, ou desloga em erro/
+      quando desligado. Estado transitório (criterions, mailbox, quota) é resetado
+      no checkout. Views não mudam.
+    - Isolamento estrito por username; cada requisição já é autenticada pelo
+      middleware OAuth antes de chegar aqui.
+    - Tudo atrás de `WEBMAIL_IMAP_POOL` (default OFF) → habilita por instância,
+      reverte instantâneo. Knobs: IDLE_TIMEOUT, MAX_ENTRIES.
+    - Testes: lógica do pool (reuso, isolamento, expiração, conexão morta, teto,
+      clear) + integração com o IMAPconnector real e IMAP mockado (reuso entre
+      requisições, isolamento, reconexão, não-pooling em erro).
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ modoboa/webmail/lib/imap_pool.py        | 132 +++++++++++++++++++++++
+ modoboa/webmail/lib/imaputils.py        |  37 ++++++-
+ modoboa/webmail/mocks.py                |   6 ++
+ modoboa/webmail/tests/test_imap_pool.py | 186 ++++++++++++++++++++++++++++++++
+ 4 files changed, 360 insertions(+), 1 deletion(-)
+
+commit 6e6210732595457268b85dc4e4afa64dad77a79e
+Author: Claude <noreply@anthropic.com>
+Date:   Wed Jun 24 15:31:52 2026 +0000
+
+    perf(frontend): hash de conteúdo nos mf-entry-bootstrap (cache imutável)
+    
+    Os shims de bootstrap do Module Federation eram emitidos sem hash no
+    nome (mf-entry-bootstrap-N.js). Como o conteúdo deles muda a cada build
+    (importam os chunks com hash pelo nome), servir /assets/ como imutável
+    quebraria: um cache de longa duração continuaria servindo um bootstrap
+    velho apontando para chunks que não existem mais.
+    
+    O plugin relocateMfBootstrap agora calcula um hash de conteúdo e renomeia
+    para assets/mf-entry-bootstrap-N-<hash>.js, reescrevendo as referências no
+    index.html (único arquivo que os referencia). Com isso todo arquivo em
+    /assets/ passa a ser content-addressed, e o nginx pode marcar a árvore
+    inteira como `immutable` com segurança — eliminando o re-download de tudo
+    a cada F5.
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ frontend/vite.config.js | 24 ++++++++++++++++++++----
+ 1 file changed, 20 insertions(+), 4 deletions(-)
+
+commit 92fa45b4de85f894f9bc9d8960308a31d7fa10d1
+Author: Claude <noreply@anthropic.com>
+Date:   Wed Jun 24 13:51:51 2026 +0000
+
+    fix(parameters): carrega defaults do registry de forma preguiçosa
+    
+    O `LocalConfig` é guardado em cache (pickle) e, na leitura, é
+    despicklado sem passar pelo `__init__` — então o `Manager` restaurado
+    nunca dispara `registry._load_default_values()`. Num processo que só vê
+    a instância em cache (ex.: `migrate` com cache quente), os apps ficam
+    registrados mas com `defaults` vazios, e o primeiro `get_value` levanta
+    `NotDefined` ("Application core not registered").
+    
+    Agora os defaults são carregados sob demanda via `ensure_defaults()`,
+    com um flag por nível que é invalidado quando um novo app se registra.
+    Os getters do registry (`exists`, `get_default`, `get_defaults`) e o
+    `Manager.__init__` passam a usá-lo. Assim o cache pode continuar ligado
+    por padrão (timeout 300) sem o problema no migrate, e deixa de ser
+    necessário forçar `MODOBOA_LOCALCONFIG_CACHE_TIMEOUT = 0` em produção.
+    Bônus: os defaults deixam de ser recomputados a cada construção de
+    `Manager` (antes, a cada request).
+    
+    Inclui teste de regressão que simula um processo com registry não
+    primado servindo a instância do cache.
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ modoboa/core/tests/test_core.py | 27 +++++++++++++++++++++++++++
+ modoboa/parameters/tools.py     | 27 ++++++++++++++++++++++++++-
+ 2 files changed, 53 insertions(+), 1 deletion(-)
+
+commit 74ca389bece477355af2664822504c160458a6a7
+Author: Claude <noreply@anthropic.com>
+Date:   Wed Jun 24 12:24:50 2026 +0000
+
+    perf(frontend): auto-hospeda Roboto, remove Google Fonts externo
+    
+    O index.html fazia preconnect/preload para fonts.gstatic.com e
+    fonts.googleapis.com a cada acesso — uma chamada externa ao Google
+    (privacidade/LGPD + dependência de rede de terceiros) para servir o
+    Roboto.
+    
+    Passa a empacotar o Roboto localmente via @fontsource/roboto:
+    - importa só os 4 pesos usados (300/400/500/700), subsets latin +
+      latin-ext (cobre en/pt_BR e demais línguas latinas);
+    - remove o plugin unplugin-fonts (ViteFonts/google) do vite.config.js e
+      a dependência do package.json.
+    
+    Resultado: head do index.html sem nenhuma referência externa; os .woff2
+    do Roboto são servidos localmente (/assets). Nenhuma chamada ao Google.
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ frontend/package.json           |   2 +-
+ frontend/src/plugins/vuetify.js |  11 ++++
+ frontend/vite.config.js         |  14 ----
+ frontend/yarn.lock              | 140 +++-------------------------------------
+ 4 files changed, 20 insertions(+), 147 deletions(-)
+
+commit 01dd6019e110f363069dd582bbb69b298ea16b86
+Author: Claude <noreply@anthropic.com>
+Date:   Wed Jun 24 12:17:59 2026 +0000
+
+    perf(frontend): remove pesos Roboto não usados (Thin 100, Black 900)
+    
+    O index.html pedia 6 pesos do Google Fonts (100;300;400;500;700;900),
+    mas Thin (100) e Black (900) não são usados por nenhum componente — só
+    existiam como classes utilitárias do Vuetify nunca aplicadas. Reduz a
+    requisição do Google Fonts para os 4 pesos reais: 300;400;500;700.
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ frontend/vite.config.js | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+commit ede06c169dd15c07db77766c3dccd2e8a5b1c7f0
+Author: Claude <noreply@anthropic.com>
+Date:   Wed Jun 24 12:13:19 2026 +0000
+
+    perf(frontend): reaplica ícones MDI em SVG (#15)
+    
+    Reaplica a migração de fonte -> SVG que havia sido revertida. O "ícone
+    gigante" visto em produção NÃO era bug do SVG: era o index.html antigo
+    (arquivo real, não symlink) apontando para bundles de CSS/JS que não
+    existiam mais após o upgrade. Com o index.html voltando a ser symlink
+    para o frontend_dist do pacote, o frontend carrega os assets corretos.
+    
+    Recupera o ganho de tamanho do #15:
+      dist total : 7.4 MB -> 3.6 MB
+      webfonts MDI (~3.5 MB) : removidas
+    
+    Build, lint e testes (13/13) passando; index.html referencia apenas
+    assets presentes no dist.
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ frontend/package.json           |   2 +-
+ frontend/src/plugins/icons.js   | 226 ++++++++++++++++++++++++++++++++++++++++
+ frontend/src/plugins/vuetify.js |  18 +++-
+ frontend/yarn.lock              |   6 +-
+ 4 files changed, 247 insertions(+), 5 deletions(-)
+
+commit 5173ed84e44276b3639a3e81dc494371255138e2
+Author: Claude <noreply@anthropic.com>
+Date:   Wed Jun 24 04:23:19 2026 +0000
+
+    revert(frontend): volta ícones MDI de SVG para fonte (#15)
+    
+    A migração para ícones SVG (#15) quebrou o frontend em produção: o
+    webmail renderizava um ícone preto gigante ocupando a tela, com layout
+    quebrado. Revertendo para o pacote de fonte @mdi/font, que renderiza
+    corretamente, até que o caminho SVG seja testado visualmente.
+    
+    - vuetify.js: restaura import do CSS @mdi/font; remove o iconset SVG
+      customizado e o bloco icons:.
+    - package.json/yarn.lock: troca @mdi/js de volta por @mdi/font.
+    - remove src/plugins/icons.js (mapa de 109 ícones SVG).
+    
+    Mantém a correção mdi-location -> mdi-map-marker do #15 (válida na fonte).
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+
+ frontend/package.json           |   2 +-
+ frontend/src/plugins/icons.js   | 226 ----------------------------------------
+ frontend/src/plugins/vuetify.js |  18 +---
+ frontend/yarn.lock              |   6 +-
+ 4 files changed, 5 insertions(+), 247 deletions(-)
+
+commit f155b047e87082c4fd960dc74efb48f687533079
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 23:56:39 2026 -0400
+
+    ci: recria o release.yml (build do wheel) + gatilho release:published (#20)
+    
+    Recria o release.yml (o PR #16 não chegou a ser mergeado) e adiciona o
+    gatilho `release: [published]`, para que publicar uma Release pela
+    interface do GitHub gere e anexe o wheel com um clique.
+    
+    A cada Release publicada (ou tag v* / execução manual) o Action:
+    - builda o frontend (yarn build -> frontend_dist, só en+pt_BR);
+    - compila as traduções (.po -> .mo);
+    - gera o wheel (inclui frontend_dist e .mo via MANIFEST);
+    - anexa o(s) artefato(s) à Release.
+    
+    Como o evento `release` roda na ref da tag, o version.py resolve a
+    versão a partir do nome da tag automaticamente.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ .github/workflows/release.yml | 76 +++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 76 insertions(+)
+
+commit b1627e9ff76c867c3ee643f86bc2b6ddbb4b5ab2
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 23:37:02 2026 -0400
+
+    build(frontend): embute apenas en e pt_BR no bundle (#19)
+    
+    Define BUNDLED_LOCALES = ['en', 'pt_BR'] em locales.config.js, reduzindo
+    o bundle (~60 KB gz a menos) e deixando o seletor com só esses dois
+    idiomas. Os demais .po continuam no repositório; é só ajustar a lista
+    para reincluí-los.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ frontend/locales.config.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit d067c864549d8f96676cc81b191b9deaf2f07911
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 23:28:58 2026 -0400
+
+    ci: roda o job de release (PyPI) só no repositório oficial (#18)
+    
+    O job `release` do modoboa.yml publica o pacote `modoboa` no (Test)PyPI a
+    cada push no master/tag. Em um fork isso falha (sem credenciais PyPI) e
+    deixa o CI vermelho mesmo com todos os testes verdes — além de ser uma
+    tentativa indevida de publicar o pacote oficial.
+    
+    Adiciona a guarda `github.repository == 'modoboa/modoboa'` para o job só
+    executar no repositório oficial. Forks usam o release.yml (wheel anexado
+    na GitHub Release) como caminho de publicação.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ .github/workflows/modoboa.yml | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit a30df5d2a6e7541c811230e33a61c2761ca019c2
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 23:15:27 2026 -0400
+
+    fix(core): não cachear o LocalConfig durante os testes (corrige regressão do #2) (#17)
+    
+    O cache do LocalConfig (get_instance) não é resetado entre testes,
+    enquanto o banco e o registro de parâmetros são. Com isso, uma instância
+    cacheada vazava estado entre testes da suíte completa, causando erros
+    como `NotDefined: Application admin not registered` e
+    `LimitReached: Domain admins` (uma instância cacheada é desserializada
+    sem passar pelo __init__, então não enxerga o registro de parâmetros
+    recarregado entre os testes).
+    
+    - get_instance passa a respeitar MODOBOA_LOCALCONFIG_CACHE_TIMEOUT=0
+      como "não cachear" (sempre lê fresco do banco).
+    - test_project define MODOBOA_LOCALCONFIG_CACHE_TIMEOUT=0, desabilitando
+      o cache na suíte; o comportamento de cache continua coberto por
+      LocalConfigCacheTestCase (que reabilita via override_settings).
+    
+    Em produção o cache permanece ativo (registro carregado uma vez, nunca
+    recarregado), sem mudança de comportamento.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ modoboa/core/models.py                | 17 ++++++++++++-----
+ modoboa/core/tests/test_core.py       |  2 ++
+ test_project/test_project/settings.py |  6 ++++++
+ 3 files changed, 20 insertions(+), 5 deletions(-)
+
+commit 20a6d664f31919f50e8776406a112aae1918eb6b
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 20:42:12 2026 -0400
+
+    perf(frontend): migra ícones MDI de fonte para SVG (dist −50%, style.css −316 KB) (#15)
+    
+    Substitui o pacote de fonte @mdi/font (que embarcava os 7.448 ícones do
+    Material Design — ~400 KB de CSS + ~3,5 MB de fontes) por @mdi/js com
+    ícones SVG tree-shakeable: apenas os 109 ícones realmente usados pelo app
+    entram no bundle.
+    
+    - src/plugins/icons.js: mapa gerado com os 109 ícones usados (mdi-* ->
+      path SVG do @mdi/js).
+    - src/plugins/vuetify.js: iconset SVG customizado que resolve os nomes
+      mdi-* pelo mapa; aliases internos do Vuetify ($dropdown, $close, ...)
+      vêm de vuetify/iconsets/mdi-svg. Remove o import do CSS da fonte.
+    - Corrige um ícone inexistente: ContactForm usava `mdi-location` (sem
+      glifo na fonte, renderizava em branco) -> `mdi-map-marker`.
+    - Remove a dependência @mdi/font; adiciona @mdi/js.
+    
+    Impacto medido no build:
+      dist total : 7,6 MB -> 3,8 MB
+      style.css  : 778 KB  -> 462 KB  (101 KB -> 65 KB gz)
+      fontes de ícone (~3,5 MB, woff2 de 394 KB baixado) : removidas
+      main.js    : +~33 KB raw (paths SVG inline dos 109 ícones)
+    
+    Build, lint e testes (13/13) passando. Como não há ícones construídos
+    dinamicamente, o mapa estático cobre todos os usos.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ frontend/package.json                            |   4 +-
+ frontend/src/components/contacts/ContactForm.vue |   2 +-
+ frontend/src/plugins/icons.js                    | 226 +++++++++++++++++++++++
+ frontend/src/plugins/vuetify.js                  |  18 +-
+ frontend/yarn.lock                               |   6 +-
+ 5 files changed, 249 insertions(+), 7 deletions(-)
+
+commit 55622c3c93c5118dc8b1e5dd14b5310d879b470d
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 20:37:14 2026 -0400
+
+    chore(frontend): remove dependências não usadas (core-js, minimatch, roboto-fontface) (#14)
+    
+    Remove dependências sem nenhuma referência no código (confirmado: build
+    e testes seguem passando):
+    
+    - core-js: nenhum import; com target esnext não há polyfills a injetar.
+    - minimatch: nenhum import.
+    - roboto-fontface: nenhum import; a fonte Roboto já é carregada via
+      unplugin-fonts (provider do Google) no vite.config.
+    
+    Move vue-eslint-parser de dependencies para devDependencies (é
+    ferramenta de lint, não dependência de runtime).
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ frontend/package.json |  9 +++------
+ frontend/yarn.lock    | 12 +-----------
+ 2 files changed, 4 insertions(+), 17 deletions(-)
+
+commit c686f863bd1dcc3493682f7a19f23337f8b16fb8
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 19:00:46 2026 -0400
+
+    feat(frontend): arquivo de config para escolher quais traduções entram no bundle (#13)
+    
+    Adiciona locales.config.js, um arquivo único que define quais locales
+    são embutidos no build. O translations.json versionado continua com
+    todos os idiomas; um plugin do Vite (virtual:modoboa-translations) filtra
+    em tempo de build apenas os locales selecionados, então idiomas não
+    usados deixam de ser embarcados no main.js.
+    
+    Uso:
+    - editar BUNDLED_LOCALES em locales.config.js, ou
+    - MODOBOA_LOCALES=en,pt_BR yarn build   (override sem editar arquivo)
+    
+    'en' (idioma de origem) é sempre incluído. O gettext passa a importar as
+    traduções do módulo virtual e restringe availableLanguages aos locales
+    embutidos; combinado com o filtro de cobertura, o seletor mostra apenas
+    os idiomas realmente disponíveis.
+    
+    Medições (main.js):
+      todos os idiomas : 1346 KB  (sem regressão)
+      en,pt_BR         : 1146 KB  (-200 KB raw / ~-62 KB gz)
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ frontend/locales.config.js      | 50 +++++++++++++++++++++++++++++++++++++++++
+ frontend/src/plugins/gettext.js | 13 +++++++++--
+ frontend/vite.config.js         | 35 +++++++++++++++++++++++++++++
+ 3 files changed, 96 insertions(+), 2 deletions(-)
+
+commit c6aaff4328d0ce1b4452ac683c5e7454cd917fb6
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 17:32:52 2026 -0400
+
+    perf(frontend): habilita minificação no build (main.js -43%, dist -31%) (#12)
+    
+    O build estava com `minify: false`, então o bundle ia para produção sem
+    minificação: main.js ~2,37 MB e style.css ~1,06 MB. Habilitar a
+    minificação (esbuild) reduz significativamente os artefatos servidos:
+    
+      main.js : 2373 KB -> 1347 KB   (-43%)
+      style.css: 1062 KB ->  778 KB   (-27%)
+      total dist: 11 MB -> 7,6 MB     (-31%)
+    
+    Mantém cssCodeSplit e a estrutura de chunks como estavam, para não
+    alterar a integração com o Module Federation nem o carregamento do CSS
+    único. Demais otimizações (split de vendors, lazy-load das traduções por
+    idioma, gzip/brotli no servidor) ficam para passos seguintes.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ frontend/vite.config.js | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+commit 88a70ffd76778246c2b8d77dcdd0dceb7d08f457
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 17:32:46 2026 -0400
+
+    feat(i18n): oculta do seletor idiomas sem tradução (0% de cobertura) (#11)
+    
+    O seletor de idioma listava todos os idiomas de constants.LANGUAGES,
+    inclusive os que não têm nenhuma tradução no frontend (cs, el, ja, nl,
+    pl, zh-hant) e os que sequer possuem locale (pt, ro) — todos exibiam a
+    interface em inglês.
+    
+    Passa a oferecer apenas idiomas com cobertura real:
+    - utils.languageHasCoverage(): função pura que verifica se o locale tem
+      entrada não vazia no translations.json compilado (o idioma de origem,
+      inglês, é sempre considerado coberto).
+    - language.store: novo getter selectableLanguages (lista filtrada) usado
+      pelos seletores; availableLanguages (lista completa) é mantido para
+      resolver o rótulo de um idioma já selecionado.
+    - ProfileForm e AccountProfileForm passam a usar selectableLanguages.
+      ProfileForm deixa de chamar a API diretamente e usa o store.
+    
+    Resultado com os dados atuais — mostra: br, de, en, es, fi, fr, it,
+    pt-br, ru, sv, tr; oculta: cs, el, ja, nl, pt, pl, ro, zh-hant.
+    
+    Inclui testes de languageHasCoverage (idioma de origem, locale com
+    mensagens, locale vazio e locale ausente).
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ frontend/src/components/account/ProfileForm.vue    | 15 +++++-----
+ .../identities/form_steps/AccountProfileForm.vue   |  2 +-
+ frontend/src/stores/language.store.js              | 19 ++++++++++++-
+ frontend/src/utils.js                              | 17 +++++++++++-
+ frontend/src/utils.spec.js                         | 32 +++++++++++++++++++++-
+ 5 files changed, 73 insertions(+), 12 deletions(-)
+
+commit bd942995068d0730dd64ed969617aa61af3e5930
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 13:29:18 2026 -0400
+
+    i18n(frontend): ressincroniza translations.json com os .po (#10)
+    
+    O translations.json versionado estava defasado em relação a vários
+    arquivos app.po: traduções já existentes não estavam sendo servidas no
+    app porque o artefato compilado não havia sido regenerado.
+    
+    Recompila o translations.json (yarn gettext:compile) a partir dos .po
+    atuais, atualizando os idiomas afetados:
+    
+      br: 110 -> 121      de: 121 -> 566     es: 102 -> 113
+      fr: 453 -> 657      it: 114 -> 645     ru:  89 -> 657
+      sv: 318 -> 537      fi: 261 -> 255 (remove strings órfãs fora do .pot)
+    
+    pt_BR permanece em 657 (já regenerado em #8). Apenas o artefato gerado
+    muda; nenhum .po é alterado.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ frontend/src/locale/translations.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 1b664344cb436bffc76409fdc78e56b90dfacad9
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 13:28:13 2026 -0400
+
+    i18n(pt_BR): completa a tradução do backend (Django) para 100% (#9)
+    
+    Traduz as 180 mensagens que faltavam no django.po do pt_BR
+    (95 sem tradução + 77 fuzzy com traduções incorretas + multilinha +
+    1 forma plural):
+    
+    - django.po: de 618 traduzidas / 77 fuzzy / 95 vazias -> 790 traduzidas,
+      0 fuzzy, 0 vazias (100%, confirmado por `msgfmt --statistics`).
+    
+    Cobre rótulos e textos de ajuda de configurações (Amavis, Rspamd, DKIM,
+    SMTP, webmail, temas/logos), mensagens de erro e templates de e-mail.
+    Mantém o estilo já usado no arquivo (ex.: "Enable" -> "Habilitar",
+    "Quarantine" -> "Quarentena") e a forma plural conforme o cabeçalho
+    Plural-Forms (nplurals=3).
+    
+    O .mo é gerado no deploy (compilemessages) e permanece fora do versionamento.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ modoboa/locale/pt_BR/LC_MESSAGES/django.po | 588 ++++++++++++++---------------
+ 1 file changed, 286 insertions(+), 302 deletions(-)
+
+commit d21497d7f4767d7c11d2036b530297859faa5773
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 13:28:07 2026 -0400
+
+    i18n(pt_BR): completa a tradução do frontend para 100% (#8)
+    
+    Traduz as 186 mensagens que faltavam no locale pt_BR do frontend
+    (67 sem tradução + 97 marcadas como fuzzy com traduções incorretas,
+    além de entradas multilinha e plurais):
+    
+    - app.po: de 494 traduzidas / 97 fuzzy / 67 vazias -> 658 traduzidas,
+      0 fuzzy, 0 vazias (100%).
+    - translations.json: recompilado apenas para a seção pt_BR (275 -> 657
+      mensagens), preservando os demais idiomas como estavam.
+    
+    Padronização seguindo o estilo já presente no arquivo (ex.: "Delete" ->
+    "Remover", "deleted" -> "removido(a)"). Formas plurais ajustadas ao
+    cabeçalho Plural-Forms do pt_BR (nplurals=3).
+    
+    Nota: a recompilação revelou que o translations.json versionado estava
+    defasado em relação a vários .po (de, it, ru, fr, sv...), ou seja,
+    traduções existentes não chegavam a ser servidas. Isso é tratado à
+    parte para manter este PR focado no pt_BR.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ frontend/src/locale/pt_BR/app.po      | 524 ++++++++++++++--------------------
+ frontend/src/locale/translations.json |   2 +-
+ 2 files changed, 218 insertions(+), 308 deletions(-)
+
+commit 5dbbda521e5eac6e24af64c89dccac96eb24b8ca
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 13:12:30 2026 -0400
+
+    perf(sessions): armazena sessões no cache (Redis) via cached_db (#7)
+    
+    O template de settings já configura o cache padrão como RedisCache, mas
+    as sessões usavam o backend de banco (default do Django), gerando uma
+    query de sessão a cada request autenticado.
+    
+    Define SESSION_ENGINE = cached_db: as leituras passam a vir do Redis
+    (com fallback para o banco), eliminando essa query por request. O uso de
+    cached_db (em vez de cache puro) mantém as sessões persistidas no banco,
+    então elas sobrevivem a um restart/flush do Redis — usuários não são
+    deslogados.
+    
+    Afeta apenas novas instalações geradas pelo instalador; instalações
+    existentes precisam adicionar a linha manualmente.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ modoboa/core/commands/templates/settings.py.tpl | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+commit a11db81b615c9286340a7ddab036476eff4998d8
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 13:05:48 2026 -0400
+
+    test(frontend): adiciona Vitest e testes de regressão de i18n (#6)
+    
+    Configura o Vitest como runner de testes do frontend, que até então não
+    tinha nenhum, e cobre as funções utilitárias de i18n — incluindo os dois
+    bugs corrigidos recentemente:
+    
+    - localeToBCP47('pt_BR') -> 'pt-BR' e validação de que o Intl aceita o
+      resultado (regressão do crash de renderização em Português (BR));
+    - toGettextLocale('zh-hant') -> 'zh' (regressão do erro "Language does
+      no exist" em chinês) e o tratamento de região (pt-br -> pt_BR).
+    
+    Detalhes:
+    - vitest.config.js separado do vite.config.js (evita carregar os
+      plugins pesados de federation/vuetify/ssl nos testes unitários),
+      mapeando apenas o alias `@`.
+    - scripts `test` (vitest run) e `test:watch`.
+    - passo "Test" no workflow frontend.yml, rodando antes do build.
+    - resolutions.vite (^8.0.0): contorna um bug do yarn classic que falhava
+      ao linkar o vitest ("could not find a copy of vite to link"); força um
+      único vite hoisted. Sem efeito no build (mesma versão já em uso).
+    
+    Validado: `yarn install --frozen-lockfile` (caminho do CI) ok e
+    `yarn test` com 9/9 testes passando.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ .github/workflows/frontend.yml |   4 +
+ frontend/package.json          |  10 +-
+ frontend/src/utils.spec.js     |  54 +++++++
+ frontend/vitest.config.js      |  17 +++
+ frontend/yarn.lock             | 326 ++++++++++++++++++++++++++++++++++++++++-
+ 5 files changed, 408 insertions(+), 3 deletions(-)
+
+commit 4a84e16842ead1586ba25f95a18b9ad78f3ec76c
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 12:53:38 2026 -0400
+
+    fix(i18n): centraliza mapeamento de idioma e corrige o chinês (zh-hant) (#5)
+    
+    O frontend convertia o código de idioma do backend para o locale do
+    vue3-gettext com uma regra inline `xx-yy` -> `xx_YY` em auth.store.js.
+    A regra funciona para `pt-br` -> `pt_BR`, mas quebra o chinês:
+    `zh-hant` virava `zh_HANT`, que não existe na lista de idiomas do
+    frontend (a chave correta é `zh`). Resultado: usuários em chinês caíam
+    no erro "Language does no exist" e a UI não trocava de locale.
+    
+    - Adiciona toGettextLocale() em utils.js como ponto único de conversão,
+      com tabela de aliases para os casos que a regra genérica erra
+      (zh-hant -> zh) e o tratamento usual de região (pt-br -> pt_BR).
+    - accountLanguage passa a usar o util.
+    - Extrai applyLanguage(), que só aplica locales conhecidos pelo gettext
+      e cai para o idioma padrão caso contrário — assim nunca selecionamos
+      um locale inválido (ex.: `pt`/`ro`, que o frontend não traduz).
+    - Exporta DEFAULT_LANGUAGE de plugins/gettext.js para evitar string
+      mágica duplicada.
+    
+    Mapeamento validado para todos os códigos de constants.LANGUAGES.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ frontend/src/plugins/gettext.js   |  4 +++-
+ frontend/src/stores/auth.store.js | 30 +++++++++++++++++-------------
+ frontend/src/utils.js             | 35 ++++++++++++++++++++++++++++++++++-
+ 3 files changed, 54 insertions(+), 15 deletions(-)
+
+commit 582774299d7b045a2e1d6b948ce6762309f30a32
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 12:47:57 2026 -0400
+
+    chore(tox): atualiza versões do Python (3.10–3.14) e conserta as dependências (#4)
+    
+    * chore(tox): atualiza envlist do Python para 3.10–3.14
+    
+    O envlist estava em py{37,38,39,310}, testando versões de Python já fora
+    de suporte (3.7–3.9) e ignorando as versões realmente suportadas.
+    
+    Alinha com a matriz do CI (.github/workflows/modoboa.yml) e com o
+    pyproject.toml, que declaram suporte a Python 3.10 a 3.14.
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    * chore(tox): aponta deps para os extras do pyproject.toml
+    
+    A seção [testenv].deps referenciava arquivos inexistentes
+    (requirements.txt, test-requirements.txt, postgresql-requirements.txt,
+    mysql-requirements.txt), resquício de antes da migração para
+    [project.optional-dependencies] no pyproject.toml. Com isso o tox não
+    conseguia mais instalar as dependências.
+    
+    Passa a instalar o pacote com os extras do pyproject, espelhando o CI
+    (pip install -e .[ldap,test,dev], + postgresql/mysql por banco):
+    
+        extras = dev, ldap, test, postgres: postgresql, mysql: mysql
+    
+    Validado com `tox c`: os extras resolvem por fator corretamente
+    (py312 -> dev,ldap,test; py312-postgres -> +postgresql; py312-mysql ->
+    +mysql).
+    
+    Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    ---------
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ tox.ini | 16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
+
+commit c7a79ce5ea8fcf667be6cf5cf74120d8678ad2ad
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 12:24:32 2026 -0400
+
+    chore: remove artefato de cache de teste versionado por engano (#3)
+    
+    O FileBasedCache (usado nos testes) grava em test_project/cache/, e um
+    arquivo .djcache acabou sendo commitado. Remove o artefato e ignora o
+    diretório test_project/cache/ para evitar reincidência.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ .gitignore                                                |   1 +
+ .../cache/01b97384f5667b87c3c82b2e49715666.djcache        | Bin 557 -> 0 bytes
+ 2 files changed, 1 insertion(+)
+
+commit 55faa16d50d1a0c4a24a3e478e329340c204ef24
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 12:22:49 2026 -0400
+
+    perf(core): cacheia o LocalConfig para evitar query do banco a cada request (#2)
+    
+    O LocalConfigMiddleware injeta o LocalConfig em quase toda requisição
+    executando LocalConfig.objects.first() + parse do JSON de parâmetros.
+    Em produção isso representa uma query e desserialização por request.
+    
+    Adiciona LocalConfig.get_instance(), que serve a instância a partir do
+    cache do Django e só recorre ao banco quando o cache está vazio. O cache
+    é invalidado em save()/delete(), garantindo consistência após alterações
+    de parâmetros. Como o framework de cache serializa os valores, cada
+    chamada retorna uma cópia independente — seguro para os fluxos que
+    mutam e salvam request.localconfig.
+    
+    O middleware e o fallback de parameters.tools.get_localconfig passam a
+    usar get_instance(). Timeout configurável via
+    MODOBOA_LOCALCONFIG_CACHE_TIMEOUT (padrão 300s) como rede de segurança
+    para backends de cache não compartilhados.
+    
+    Inclui testes de cache, invalidação e independência das cópias.
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ modoboa/core/middleware.py                         |   2 +-
+ modoboa/core/models.py                             |  35 +++++++++++++++
+ modoboa/core/tests/test_core.py                    |  50 +++++++++++++++++++++
+ modoboa/parameters/tools.py                        |   2 +-
+ .../cache/01b97384f5667b87c3c82b2e49715666.djcache | Bin 0 -> 557 bytes
+ 5 files changed, 87 insertions(+), 2 deletions(-)
+
+commit 4cf67be86a37849444afdf6f0fa603a32ab693b1
+Author: Bruno Nyland <113864915+BrunoNyland@users.noreply.github.com>
+Date:   Tue Jun 23 11:59:54 2026 -0400
+
+    fix(i18n): corrige quebra de renderização no Português (BR) + roadmap (#1)
+    
+    O vue3-gettext usa o código de locale interno `pt_BR` (com underscore),
+    que era repassado diretamente à API `Intl` via luxon (`$date`) e filesize
+    (`$filesize`). A `Intl` exige language tags BCP 47 com hífen (`pt-BR`); o
+    underscore lança `RangeError`, derrubando a renderização de qualquer
+    componente que use esses filtros (cotas, tamanhos, datas).
+    
+    Adiciona o helper `localeToBCP47()` que normaliza o locale antes de
+    entregá-lo a consumidores de `Intl`, e o aplica em `$date` e `$filesize`.
+    
+    Inclui também:
+    - remoção do `frontend/yarn-error.log` versionado por engano + .gitignore
+    - ROADMAP-performance.md com análise de performance, estabilidade,
+      testes e limpeza
+    
+    
+    Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH
+    
+    Co-authored-by: Claude <noreply@anthropic.com>
+
+ .gitignore                      |    2 +
+ ROADMAP-performance.md          |  160 +++
+ frontend/src/plugins/filters.js |    5 +-
+ frontend/src/utils.js           |   14 +-
+ frontend/yarn-error.log         | 2659 ---------------------------------------
+ 5 files changed, 178 insertions(+), 2662 deletions(-)

@@ -1,7 +1,13 @@
 """Modoboa core template context processors."""
 
+import logging
+
+from django.db import Error as DatabaseError
+
 from modoboa.core import signals as core_signals
 from modoboa.parameters import tools as param_tools
+
+logger = logging.getLogger("modoboa.core")
 
 
 def theme(request):
@@ -14,7 +20,12 @@ def theme(request):
     """
     try:
         params = dict(param_tools.get_global_parameters(app="core"))
-    except Exception:
+    except (param_tools.NotDefined, DatabaseError) as exc:
+        # Parameters not registered yet, or the DB isn't ready (e.g. during
+        # `migrate` / a fresh install). Fall back to empty theme values so the
+        # auth pages still render — but log it instead of swallowing silently,
+        # and let unexpected errors (real bugs) propagate.
+        logger.warning("Could not load core theme parameters: %s", exc)
         return {}
     values = {
         "theme_primary_color": params.get("theme_primary_color", ""),

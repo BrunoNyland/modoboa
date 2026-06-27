@@ -45,6 +45,23 @@ class FetchParserTestCase(unittest.TestCase):
         self.assertEqual(output, expected)
         return r
 
+    def test_flags_outside_uid_scope(self):
+        """FLAGS on a separate untagged line must not be lost.
+
+        Some servers split a message's FETCH response across lines, e.g.::
+
+            36 (FLAGS (\\Seen))
+            36 (UID 36 BODYSTRUCTURE (...))
+
+        Both lines belong to sequence number 36, so the parser must merge
+        them and keep the flags (otherwise a read message shows as unread).
+        """
+        result = self.parser.parse(data.BODYSTRUCTURE_SAMPLE_1)
+        self.assertEqual(list(result.keys()), [36])
+        self.assertIn("FLAGS", result[36])
+        self.assertEqual(result[36]["FLAGS"], ["\\Seen"])
+        self.assertIn("BODYSTRUCTURE", result[36])
+
     def test_parse_bodystructure(self):
         """Test the parsing of several responses containing BS."""
         self._test_bodystructure_output(

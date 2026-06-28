@@ -184,9 +184,6 @@ class IMAPconnector:
         list_base_pattern + r"\s*(?P<childinfo>.*)"
     )
     unseen_pattern = re.compile(r"[^\(]+\(UNSEEN (\d+)\)")
-    # STATUS items can come in any order, so match each independently.
-    status_messages_pattern = re.compile(r"MESSAGES (\d+)")
-    status_unseen_pattern = re.compile(r"UNSEEN (\d+)")
 
     def __init__(self, user: str, password: str, with_namespaces: bool = True) -> None:
         self.__hdelimiter: str | None = None
@@ -473,20 +470,19 @@ class IMAPconnector:
         return int(m.group(1))
 
     def folder_counters(self, mailbox: str) -> tuple[int, int]:
-        """Return ``(total, unseen)`` message counts for a mailbox.
+        """Return ``(total, unseen)`` counts of non-deleted messages.
 
-        Both come from a single STATUS call (no extra round-trip vs. the
-        unseen-only query).
+        Counts exclude messages flagged ``\\Deleted`` (not yet expunged), so
+        the numbers match the message listing (which filters ``NOT DELETED``).
+        ``STATUS (MESSAGES)`` would also count those un-expunged ghosts, which
+        made folders like Sent report e.g. 13 when only 1 message is visible.
         """
-        data = self._cmd(
-            "STATUS", self._encode_mbox_name(mailbox), "(MESSAGES UNSEEN)"
-        )
-        line = data[-1].decode()
-        total = self.status_messages_pattern.search(line)
-        unseen = self.status_unseen_pattern.search(line)
+        self.select_mailbox(mailbox, readonly=True)
+        total = self._cmd("SEARCH", "NOT", "DELETED")
+        unseen = self._cmd("SEARCH", "UNSEEN", "NOT", "DELETED")
         return (
-            int(total.group(1)) if total else 0,
-            int(unseen.group(1)) if unseen else 0,
+            len(total[0].split()) if total and total[0] else 0,
+            len(unseen[0].split()) if unseen and unseen[0] else 0,
         )
 
     def _encode_mbox_name(self, folder):

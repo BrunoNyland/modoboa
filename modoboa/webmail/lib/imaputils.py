@@ -547,6 +547,9 @@ class IMAPconnector:
                 descr = {"name": name, "label": name, "type": "normal"}
                 newmboxes += [descr]
 
+            # The folder was returned by LIST, so it actually exists on the
+            # server (used to decide whether to query its counters).
+            descr["_exists"] = True
             if "\\Marked" in flags or "\\UnMarked" not in flags:
                 descr["send_status"] = True
             if r"\NonExistent" in flags:
@@ -624,12 +627,17 @@ class IMAPconnector:
 
         if unseen_messages:
             for mb in md_mailboxes:
-                if "send_status" not in mb:
+                # ``send_status`` is an internal LIST flag; never expose it.
+                mb.pop("send_status", None)
+                exists = mb.pop("_exists", False)
+                # Only query counters for folders that actually exist (a
+                # hardcoded special folder may not have been created yet). This
+                # also avoids the previous bug where folders flagged
+                # ``\UnMarked`` (e.g. Sent/Junk with no recent activity) were
+                # skipped and reported a count of 0.
+                if not exists or mb.get("removed", False):
                     continue
-                del mb["send_status"]
                 key = "path" if "path" in mb else "name"
-                if mb.get("removed", False):
-                    continue
                 total, unseen = self.folder_counters(mb[key])
                 mb["nbmessages"] = total
                 if unseen:

@@ -9,6 +9,7 @@
           icon="mdi-arrow-left"
           size="small"
           variant="flat"
+          :title="$gettext('Back')"
           :aria-label="$gettext('Back')"
           @click="close"
         />
@@ -28,6 +29,7 @@
             icon
             variant="tonal"
             color="primary"
+            :title="$gettext('More reply options')"
             :aria-label="$gettext('More reply options')"
           >
             <v-icon icon="mdi-chevron-down" />
@@ -52,33 +54,49 @@
             variant="tonal"
             icon="mdi-trash-can"
             size="small"
+            :title="$gettext('Delete')"
             :aria-label="$gettext('Delete')"
             :loading="working"
             @click="deleteEmail"
           >
           </v-btn>
           <v-btn
-            v-if="route.params.mailbox !== 'Junk'"
+            v-if="route.query.mailbox === 'Trash'"
             class="ml-2"
-            color="warning"
+            color="primary"
             variant="tonal"
-            icon="mdi-fire"
+            icon="mdi-backup-restore"
             size="small"
-            :aria-label="$gettext('Mark as junk')"
+            :title="$gettext('Restore to Inbox')"
+            :aria-label="$gettext('Restore to Inbox')"
             :loading="working"
-            @click="markEmailAsJunk"
+            @click="restoreEmail"
           >
           </v-btn>
           <v-btn
-            v-else
+            v-else-if="route.query.mailbox === 'Junk'"
             class="ml-2"
             color="success"
             variant="tonal"
             icon="mdi-thumb-up"
             size="small"
+            :title="$gettext('Mark as not junk')"
             :aria-label="$gettext('Mark as not junk')"
             :loading="working"
             @click="markEmailAsNotJunk"
+          >
+          </v-btn>
+          <v-btn
+            v-else
+            class="ml-2"
+            color="warning"
+            variant="tonal"
+            icon="mdi-alert-octagon-outline"
+            size="small"
+            :title="$gettext('Mark as junk')"
+            :aria-label="$gettext('Mark as junk')"
+            :loading="working"
+            @click="markEmailAsJunk"
           >
           </v-btn>
           <v-btn
@@ -87,6 +105,7 @@
             variant="tonal"
             icon="mdi-pencil"
             size="small"
+            :title="$gettext('Edit draft')"
             :aria-label="$gettext('Edit draft')"
             @click="editDraft"
           >
@@ -97,6 +116,7 @@
           variant="tonal"
           icon
           size="small"
+          :title="$gettext('More actions')"
           :aria-label="$gettext('More actions')"
         >
           <v-icon icon="mdi-cog" />
@@ -291,6 +311,21 @@ const deleteEmail = () => {
     displayNotification({ msg: $gettext('Message deleted') })
     reloadMailboxCounters()
   })
+}
+
+const restoreEmail = () => {
+  working.value = true
+  api
+    .moveSelection(route.query.mailbox, 'INBOX', [route.query.mailid])
+    .then(() => {
+      working.value = false
+      router.push({
+        name: 'MailboxView',
+        query: { mailbox: route.query.mailbox },
+      })
+      displayNotification({ msg: $gettext('Message restored to Inbox') })
+      reloadMailboxCounters()
+    })
 }
 
 const markEmailAsJunk = () => {

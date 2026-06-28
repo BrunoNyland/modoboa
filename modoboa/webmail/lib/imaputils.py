@@ -696,10 +696,28 @@ class IMAPconnector:
         self._add_flag(mailbox, mailid, r"(\Answered)")
 
     def move(self, msgset, oldmailbox: str, newmailbox: str) -> None:
-        """Move messages between mailboxes."""
+        """Move messages between mailboxes.
+
+        Copy the messages to the destination, flag the originals as
+        ``\\Deleted`` and EXPUNGE them so the source folder doesn't keep
+        ghost messages around. Without the EXPUNGE the originals linger
+        until the server compacts and STATUS (MESSAGES) over-counts them.
+        """
         self.select_mailbox(oldmailbox, False)
         self._cmd("COPY", msgset, self._encode_mbox_name(newmailbox))
         self._cmd("STORE", msgset, "+FLAGS", r"(\Deleted \Seen)")
+        self._cmd("EXPUNGE")
+
+    def delete_messages(self, mbox: str, msgset) -> None:
+        """Permanently delete a set of messages (set \\Deleted and expunge).
+
+        Used when deleting from the trash folder itself: there is nowhere
+        left to move to, so the messages are removed for good instead of
+        being copied back into the same mailbox.
+        """
+        self.select_mailbox(mbox, False)
+        self._cmd("STORE", msgset, "+FLAGS", r"(\Deleted)")
+        self._cmd("EXPUNGE")
 
     def push_mail(self, mbox: str, msg) -> int:
         """

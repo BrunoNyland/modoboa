@@ -223,9 +223,19 @@ class UserEmailViewSet(viewsets.GenericViewSet):
         serializer_class=serializers.MoveSelectionSerializer,
     )
     def delete(self, request):
-        count = self.move_selection(
-            request, request.user.parameters.get_value("trash_folder")
-        )
+        trash_folder = request.user.parameters.get_value("trash_folder")
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        selection = serializer.validated_data["selection"]
+        if serializer.validated_data["source"] == trash_folder:
+            # Already in the trash: there is nowhere to move to, so delete
+            # the messages permanently instead of copying them back in.
+            if selection:
+                with lib.get_imapconnector(request) as mbc:
+                    mbc.delete_messages(trash_folder, ",".join(selection))
+            count = len(selection)
+        else:
+            count = self.move_selection(request, trash_folder)
         return response.Response({"count": count})
 
     @action(

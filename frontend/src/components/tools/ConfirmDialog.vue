@@ -6,21 +6,19 @@
     @keydown.esc="cancel"
   >
     <v-card>
-      <v-toolbar :color="options.color" density="compact" variant="flat">
-        <v-toolbar-title class="text-body-medium font-weight-bold">
-          {{ title }}
-        </v-toolbar-title>
-      </v-toolbar>
-      <v-card-text v-show="!!message" class="pa-4">
+      <v-card-title class="text-h6 px-6 pt-6 pb-2">
+        {{ title }}
+      </v-card-title>
+      <v-card-text v-show="!!message" class="text-body-1 px-6 py-2">
         {{ message }}
         <slot></slot>
       </v-card-text>
-      <v-card-actions class="pt-3">
+      <v-card-actions class="px-6 pb-6 pt-2">
         <v-spacer></v-spacer>
-        <v-btn v-if="!options.noconfirm" @click="cancel">
+        <v-btn v-if="!options.noconfirm" variant="text" @click="cancel">
           {{ options.cancelLabel }}
         </v-btn>
-        <v-btn :color="options.color" @click="agree">
+        <v-btn :color="options.color" variant="flat" @click="agree">
           {{ options.agreeLabel }}
         </v-btn>
       </v-card-actions>

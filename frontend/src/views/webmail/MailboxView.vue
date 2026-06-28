@@ -77,7 +77,7 @@ const showMailboxForm = ref(false)
 
 const currentMailbox = computed(() => route.query.mailbox || 'INBOX')
 
-const readOnlyMailbox = computed(() => ['INBOX'].includes(currentMailbox.value))
+const readOnlyMailbox = computed(() => ['INBOX', 'Sent', 'Drafts', 'Trash', 'Junk'].includes(currentMailbox.value))
 
 // Name of the currently open folder. Prefer the (already translated) label
 // from the backend; fall back to the last path segment for nested mailboxes.

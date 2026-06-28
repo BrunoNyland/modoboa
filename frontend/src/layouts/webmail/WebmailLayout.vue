@@ -209,6 +209,15 @@ watch(dataKey, () => {
   fetchUserMailboxes()
 })
 
+// Refresh folder counters (unseen + total) after any count-changing action
+// (delete, empty, mark read/unread, move). reloadMailboxCounters() bumps this.
+watch(
+  () => busStore.mbCounterKey,
+  () => {
+    fetchUserMailboxes()
+  }
+)
+
 await fetchUserMailboxes()
 const resp = await api.getUserMailboxQuota(route.query.mailbox || 'INBOX')
 mailboxQuota.value = resp.data

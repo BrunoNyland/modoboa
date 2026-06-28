@@ -247,6 +247,20 @@ class UserEmailViewSetTestCase(WebmailTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["count"], 0)
 
+    def test_delete_from_trash(self):
+        """Deleting from the trash folder removes messages for good."""
+        self.authenticate()
+        url = reverse("v2:webmail-email-delete")
+        body = {"source": "Trash", "selection": [1]}
+        response = self.client.post(url, body, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["count"], 1)
+
+        body = {"source": "Trash", "selection": ["truc"]}
+        response = self.client.post(url, body, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["count"], 0)
+
     def test_mark_as_junk(self):
         self.authenticate()
         url = reverse("v2:webmail-email-mark-as-junk")

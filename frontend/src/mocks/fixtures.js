@@ -68,11 +68,11 @@ export const parameterApps = [
 export const mailboxes = {
   hdelimiter: '.',
   mailboxes: [
-    { name: 'INBOX', label: 'Caixa de entrada', type: 'inbox', unseen: 3 },
-    { name: 'Drafts', label: 'Rascunhos', type: 'draft' },
-    { name: 'Sent', label: 'Enviados', type: 'sent' },
-    { name: 'Junk', label: 'Spam', type: 'junk', unseen: 1 },
-    { name: 'Trash', label: 'Lixeira', type: 'trash' },
+    { name: 'INBOX', label: 'Caixa de entrada', type: 'inbox', unseen: 3, nbmessages: 128 },
+    { name: 'Drafts', label: 'Rascunhos', type: 'draft', nbmessages: 2 },
+    { name: 'Sent', label: 'Enviados', type: 'sent', nbmessages: 87 },
+    { name: 'Junk', label: 'Spam', type: 'junk', unseen: 1, nbmessages: 5 },
+    { name: 'Trash', label: 'Lixeira', type: 'trash', nbmessages: 12 },
   ],
 }
 

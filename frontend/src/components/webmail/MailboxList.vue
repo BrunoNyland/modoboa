@@ -18,27 +18,10 @@
         @dragleave="setHover(mailbox, false)"
         @drop="onDrop(mailbox)"
       >
-        <v-list-item-title>
-          <template v-if="!props.rail">
-            <template v-if="mailbox.name === route.query.mailbox">
-              <span v-if="currentMailboxUnseen > 0" class="font-weight-bold">
-                {{ getMailboxLabel(mailbox) }} ({{
-                  getCurrentMailboxUnseen(mailbox)
-                }})
-              </span>
-              <span v-else>
-                {{ getMailboxLabel(mailbox) }}
-              </span>
-            </template>
-            <template v-else>
-              <span v-if="mailbox.unseen > 0" class="font-weight-bold">
-                {{ getMailboxLabel(mailbox) }} ({{ mailbox.unseen }})
-              </span>
-              <span v-else>
-                {{ getMailboxLabel(mailbox) }}
-              </span>
-            </template>
-          </template>
+        <v-list-item-title v-if="!props.rail">
+          <span :class="{ 'font-weight-bold': mailboxUnseen(mailbox) > 0 }">
+            {{ getMailboxLabel(mailbox) }} {{ mailboxCountLabel(mailbox) }}
+          </span>
         </v-list-item-title>
 
         <template #append v-if="!props.rail && mailbox.sub">
@@ -129,11 +112,23 @@ function getMailboxLabel(mailbox) {
   return mailbox.label.split('/').pop()
 }
 
-function getCurrentMailboxUnseen(mailbox) {
-  if (currentMailboxUnseen.value === null) {
-    currentMailboxUnseen.value = mailbox.unseen
+function mailboxUnseen(mailbox) {
+  // For the open mailbox, prefer the live unseen counter (kept fresh as the
+  // user reads messages); otherwise use the value from the folder listing.
+  if (
+    mailbox.name === route.query.mailbox &&
+    currentMailboxUnseen.value !== null
+  ) {
+    return currentMailboxUnseen.value
   }
-  return currentMailboxUnseen.value
+  return mailbox.unseen || 0
+}
+
+function mailboxCountLabel(mailbox) {
+  // Always show the total; prefix with unseen when there are unread messages.
+  const total = mailbox.nbmessages || 0
+  const unseen = mailboxUnseen(mailbox)
+  return unseen > 0 ? `(${unseen}/${total})` : `(${total})`
 }
 
 function setHover(mailbox, value) {
@@ -178,6 +173,7 @@ async function onDrop(mailbox) {
     )
     webmailStore.listingKey++
     webmailStore.selection = []
+    busStore.reloadMailboxCounters()
   } finally {
     busStore.hideNotification()
   }

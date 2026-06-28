@@ -60,7 +60,7 @@ class RelayDomainAPITestCase(DataMixin, ModoAPITestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.data["transport"]["_settings"],
+            response.data["errors"]["transport"],
             ["relay_target_port: This field is required"],
         )
 

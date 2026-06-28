@@ -149,7 +149,7 @@ async function updatePassword() {
     passwordForm.value.reset()
   } catch (err) {
     if (err.status === 400) {
-      passwordFormErrors.value = err.response.data
+      passwordFormErrors.value = err.response.data?.errors || {}
     }
   } finally {
     loadingPasswordUpdate.value = false

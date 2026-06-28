@@ -44,7 +44,7 @@ class ARMessageViewSetTestCase(PatcherMixin, ModoAPITestCase):
         resp = self.client.put(url, data, format="json")
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(
-            resp.json()["tracking_period"][0], "Value can't be less than 1 day"
+            resp.json()["errors"]["tracking_period"][0], "Value can't be less than 1 day"
         )
 
     def test_retrieve_armessage(self):
@@ -93,7 +93,7 @@ class ARMessageViewSetTestCase(PatcherMixin, ModoAPITestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json()["mbox"][0], "You don't have ownership on this mailbox"
+            response.json()["errors"]["mbox"][0], "You don't have ownership on this mailbox"
         )
 
         # As Simpluser now
@@ -101,7 +101,7 @@ class ARMessageViewSetTestCase(PatcherMixin, ModoAPITestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json()["mbox"][0], "You don't have ownership on this mailbox"
+            response.json()["errors"]["mbox"][0], "You don't have ownership on this mailbox"
         )
 
     def test_retrieve_armessage_simpleuser(self):
@@ -158,7 +158,7 @@ class ARMessageViewSetTestCase(PatcherMixin, ModoAPITestCase):
         }
         response = self.client.patch(url, data)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data["untildate"][0], "This date is over")
+        self.assertEqual(response.data["errors"]["untildate"][0], "This date is over")
 
         data.update(
             {
@@ -169,7 +169,7 @@ class ARMessageViewSetTestCase(PatcherMixin, ModoAPITestCase):
         response = self.client.patch(url, data)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.data["untildate"][0], "Must be greater than start date"
+            response.data["errors"]["untildate"][0], "Must be greater than start date"
         )
 
 

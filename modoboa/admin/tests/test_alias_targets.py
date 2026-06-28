@@ -26,7 +26,7 @@ class AliasTargetSettingsTestCase(ModoAPITestCase):
         resp = self.client.post(reverse("v2:alias-list"), values, format="json")
         # Creation should fail
         self.assertEqual(resp.status_code, 400)
-        self.assertEqual(resp.json()["error"], "Target domain not allowed: bad.com")
+        self.assertEqual(resp.json()["detail"], "Target domain not allowed: bad.com")
 
     def test_block_external_domains(self):
         self.set_global_parameter("alias_can_target_any_domain", False, app="admin")
@@ -38,7 +38,7 @@ class AliasTargetSettingsTestCase(ModoAPITestCase):
         }
         resp = self.client.post(reverse("v2:alias-list"), values, format="json")
         self.assertEqual(resp.status_code, 400)
-        self.assertEqual(resp.json()["error"], "Target domain not allowed: bad.com")
+        self.assertEqual(resp.json()["detail"], "Target domain not allowed: bad.com")
 
     def test_allow_only_list_when_any_disallowed(self):
         # alias_can_target_any_domain = False and allow list contains domain
@@ -77,4 +77,4 @@ class AliasTargetSettingsTestCase(ModoAPITestCase):
         }
         resp = self.client.post(reverse("v2:alias-list"), values, format="json")
         self.assertEqual(resp.status_code, 400)
-        self.assertEqual(resp.json()["error"], "Target domain not allowed: bad.com")
+        self.assertEqual(resp.json()["detail"], "Target domain not allowed: bad.com")

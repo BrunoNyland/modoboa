@@ -158,7 +158,7 @@ class ViewSetTestCase(DataMixin, ModoAPITestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json()["error"],
+            response.json()["detail"],
             "Migrated domain with name gmail.com already exists",
         )
 

@@ -323,8 +323,8 @@ async function saveFilterSet() {
     await accountApi.saveFilterSet(currentFilterSet.value.name, data)
     busStore.displayNotification({ msg: $gettext('Filter set updated') })
   } catch (err) {
-    if (err.response.status === 400 && err.response.data.content) {
-      rawContentErrors.value = err.response.data.content
+    if (err.response.status === 400 && err.response.data.errors?.content) {
+      rawContentErrors.value = err.response.data.errors.content
     }
   } finally {
     saving.value = false

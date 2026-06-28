@@ -178,7 +178,7 @@ function finalizeTFASetup() {
     })
     .catch((error) => {
       if (error.response.status === 400) {
-        pinCodeErrors.value = error.response.data.pin_code
+        pinCodeErrors.value = error.response.data.errors?.pin_code
       }
     })
 }
@@ -199,10 +199,10 @@ async function disableTFA() {
     })
     .catch((error) => {
       if (error.response.status === 400) {
-        passwordError.value = error.response.data.password
+        passwordError.value = error.response.data.errors?.password
       } else {
         busStore.displayNotification({
-          msg: $gettext(error.response.data),
+          msg: $gettext(error.response.data?.detail || error.response.data),
           type: 'error',
         })
       }

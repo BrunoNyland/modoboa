@@ -358,7 +358,7 @@ class AccessRuleViewSetTestCase(TestDataMixin, ModoAPITestCase):
         url = reverse("api:access-rule-list")
         response = self.client.post(url, data=data, format="json")
         self.assertEqual(response.status_code, 400)
-        self.assertIn("mailbox", response.json())
+        self.assertIn("mailbox", response.json()["errors"])
 
     def test_create_accessrule_denied_calendar(self):
         """Try to grant access to a calendar the user doesn't own."""
@@ -375,7 +375,7 @@ class AccessRuleViewSetTestCase(TestDataMixin, ModoAPITestCase):
         url = reverse("api:access-rule-list")
         response = self.client.post(url, data=data, format="json")
         self.assertEqual(response.status_code, 400)
-        self.assertIn("calendar", response.json())
+        self.assertIn("calendar", response.json()["errors"])
         self.assertFalse(
             models.AccessRule.objects.filter(
                 mailbox=self.account.mailbox, calendar=self.calendar2
@@ -402,7 +402,7 @@ class AccessRuleViewSetTestCase(TestDataMixin, ModoAPITestCase):
         url = reverse("api:access-rule-detail", args=[acr.pk])
         response = self.client.put(url, data=data, format="json")
         self.assertEqual(response.status_code, 400)
-        self.assertIn("calendar", response.json())
+        self.assertIn("calendar", response.json()["errors"])
         acr.refresh_from_db()
         self.assertEqual(acr.calendar, self.calendar)
 

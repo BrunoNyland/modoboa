@@ -309,7 +309,7 @@ class UserEmailViewSetTestCase(WebmailTestCase):
         # Scheduled message
         response = self.client.get(f"{url}?mailbox=Scheduled&mailid=33")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("scheduled_datetime", response.json())
+        self.assertIn("scheduled_datetime", response.json()["errors"])
 
     def test_attachment(self):
         self.authenticate()
@@ -606,7 +606,7 @@ class ComposeSessionViewSetTestCase(WebmailTestCase):
                 format="json",
             )
             self.assertEqual(response.status_code, 400)
-            self.assertIn("scheduled_datetime", response.json())
+            self.assertIn("scheduled_datetime", response.json()["errors"])
 
             scheduled_datetime = timezone.now() + relativedelta(hours=1)
             response = self.client.post(

@@ -93,11 +93,12 @@ class RelayDomainsTestCase(ModoAPITestCase, Operations):
 
         response = self._create_relay_domain("test.com", 400)
         self.assertEqual(
-            response.json()["name"][0], "domain with this name already exists."
+            response.json()["errors"]["name"][0],
+            "domain with this name already exists.",
         )
         response = self._create_relay_domain("relaydomainalias.tld", 400)
         self.assertEqual(
-            response.json()["name"][0],
+            response.json()["errors"]["name"][0],
             "domain alias with this name already exists",
         )
 
@@ -158,7 +159,7 @@ class RelayDomainsTestCase(ModoAPITestCase, Operations):
         response = self.client.put(url, values, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json()["transport"][0],
+            response.json()["errors"]["transport"][0],
             "This field is valid when type is relaydomain",
         )
 

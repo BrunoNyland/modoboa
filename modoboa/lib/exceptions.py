@@ -6,9 +6,6 @@
 
 from django.utils.translation import gettext as _
 
-from rest_framework.exceptions import ValidationError as DRFValidationError
-from rest_framework.views import exception_handler as drf_exception_handler
-
 
 def _collect_messages(value) -> list:
     """Recursively collect every leaf message as a flat list of strings.
@@ -42,6 +39,13 @@ def api_exception_handler(exc, context):
     - ``errors`` maps each field to a flat list of strings (empty for
       non-validation errors), suitable for per-field form display.
     """
+    # Imported lazily: this module is loaded very early (parameters/tools ->
+    # password hashers) before Django settings are configured, and importing
+    # rest_framework at module level would trigger it to read REST_FRAMEWORK
+    # too soon (ImproperlyConfigured).
+    from rest_framework.exceptions import ValidationError as DRFValidationError
+    from rest_framework.views import exception_handler as drf_exception_handler
+
     response = drf_exception_handler(exc, context)
     if response is None:
         return None

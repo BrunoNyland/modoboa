@@ -26,6 +26,7 @@
           <v-btn
             color="primary"
             variant="flat"
+            height="40"
             prepend-icon="mdi-upload"
             :text="$gettext('Attach')"
             :loading="loading"
@@ -49,7 +50,7 @@
         </v-alert>
       </transition>
 
-      <p class="eyebrow mt-4 mb-2">
+      <p class="eyebrow mt-8 mb-2">
         {{ $gettext('Attached files') }} ({{ attachments.length }})
       </p>
 
@@ -67,7 +68,7 @@
           <v-icon icon="mdi-file-outline" size="small" class="attach-row__icon" />
           <span class="attach-row__name">{{ attachment.fname }}</span>
           <v-btn
-            icon="mdi-close"
+            icon="mdi-trash-can-outline"
             size="x-small"
             variant="text"
             color="error"

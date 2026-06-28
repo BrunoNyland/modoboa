@@ -93,7 +93,7 @@ const formattedNotification = computed(() => {
           return `${key}: ${value}`
         })
         .join('\n')
-    } catch(e) {
+    } catch (e) {
       return String(msg)
     }
   }

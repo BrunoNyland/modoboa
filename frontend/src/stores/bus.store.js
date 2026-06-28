@@ -40,6 +40,7 @@ export const useBusStore = defineStore('bus', () => {
   return {
     notification,
     notificationColor,
+    notificationTimeout,
     displayNotification,
     hideNotification,
     reloadMailboxCounters,

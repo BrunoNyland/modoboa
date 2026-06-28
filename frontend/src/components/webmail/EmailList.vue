@@ -425,6 +425,7 @@ const deleteSelection = () => {
   working.value = true
   api.deleteSelection(currentMailbox.value, webmailStore.selection).then(() => {
     working.value = false
+    webmailStore.selection = []
     displayNotification({ msg: $gettext('Message(s) deleted') })
     fetchEmails()
     reloadMailboxCounters()
@@ -440,6 +441,7 @@ const markSelectionAsJunk = () => {
     .markSelectionAsJunk(currentMailbox.value, webmailStore.selection)
     .then(() => {
       working.value = false
+      webmailStore.selection = []
       displayNotification({ msg: $gettext('Message(s) marked as junk') })
       autoRefreshContent()
     })
@@ -454,6 +456,7 @@ const markSelectionAsNotJunk = () => {
     .markSelectionAsNotJunk(currentMailbox.value, webmailStore.selection)
     .then(() => {
       working.value = false
+      webmailStore.selection = []
       displayNotification({ msg: $gettext('Message(s) marked as not junk') })
       autoRefreshContent()
     })

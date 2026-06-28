@@ -25,7 +25,7 @@ O frontend e as páginas Django (autenticação) receberam uma reformulação co
 - **Tema Escuro Padrão:** O estilo passou a ser um "Dark Editorial Theme" de alto contraste (referência: `brunonyland.com`), com fontes tipográficas modernas (*Space Grotesk* e *JetBrains Mono*).
 - **Detalhes "Brutalistas":** Uso de linhas finas (*hairline*), cantos retos (`border-radius: 0` ou `2px`), listagens compactas (listas do webmail em vez de *cards* empilhados) e fundos pretos absolutos.
 - **Transições e Experiência:** Remoção de *loaders* agressivos (pisca-pisca) em prol de *cross-fades* suaves.
-- **Acessibilidade (a11y) e SEO:** Adição de foco visível (*accent*), contraste acessível (AA), respeito à preferência do sistema `prefers-reduced-motion` e melhorias no `robots.txt` para SEO na página de login.
+- **Acessibilidade (a11y) e SEO:** Adição de foco visível (*accent*), contraste acessível (AA)e melhorias no `robots.txt` para SEO na página de login.
 - **Remoção da Theme API:** A customização dinâmica de temas do Modoboa foi removida, delegando a responsabilidade de visual 100% para os tokens CSS e SCSS do frontend.
 
 ### 🌍 1.4. Internacionalização (i18n)

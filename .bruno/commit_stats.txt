@@ -201,7 +201,7 @@ Date:   Fri Jun 26 08:59:39 2026 -0400
     
     - Inputs: suprime o anel de foco nativo dentro do .v-field (borda accent única, sem colidir com placeholder).
     - Corpo do e-mail: layout flex em coluna no lugar do posicionamento absoluto calculado em JS; sem glitch, fade-in suave.
-    - Loading/transições: remove v-skeleton-loader e adiciona blur+fade entre páginas, com guarda de prefers-reduced-motion.
+    - Loading/transições: remove v-skeleton-loader e adiciona blur+fade entre páginas.
 
  frontend/src/components/webmail/EmailList.vue    |  7 +--
  frontend/src/layouts/connected/ConnectedView.vue |  2 +-
@@ -322,8 +322,7 @@ Date:   Thu Jun 25 22:24:09 2026 -0400
       a passagem login -> app (e troca de layout) faz cross-fade suave.
     - Define de fato o CSS .fade-* (a transition "fade" do ConnectedView era
       no-op por falta de CSS) — as trocas de página dentro do app também suavizam.
-    - Remove o CSS morto do antigo loader (.login-gate*); respeita
-      prefers-reduced-motion.
+    - Remove o CSS morto do antigo loader (.login-gate*);
     
     Build e testes (13/13) verdes; app verificado no dev:mock.
     
@@ -562,14 +561,14 @@ Date:   Thu Jun 25 14:33:04 2026 -0400
       backend (composables/theme.js), espelhando o accent picker do portfólio.
     - settings.scss: $body-font-family Space Grotesk e cantos de 4px.
     - Login/callback viram um loader editorial (wordmark + barra accent), com
-      role=progressbar e respeito a prefers-reduced-motion.
+      role=progressbar.
     - Mapeia o cinza fixo #f7f8fa para rgb(var(--v-theme-background)) nas views,
       que passam a seguir o tema ativo.
     - index.html: color-scheme dark + CSS crítico p/ evitar flash branco.
     - Mock do tema devolve o accent #7c5cff (preview fiel ao portfólio).
     
     Acessibilidade: foco visível accent, contraste AA sobre #0a0a0a e
-    reduced-motion. Build e testes (13/13) verdes.
+    Build e testes (13/13) verdes.
     
     Co-Authored-By: Claude <noreply@anthropic.com>
     Claude-Session: https://claude.ai/code/session_01Q7JF9MYjwLPMfxfzHq7awH

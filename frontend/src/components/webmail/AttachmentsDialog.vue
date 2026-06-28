@@ -283,17 +283,4 @@ api.getComposeSession(props.sessionUid).then((resp) => {
 .fade-leave-to {
   opacity: 0;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .attach-enter-active,
-  .attach-leave-active,
-  .fade-enter-active,
-  .fade-leave-active {
-    transition: none;
-  }
-  .attach-enter-from,
-  .attach-leave-to {
-    transform: none;
-  }
-}
 </style>

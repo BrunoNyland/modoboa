@@ -431,12 +431,6 @@ const editDraft = () => {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .email-frame {
-    animation: none;
-  }
-}
-
 /* Message header is app chrome, not email content. Flush with the content
    edge (no side padding) so the subject lines up with the body below; a
    single bottom rule separates it from the rendered email. */

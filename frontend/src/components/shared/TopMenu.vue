@@ -34,34 +34,6 @@
       </v-menu>
     </v-btn>
 
-    <v-btn icon class="mr-4" variant="flat" :aria-label="$gettext('Applications')">
-      <v-icon icon="mdi-apps" />
-      <v-menu activator="parent" location="bottom">
-        <v-card min-width="350" max-width="400" class="pa-4">
-          <v-row class="justify-center">
-            <v-col
-              v-for="application in applications"
-              :key="application.name"
-              cols="6"
-            >
-              <v-sheet
-                rounded
-                class="application text-center pa-4 text-body-medium"
-                @click="$router.push(application.url)"
-              >
-                <v-icon
-                  color="primary"
-                  :icon="application.icon"
-                  size="x-large"
-                />
-                <div class="mt-2">{{ application.label }}</div>
-              </v-sheet>
-            </v-col>
-          </v-row>
-        </v-card>
-      </v-menu>
-    </v-btn>
-
     <v-btn icon flat color="primary">
       {{ userInitials }}
       <v-menu activator="parent" location="bottom">
@@ -74,19 +46,21 @@
               <v-list-item :title="user.username" />
             </div>
             <v-divider></v-divider>
-            <v-list-item
-              v-for="item in userMenuItems"
-              :key="item.text"
-              :to="item.to"
-              :href="item.href"
-              link
-              @click="item.click"
-            >
-              <template #prepend>
-                <v-icon :icon="item.icon"></v-icon>
-              </template>
-              <v-list-item-title>{{ item.text }}</v-list-item-title>
-            </v-list-item>
+            <template v-for="(item, index) in userMenuItems" :key="index">
+              <v-divider v-if="item.divider"></v-divider>
+              <v-list-item
+                v-else
+                :to="item.to"
+                :href="item.href"
+                link
+                @click="item.click"
+              >
+                <template #prepend>
+                  <v-icon :icon="item.icon"></v-icon>
+                </template>
+                <v-list-item-title>{{ item.text }}</v-list-item-title>
+              </v-list-item>
+            </template>
           </v-list>
         </v-card>
       </v-menu>
@@ -126,7 +100,19 @@ const userInitials = computed(() => {
 })
 
 const userMenuItems = computed(() => {
-  return [
+  const apps = applications.value.map(app => ({
+    text: app.label,
+    icon: app.icon,
+    to: app.url,
+    click: () => null,
+  }))
+
+  const items = []
+  if (apps.length > 0) {
+    items.push(...apps, { divider: true })
+  }
+
+  items.push(
     {
       text: $gettext('Account'),
       icon: 'mdi-account-circle-outline',
@@ -138,8 +124,10 @@ const userMenuItems = computed(() => {
       text: $gettext('Logout'),
       icon: 'mdi-logout',
       click: logout,
-    },
-  ]
+    }
+  )
+
+  return items
 })
 
 async function logout() {
@@ -168,13 +156,5 @@ onMounted(() => {
   font-weight: 500;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-}
-
-.application {
-  cursor: pointer;
-}
-
-.application:hover {
-  background-color: rgb(var(--v-theme-surface));
 }
 </style>

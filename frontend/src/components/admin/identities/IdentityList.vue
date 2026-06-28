@@ -124,7 +124,7 @@
         </template>
       </template>
       <template #[`item.role`]="{ item }">
-        <v-chip color="default" size="small">
+        <v-chip :color="getRoleColor(item.role)" size="small" variant="flat">
           {{ item.role }}
         </v-chip>
       </template>
@@ -538,6 +538,15 @@ async function deleteAlias(alias) {
   } finally {
     loading.value = false
   }
+}
+
+function getRoleColor(role) {
+  if (!role) return 'default'
+  const r = role.toLowerCase()
+  if (r.includes('super')) return 'error'
+  if (r.includes('domain') || r.includes('domínio') || r.includes('domaine') || r.includes('dominio')) return 'warning'
+  if (r.includes('reseller') || r.includes('revend')) return 'info'
+  return 'primary'
 }
 
 function displayRecipients(alias) {

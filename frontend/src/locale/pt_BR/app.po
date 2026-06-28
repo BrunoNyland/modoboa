@@ -2812,7 +2812,7 @@ msgstr "Provedores de e-mail"
 #: src/layouts/admin/AdminLayout.vue:112
 #: src/views/admin/imap_migration/MigrationsView.vue:4
 msgid "Migrations"
-msgstr "MIgrações"
+msgstr "Migrações"
 
 #: src/layouts/admin/AdminLayout.vue:143 src/views/admin/InformationView.vue:4
 #: src/views/calendars/CalendarView.vue:194

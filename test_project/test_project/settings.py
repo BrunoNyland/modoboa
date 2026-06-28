@@ -256,6 +256,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.NamespaceVersioning",
+    "EXCEPTION_HANDLER": "modoboa.lib.exceptions.api_exception_handler",
 }
 
 SPECTACULAR_SETTINGS = {

@@ -48,7 +48,11 @@ _axios.interceptors.response.use(
         !error.config.ignoreErrors
       ) {
         const busStore = useBusStore()
-        const msg = error.response.data?.error || error.response.data
+        // Standardized error envelope: { detail, errors }. `detail` is always
+        // a single human-readable string; fall back to legacy shapes just in
+        // case a non-API response slips through.
+        const data = error.response.data
+        const msg = data?.detail || data?.error || data
         busStore.displayNotification({
           msg,
           type: 'error',

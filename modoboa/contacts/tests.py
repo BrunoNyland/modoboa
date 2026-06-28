@@ -238,7 +238,7 @@ class ContactViewSetTestCase(TestDataMixin, ModoAPITestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.data["display_name"][0], "Name or display name required"
+            response.data["errors"]["display_name"][0], "Name or display name required"
         )
 
         data["display_name"] = "Magie Simpson"

@@ -70,7 +70,7 @@ class DomainTestCase(ModoAPITestCase):
         response = self.client.post(reverse("v2:domain-list"), values, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json()["default_mailbox_quota"][0],
+            response.json()["errors"]["default_mailbox_quota"][0],
             "Cannot be greater than domain quota",
         )
 
@@ -83,7 +83,7 @@ class DomainTestCase(ModoAPITestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json()["default_mailbox_quota"][0],
+            response.json()["errors"]["default_mailbox_quota"][0],
             "Cannot be greater than domain quota",
         )
 
@@ -119,7 +119,10 @@ class DKIMTestCase(ModoAPITestCase):
         settings["dkim_keys_storage_dir"] = "/wrong"
         response = self.client.put(url, settings, format="json")
         self.assertEqual(response.status_code, 400)
-        compare(response.json(), {"dkim_keys_storage_dir": ["Directory not found."]})
+        compare(
+            response.json()["errors"],
+            {"dkim_keys_storage_dir": ["Directory not found."]},
+        )
         settings["dkim_keys_storage_dir"] = self.workdir
         response = self.client.put(url, settings, format="json")
         self.assertEqual(response.status_code, 200)
@@ -137,7 +140,7 @@ class DKIMTestCase(ModoAPITestCase):
         response = self.client.post(url, values, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json()["enable_dkim"][0],
+            response.json()["errors"]["enable_dkim"][0],
             "DKIM keys storage directory not configured",
         )
 

@@ -6,6 +6,74 @@
 
 from django.utils.translation import gettext as _
 
+from rest_framework.exceptions import ValidationError as DRFValidationError
+from rest_framework.views import exception_handler as drf_exception_handler
+
+
+def _collect_messages(value) -> list:
+    """Recursively collect every leaf message as a flat list of strings.
+
+    DRF validation errors can nest arbitrarily: a plain field gives
+    ``["msg"]``, a ``ListField`` gives ``{0: ["msg"]}``, a nested
+    serializer gives ``{"sub": ["msg"]}``. We flatten all of those into a
+    single list of strings so a form field always maps to ``[messages]``.
+    """
+    if isinstance(value, dict):
+        messages = []
+        for item in value.values():
+            messages.extend(_collect_messages(item))
+        return messages
+    if isinstance(value, (list, tuple)):
+        messages = []
+        for item in value:
+            messages.extend(_collect_messages(item))
+        return messages
+    return [str(value)]
+
+
+def api_exception_handler(exc, context):
+    """Normalize every API error into a single, consistent envelope.
+
+    All error responses share the shape::
+
+        {"detail": "<human readable summary>", "errors": {<field>: [msg]}}
+
+    - ``detail`` is always a single string, suitable for a global toast.
+    - ``errors`` maps each field to a flat list of strings (empty for
+      non-validation errors), suitable for per-field form display.
+    """
+    response = drf_exception_handler(exc, context)
+    if response is None:
+        return None
+
+    data = response.data
+
+    if isinstance(exc, DRFValidationError):
+        # Field validation errors -> flatten into {field: [messages]}.
+        if isinstance(data, dict):
+            errors = {
+                str(field): _collect_messages(value) for field, value in data.items()
+            }
+        else:
+            # Top-level non-field error list.
+            errors = {"non_field_errors": _collect_messages(data)}
+        detail = next(
+            (msg for messages in errors.values() for msg in messages),
+            str(_("Invalid request")),
+        )
+        response.data = {"detail": detail, "errors": errors}
+        return response
+
+    if isinstance(data, dict) and set(data.keys()) == {"detail"}:
+        # Plain APIException (404, 403, throttling, ...).
+        response.data = {"detail": str(data["detail"]), "errors": {}}
+        return response
+
+    # Any other exception carries a deliberately-structured payload (e.g. the
+    # password-reset flow raises NotFound({"type": "sms"})). Leave it intact
+    # rather than mangling protocol data into the error envelope.
+    return response
+
 
 class ModoboaException(Exception):
     """

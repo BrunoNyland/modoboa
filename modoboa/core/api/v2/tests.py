@@ -106,7 +106,7 @@ class ParametersAPITestCase(ModoAPITestCase):
         data["sms_password_recovery"] = True
         resp = self.client.put(url, data, format="json")
         self.assertEqual(resp.status_code, 400)
-        self.assertIn("sms_provider", resp.json())
+        self.assertIn("sms_provider", resp.json()["errors"])
         data["sms_provider"] = "test"
         resp = self.client.put(url, data, format="json")
         self.assertEqual(resp.status_code, 400)
@@ -125,12 +125,12 @@ class ParametersAPITestCase(ModoAPITestCase):
         data.update({"authentication_type": "ldap", "ldap_auth_method": "searchbind"})
         resp = self.client.put(url, data, format="json")
         self.assertEqual(resp.status_code, 400)
-        self.assertIn("ldap_search_base", resp.json())
+        self.assertIn("ldap_search_base", resp.json()["errors"])
 
         data.update({"ldap_auth_method": "directbind"})
         resp = self.client.put(url, data, format="json")
         self.assertEqual(resp.status_code, 400)
-        self.assertIn("ldap_user_dn_template", resp.json())
+        self.assertIn("ldap_user_dn_template", resp.json()["errors"])
 
         data.update(
             {

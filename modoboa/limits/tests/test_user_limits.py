@@ -147,7 +147,9 @@ class DomainAdminTestCase(ResourceTestCase):
         self._create_account("tester2@test.com")
         self._check_limit("mailboxes", 2, 2)
         response = self._create_account("tester3@test.com", status=400)
-        self.assertEqual(response.json()["mailbox"][0], "Mailboxes: limit reached")
+        self.assertEqual(
+            response.json()["errors"]["mailbox"][0], "Mailboxes: limit reached"
+        )
         self._check_limit("mailboxes", 2, 2)
         response = self.client.post(
             reverse(
@@ -167,7 +169,7 @@ class DomainAdminTestCase(ResourceTestCase):
         self._check_limit("mailbox_aliases", 2, 2)
         response = self._create_alias("alias3@test.com", status=400)
         self.assertEqual(
-            response.json()["address"][0], "Mailbox aliases: limit reached"
+            response.json()["errors"]["address"][0], "Mailbox aliases: limit reached"
         )
         self._check_limit("mailbox_aliases", 2, 2)
         # Set unlimited value
@@ -249,7 +251,9 @@ class ResellerTestCase(ResourceTestCase):
         response = self._domain_alias_operation(
             "add", "pouet.com", "domain-alias3.tld", 400
         )
-        self.assertEqual(response.json()["domain"], "Domain aliases: limit reached")
+        self.assertEqual(
+            response.json()["errors"]["domain"][0], "Domain aliases: limit reached"
+        )
         self._check_limit("domain_aliases", 2, 2)
         self._domain_alias_operation("delete", "pouet.com", "domain-alias2.tld", 204)
         self._check_limit("domain_aliases", 1, 2)
@@ -263,7 +267,7 @@ class ResellerTestCase(ResourceTestCase):
         resp = self._create_account(
             "admin3@domain.tld", role="DomainAdmins", status=400
         )
-        self.assertEqual(resp.json()["role"][0], "Invalid choice")
+        self.assertEqual(resp.json()["errors"]["role"][0], "Invalid choice")
         self._check_limit("domain_admins", 2, 2)
 
         self.user.userobjectlimit_set.filter(name="mailboxes").update(max_value=3)
@@ -280,7 +284,7 @@ class ResellerTestCase(ResourceTestCase):
             reverse("v2:account-detail", args=[user.id]), values, format="json"
         )
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()["role"][0], "Invalid choice")
+        self.assertEqual(response.json()["errors"]["role"][0], "Invalid choice")
         self._check_limit("domain_admins", 2, 2)
 
     def test_domain_admin_resource_are_empty(self):
@@ -297,7 +301,7 @@ class ResellerTestCase(ResourceTestCase):
         self._check_limit("domain_admins", 2, 2)
         self._check_limit("domains", 2, 3)
         response = self._create_domain("domain3.tld", withtpl=True, status=403)
-        self.assertEqual(response.json()["error"], "Domain admins: limit reached")
+        self.assertEqual(response.json()["detail"], "Domain admins: limit reached")
         self._check_limit("domain_admins", 2, 2)
         self._check_limit("domains", 2, 3)
 
@@ -307,7 +311,7 @@ class ResellerTestCase(ResourceTestCase):
         response = self._create_domain(
             "domain2.tld", status=403, withtpl=True, quota=1000
         )
-        self.assertEqual(response.json()["error"], "Quota: limit reached")
+        self.assertEqual(response.json()["detail"], "Quota: limit reached")
         dom1 = Domain.objects.get(name="domain1.tld")
         url = reverse("v2:domain-detail", args=[dom1.pk])
         values = {
@@ -324,11 +328,11 @@ class ResellerTestCase(ResourceTestCase):
         """Check reseller can't define unlimited quota."""
         response = self._create_domain("domain1.tld", 400, quota=0)
         self.assertEqual(
-            response.json()["quota"][0], "You can't define an unlimited quota."
+            response.json()["errors"]["quota"][0], "You can't define an unlimited quota."
         )
         response = self._create_domain("domain1.tld", 400, default_mailbox_quota=0)
         self.assertEqual(
-            response.json()["default_mailbox_quota"][0],
+            response.json()["errors"]["default_mailbox_quota"][0],
             "You can't define an unlimited quota.",
         )
 
@@ -531,6 +535,6 @@ class ResellerTestCase(ResourceTestCase):
             reverse("v2:account-detail", args=[user.id]), values, format="json"
         )
         self.assertEqual(response.status_code, 424)
-        self.assertEqual(response.json()["error"], "Not enough resources")
+        self.assertEqual(response.json()["detail"], "Not enough resources")
         self._check_limit("mailboxes", 1, 2)
         self._check_limit("mailbox_aliases", 0, 2)

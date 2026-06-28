@@ -251,7 +251,7 @@ class PermissionsTestCase(ModoAPITestCase):
             reverse("v2:account-detail", args=[dadmin.id]), values, format="json"
         )
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()["role"][0], "Invalid choice")
+        self.assertEqual(response.json()["errors"]["role"][0], "Invalid choice")
 
         self.authenticate_user(self.reseller)
         self.assertTrue(self.reseller.can_access(self.reseller))
@@ -272,7 +272,7 @@ class PermissionsTestCase(ModoAPITestCase):
             reverse("v2:account-detail", args=[self.reseller.id]), values, format="json"
         )
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()["role"][0], "Invalid choice")
+        self.assertEqual(response.json()["errors"]["role"][0], "Invalid choice")
 
     def test_domainadmin_deletes_superadmin(self):
         """Check domain admins restrictions about super admins

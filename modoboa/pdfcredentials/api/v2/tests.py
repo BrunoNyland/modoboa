@@ -206,7 +206,7 @@ class PDFCredentialViewTestCase(ModoAPITestCase):
         data["include_connection_settings"] = True
         resp = self.client.put(url, data, format="json")
         self.assertEqual(resp.status_code, 400)
-        errors = resp.json()
+        errors = resp.json()["errors"]
         self.assertEqual(errors["smtp_server_address"][0], "This field is required.")
         self.assertEqual(errors["imap_server_address"][0], "This field is required.")
 

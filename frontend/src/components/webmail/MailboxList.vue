@@ -54,7 +54,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useGettext } from 'vue3-gettext'
 import { useBusStore, useWebmailStore } from '@/stores'
@@ -104,7 +104,6 @@ const iconByMailboxType = {
   normal: 'mdi-folder-outline',
 }
 
-const currentMailboxUnseen = ref(null)
 const hoverStates = ref({})
 const mailboxStates = ref({})
 
@@ -113,14 +112,10 @@ function getMailboxLabel(mailbox) {
 }
 
 function mailboxUnseen(mailbox) {
-  // For the open mailbox, prefer the live unseen counter (kept fresh as the
-  // user reads messages); otherwise use the value from the folder listing.
-  if (
-    mailbox.name === route.query.mailbox &&
-    currentMailboxUnseen.value !== null
-  ) {
-    return currentMailboxUnseen.value
-  }
+  // Unseen counts come straight from the folder listing, which WebmailLayout
+  // reloads (real per-folder STATUS) on every counter bump. Don't keep a
+  // separate "current mailbox" override: it leaked one folder's unseen onto
+  // whatever folder matched the route (e.g. Trash showing INBOX's unseen).
   return mailbox.unseen || 0
 }
 
@@ -178,15 +173,6 @@ async function onDrop(mailbox) {
     busStore.hideNotification()
   }
 }
-
-watch(
-  () => busStore.mbCounterKey,
-  () => {
-    api.getUserMailboxUnseen(route.query.mailbox).then((resp) => {
-      currentMailboxUnseen.value = resp.data.counter
-    })
-  }
-)
 </script>
 
 <style scoped lang="scss">

@@ -161,7 +161,9 @@ class QuarantineViewSet(viewsets.GenericViewSet):
     def retrieve(self, request, pk):
         rcpt = request.GET.get("rcpt")
         if rcpt is None:
-            return response.Response({"error": _("Invalid request")}, status=400)
+            return response.Response(
+                {"detail": _("Invalid request"), "errors": {}}, status=400
+            )
         self._check_message_access(request, pk)
         if request.user:
             if request.user.email == rcpt:

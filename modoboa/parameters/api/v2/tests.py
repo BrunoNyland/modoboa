@@ -102,7 +102,7 @@ class GlobalParametersAPITestCase(ModoAPITestCase):
         url = reverse("v2:parameter-global-detail", args=["admin"])
         resp = self.client.put(url, data, format="json")
         self.assertEqual(resp.status_code, 400)
-        errors = resp.json()
+        errors = resp.json()["errors"]
         self.assertEqual(
             errors["valid_mxs"],
             ["This field only allows valid IP addresses (or networks)"],
@@ -122,7 +122,7 @@ class GlobalParametersAPITestCase(ModoAPITestCase):
         resp = self.client.put(url, data, format="json")
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(
-            resp.json()["valid_mxs"],
+            resp.json()["errors"]["valid_mxs"],
             ["Define at least one authorized network / address"],
         )
 

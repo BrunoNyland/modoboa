@@ -112,7 +112,7 @@ class FilterSetViewSet(viewsets.ViewSet):
         try:
             sclient.activatescript(pk)
         except SieveClientError as err:
-            return response.Response({"error": str(err)}, status=400)
+            return response.Response({"detail": str(err), "errors": {}}, status=400)
         return response.Response()
 
     @action(methods=["post"], detail=False)
@@ -122,7 +122,7 @@ class FilterSetViewSet(viewsets.ViewSet):
         try:
             sclient.activatescript("")
         except SieveClientError as err:
-            return response.Response({"error": str(err)}, status=400)
+            return response.Response({"detail": str(err), "errors": {}}, status=400)
         return response.Response()
 
     @action(methods=["get"], detail=True)

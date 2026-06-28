@@ -230,7 +230,7 @@ async function save() {
       msg: $gettext('Could not save parameters'),
       type: 'error',
     })
-    formErrors.value = error.response.data
+    formErrors.value = error.response.data?.errors || {}
     Object.keys(formErrors.value).forEach((element) => {
       for (let i = 0; i < props.structure.length; i++) {
         const isIn =

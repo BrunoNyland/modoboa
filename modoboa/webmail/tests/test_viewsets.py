@@ -128,6 +128,12 @@ class UserMailboxViewSetTestCase(WebmailTestCase):
         response = self.client.post(url, body, format="json")
         self.assertEqual(response.status_code, 200)
 
+        # Top-level folders send an empty parent_mailbox: it must not be
+        # rejected as blank.
+        body = {"name": "Test renamed", "oldname": "Test", "parent_mailbox": ""}
+        response = self.client.post(url, body, format="json")
+        self.assertEqual(response.status_code, 200)
+
     def test_compress(self):
         self.authenticate()
         url = reverse("v2:webmail-mailbox-compress")
@@ -372,7 +378,9 @@ class ComposeSessionViewSetTestCase(WebmailTestCase):
         with self.settings(MEDIA_ROOT=self.workdir):
             response = self.client.post(url, {"attachment": get_gif()})
         self.assertEqual(response.status_code, 400)
-        self.assertIn("Attachment is too big", response.json()["attachment"][0])
+        self.assertIn(
+            "Attachment is too big", response.json()["errors"]["attachment"][0]
+        )
 
         self.set_global_parameters({"max_attachment_size": "10K"})
         with self.settings(MEDIA_ROOT=self.workdir):
@@ -604,7 +612,7 @@ class ComposeSessionViewSetTestCase(WebmailTestCase):
                 format="json",
             )
             self.assertEqual(response.status_code, 400)
-            self.assertIn("scheduled_datetime", response.json())
+            self.assertIn("scheduled_datetime", response.json()["errors"])
 
             scheduled_datetime = timezone.now() + relativedelta(hours=1)
             response = self.client.post(

@@ -22,7 +22,9 @@ class CommonExceptionCatcher(MiddlewareMixin):
 
         if "/api/" in request.path:
             http_code = exception.http_code if exception.http_code else 500
-            return JsonResponse({"error": str(exception)}, status=http_code)
+            return JsonResponse(
+                {"detail": str(exception), "errors": {}}, status=http_code
+            )
 
         return _render_error(request, user_context={"error": smart_str(exception)})
 

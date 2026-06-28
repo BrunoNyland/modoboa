@@ -7,6 +7,7 @@ from django.utils.translation import gettext as _
 
 from rest_framework import mixins, parsers, response, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 
 from modoboa.lib import exceptions
@@ -91,7 +92,7 @@ class UserMailboxViewSet(viewsets.GenericViewSet):
         with lib.get_imapconnector(request) as imapc:
             imapc.create_folder(
                 serializer.validated_data["name"],
-                serializer.validated_data.get("parent_mailbox"),
+                serializer.validated_data.get("parent_mailbox") or None,
             )
         return response.Response(serializer.validated_data, status=201)
 
@@ -104,7 +105,7 @@ class UserMailboxViewSet(viewsets.GenericViewSet):
                 serializer.validated_data["oldname"], sep=imapc.hdelimiter
             )
             name = serializer.validated_data["name"]
-            parent = serializer.validated_data.get("parent_mailbox")
+            parent = serializer.validated_data.get("parent_mailbox") or None
             if name != oldname or parent != oldparent:
                 newname = (
                     name if parent is None else imapc.hdelimiter.join([parent, name])
@@ -428,7 +429,7 @@ class ComposeSessionViewSet(viewsets.GenericViewSet):
                     _("Attachment is too big (limit: %s)")
                     % request.upload_handlers[0].maxsize
                 ]
-                return response.Response(errors, status=400)
+                raise ValidationError(errors)
         result = attachments.save_attachment_from_upload(
             request, pk, serializer.validated_data["attachment"]
         )
@@ -438,7 +439,7 @@ class ComposeSessionViewSet(viewsets.GenericViewSet):
     def delete_attachment(self, request, pk, name):
         error = attachments.remove_attachment(request, pk, name)
         if error:
-            return response.Response({"error": error}, status=400)
+            return response.Response({"detail": error, "errors": {}}, status=400)
         return response.Response(status=204)
 
     @action(methods=["post"], detail=True)
@@ -463,7 +464,7 @@ class ComposeSessionViewSet(viewsets.GenericViewSet):
         if status:
             attachments.remove_attachments_and_session(manager, pk)
             return response.Response(status=204)
-        return response.Response({"error": error}, status=400)
+        return response.Response({"detail": error, "errors": {}}, status=400)
 
 
 class ScheduledMessageViewSet(

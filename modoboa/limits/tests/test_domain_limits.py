@@ -77,7 +77,9 @@ class DomainLimitsTestCase(ResourceTestCase):
         body["name"] = "domainalias3.net"
         response = self.client.post(url, body, format="json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()["domain"], "Domain aliases: limit reached")
+        self.assertEqual(
+            response.json()["errors"]["domain"][0], "Domain aliases: limit reached"
+        )
 
     def test_domain_admins_limit(self):
         """Try to exceed defined limit."""
@@ -134,7 +136,7 @@ class DomainLimitsTestCase(ResourceTestCase):
 
         response = self._create_alias("alias2@test.com", ["user@test.com"], status=400)
         self.assertEqual(
-            response.json()["address"][0], "Mailbox aliases: limit reached"
+            response.json()["errors"]["address"][0], "Mailbox aliases: limit reached"
         )
 
         limit.max_value = 5

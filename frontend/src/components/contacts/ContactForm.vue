@@ -230,7 +230,7 @@ async function submit() {
     emit('close')
   } catch (err) {
     if (err.response?.status === 400) {
-      formErrors.value = err.response.data
+      formErrors.value = err.response.data?.errors || {}
     }
   } finally {
     working.value = false

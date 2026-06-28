@@ -60,13 +60,13 @@ class DomainAPITestCase(ModoAPITestCase):
 
         response = self.client.post(url, {})
         self.assertEqual(response.status_code, 400)
-        self.assertIn("name", response.data)
+        self.assertIn("name", response.data["errors"])
 
         response = self.client.post(
             url, {"name": "test5.com", "quota": 1, "default_mailbox_quota": 10}
         )
         self.assertEqual(response.status_code, 400)
-        self.assertIn("default_mailbox_quota", response.data)
+        self.assertIn("default_mailbox_quota", response.data["errors"])
 
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.da_token.key)
         response = self.client.post(
@@ -113,7 +113,7 @@ class DomainAPITestCase(ModoAPITestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json()["name"][0], "No authorized MX record found for this domain"
+            response.json()["errors"]["name"][0], "No authorized MX record found for this domain"
         )
 
         mock_getaddrinfo.side_effect = utils.mock_ip_query_result
@@ -414,7 +414,7 @@ class AccountAPITestCase(ModoAPITestCase):
         url = reverse("v1:account-list")
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 400)
-        errors = response.json()
+        errors = response.json()["errors"]
         self.assertIn("password", errors)
 
     def test_create_account_as_domadmin(self):
@@ -432,7 +432,7 @@ class AccountAPITestCase(ModoAPITestCase):
         response = self.client.post(url, data, format="json")
         # Should fail because admin has no access to @test2.com domain
         self.assertEqual(response.status_code, 400)
-        errors = response.json()
+        errors = response.json()["errors"]
         self.assertIn("mailbox", errors)
 
     def test_create_account_bad_master_user(self):
@@ -442,7 +442,7 @@ class AccountAPITestCase(ModoAPITestCase):
         url = reverse("v1:account-list")
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 400)
-        errors = response.json()
+        errors = response.json()["errors"]
         self.assertIn("master_user", errors)
 
     def test_update_account(self):
@@ -779,7 +779,7 @@ class AliasAPITestCase(ModoAPITestCase):
         data["address"] = "alias_fromapi@test2.com"
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 400)
-        errors = response.json()
+        errors = response.json()["errors"]
         self.assertIn("address", errors)
 
     def test_update_alias(self):
@@ -863,7 +863,7 @@ class SenderAddressAPITestCase(ModoAPITestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json()["address"][0], "You don't have access to this domain."
+            response.json()["errors"]["address"][0], "You don't have access to this domain."
         )
 
         mbox = models.Mailbox.objects.get(address="admin", domain__name="test2.com")
@@ -871,7 +871,7 @@ class SenderAddressAPITestCase(ModoAPITestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json()["mailbox"][0], "You don't have access to this mailbox."
+            response.json()["errors"]["mailbox"][0], "You don't have access to this mailbox."
         )
 
     def test_patch(self):

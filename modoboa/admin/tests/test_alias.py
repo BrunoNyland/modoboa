@@ -183,6 +183,6 @@ class AliasTestCase(ModoAPITestCase):
         response = self.client.post(reverse("v2:alias-list"), values, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.json()["address"][0],
+            response.json()["errors"]["address"][0],
             "Permission denied.",
         )

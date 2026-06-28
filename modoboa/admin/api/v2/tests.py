@@ -258,12 +258,12 @@ class AccountViewSetTestCase(ModoAPITestCase):
         }
         resp = self.client.post(url, data, format="json")
         self.assertEqual(resp.status_code, 400)
-        self.assertIn("password", resp.json())
+        self.assertIn("password", resp.json()["errors"])
 
         data["password"] = "Toto"
         resp = self.client.post(url, data, format="json")
         self.assertEqual(resp.status_code, 400)
-        self.assertIn("password", resp.json())
+        self.assertIn("password", resp.json()["errors"])
 
     def test_create_too_long_username(self):
         """Test that it is not possible to create too long usernames (RFC5321)."""
@@ -705,7 +705,7 @@ class AliasViewSetTestCase(ModoAPITestCase):
         data = {"address": "alias@test.com"}
         resp = self.client.post(url, data, format="json")
         self.assertEqual(resp.status_code, 400)
-        self.assertEqual(resp.json()["address"][0], "This alias already exists")
+        self.assertEqual(resp.json()["errors"]["address"][0], "This alias already exists")
 
         data = {"address": "alias2@test.com"}
         resp = self.client.post(url, data, format="json")

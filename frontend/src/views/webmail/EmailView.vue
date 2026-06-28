@@ -289,6 +289,7 @@ const deleteEmail = () => {
       query: { mailbox: route.query.mailbox },
     })
     displayNotification({ msg: $gettext('Message deleted') })
+    reloadMailboxCounters()
   })
 }
 
@@ -303,6 +304,7 @@ const markEmailAsJunk = () => {
         query: { mailbox: route.query.mailbox },
       })
       displayNotification({ msg: $gettext('Message marked as junk') })
+      reloadMailboxCounters()
     })
 }
 
@@ -317,6 +319,7 @@ const markEmailAsNotJunk = () => {
         query: { mailbox: route.query.mailbox },
       })
       displayNotification({ msg: $gettext('Message marked as not junk') })
+      reloadMailboxCounters()
     })
 }
 

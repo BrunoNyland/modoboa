@@ -444,6 +444,7 @@ const markSelectionAsJunk = () => {
       webmailStore.selection = []
       displayNotification({ msg: $gettext('Message(s) marked as junk') })
       autoRefreshContent()
+      reloadMailboxCounters()
     })
 }
 
@@ -459,6 +460,7 @@ const markSelectionAsNotJunk = () => {
       webmailStore.selection = []
       displayNotification({ msg: $gettext('Message(s) marked as not junk') })
       autoRefreshContent()
+      reloadMailboxCounters()
     })
 }
 

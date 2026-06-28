@@ -184,6 +184,9 @@ class IMAPconnector:
         list_base_pattern + r"\s*(?P<childinfo>.*)"
     )
     unseen_pattern = re.compile(r"[^\(]+\(UNSEEN (\d+)\)")
+    # STATUS items can come in any order, so match each independently.
+    status_messages_pattern = re.compile(r"MESSAGES (\d+)")
+    status_unseen_pattern = re.compile(r"UNSEEN (\d+)")
 
     def __init__(self, user: str, password: str, with_namespaces: bool = True) -> None:
         self.__hdelimiter: str | None = None
@@ -469,6 +472,23 @@ class IMAPconnector:
             return 0
         return int(m.group(1))
 
+    def folder_counters(self, mailbox: str) -> tuple[int, int]:
+        """Return ``(total, unseen)`` message counts for a mailbox.
+
+        Both come from a single STATUS call (no extra round-trip vs. the
+        unseen-only query).
+        """
+        data = self._cmd(
+            "STATUS", self._encode_mbox_name(mailbox), "(MESSAGES UNSEEN)"
+        )
+        line = data[-1].decode()
+        total = self.status_messages_pattern.search(line)
+        unseen = self.status_unseen_pattern.search(line)
+        return (
+            int(total.group(1)) if total else 0,
+            int(unseen.group(1)) if unseen else 0,
+        )
+
     def _encode_mbox_name(self, folder):
         """Encode folder name (str) to imap4-utf-7 and quote it."""
         if not folder:
@@ -610,10 +630,10 @@ class IMAPconnector:
                 key = "path" if "path" in mb else "name"
                 if mb.get("removed", False):
                     continue
-                count = self.unseen_messages(mb[key])
-                if count == 0:
-                    continue
-                mb["unseen"] = count
+                total, unseen = self.folder_counters(mb[key])
+                mb["nbmessages"] = total
+                if unseen:
+                    mb["unseen"] = unseen
         return md_mailboxes
 
     def _add_flag(self, mbox: str, msgset: list[str], flag: str) -> None:

@@ -61,6 +61,7 @@ class UserMailboxSerializer(serializers.Serializer):
     label = serializers.CharField()
     type = serializers.ChoiceField(choices=constants.MAILBOX_TYPES)
     unseen = serializers.IntegerField(default=0)
+    nbmessages = serializers.IntegerField(default=0)
     removed = serializers.BooleanField(default=False)
     sub = serializers.SerializerMethodField()
 

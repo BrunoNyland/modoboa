@@ -32,6 +32,7 @@
         variant="tonal"
         icon="mdi-trash-can"
         size="small"
+        :title="$gettext('Delete selection')"
         :aria-label="$gettext('Delete selection')"
         :loading="working"
         @click="deleteSelection"
@@ -39,27 +40,42 @@
       </v-btn>
       <template v-if="!inScheduledView">
         <v-btn
-          v-if="$route.params.mailbox !== 'Junk'"
+          v-if="currentMailbox === 'Trash'"
           class="ml-2"
-          color="warning"
+          color="primary"
           variant="tonal"
-          icon="mdi-fire"
+          icon="mdi-backup-restore"
           size="small"
-          :aria-label="$gettext('Mark selection as junk')"
+          :title="$gettext('Restore to Inbox')"
+          :aria-label="$gettext('Restore to Inbox')"
           :loading="working"
-          @click="markSelectionAsJunk"
+          @click="restoreSelection"
         >
         </v-btn>
         <v-btn
-          v-else
+          v-else-if="currentMailbox === 'Junk'"
           class="ml-2"
           color="success"
           variant="tonal"
           icon="mdi-thumb-up"
           size="small"
+          :title="$gettext('Mark selection as not junk')"
           :aria-label="$gettext('Mark selection as not junk')"
           :loading="working"
           @click="markSelectionAsNotJunk"
+        >
+        </v-btn>
+        <v-btn
+          v-else
+          class="ml-2"
+          color="warning"
+          variant="tonal"
+          icon="mdi-alert-octagon-outline"
+          size="small"
+          :title="$gettext('Mark selection as junk')"
+          :aria-label="$gettext('Mark selection as junk')"
+          :loading="working"
+          @click="markSelectionAsJunk"
         >
         </v-btn>
       </template>
@@ -68,6 +84,7 @@
         variant="tonal"
         icon
         size="small"
+        :title="$gettext('More actions')"
         :aria-label="$gettext('More actions')"
       >
         <v-icon icon="mdi-cog" />
@@ -112,6 +129,7 @@
           <v-btn
             icon="mdi-chevron-left"
             size="x-small"
+            :title="$gettext('Previous page')"
             :aria-label="$gettext('Previous page')"
             :disabled="emails.prev_page === null"
             @click="page = emails.prev_page"
@@ -119,6 +137,7 @@
           <v-btn
             icon="mdi-chevron-right"
             size="x-small"
+            :title="$gettext('Next page')"
             :aria-label="$gettext('Next page')"
             :disabled="emails.next_page === null"
             @click="page = emails.next_page"
@@ -169,6 +188,11 @@
               :color="email.flagged ? 'warning' : undefined"
               variant="text"
               size="small"
+              :title="
+                email.flagged
+                  ? $gettext('Unfollow message')
+                  : $gettext('Follow message')
+              "
               :aria-label="
                 email.flagged
                   ? $gettext('Unfollow message')
@@ -430,6 +454,22 @@ const deleteSelection = () => {
     fetchEmails()
     reloadMailboxCounters()
   })
+}
+
+const restoreSelection = () => {
+  if (!webmailStore.selection.length) {
+    return
+  }
+  working.value = true
+  api
+    .moveSelection(currentMailbox.value, 'INBOX', webmailStore.selection)
+    .then(() => {
+      working.value = false
+      webmailStore.selection = []
+      displayNotification({ msg: $gettext('Message(s) restored to Inbox') })
+      fetchEmails()
+      reloadMailboxCounters()
+    })
 }
 
 const markSelectionAsJunk = () => {

@@ -97,7 +97,7 @@ const webmailStore = useWebmailStore()
 const iconByMailboxType = {
   inbox: 'mdi-inbox',
   draft: 'mdi-file',
-  junk: 'mdi-fire',
+  junk: 'mdi-alert-octagon-outline',
   sent: 'mdi-email-fast-outline',
   scheduled: 'mdi-send-clock-outline',
   trash: 'mdi-trash-can-outline',

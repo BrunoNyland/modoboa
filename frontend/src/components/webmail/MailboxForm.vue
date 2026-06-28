@@ -96,10 +96,13 @@ const submit = async () => {
       body.oldname = props.mailbox
       await api.renameUserMailbox(body)
       displayNotification({ msg: $gettext('Mailbox renamed') })
-      emit(
-        'mailboxRenamed',
-        `${body.parent_mailbox}${props.hdelimiter}${body.name}`
-      )
+      // Only prefix the parent when there is one; a top-level folder has an
+      // empty parent, and blindly joining would yield ".name" (begins with
+      // the hierarchy separator), which the IMAP server rejects.
+      const newName = body.parent_mailbox
+        ? `${body.parent_mailbox}${props.hdelimiter}${body.name}`
+        : body.name
+      emit('mailboxRenamed', newName)
     } else {
       await api.createUserMailbox(body)
       displayNotification({ msg: $gettext('Mailbox created') })

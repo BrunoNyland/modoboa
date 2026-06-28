@@ -309,7 +309,7 @@ class UserEmailViewSetTestCase(WebmailTestCase):
         # Scheduled message
         response = self.client.get(f"{url}?mailbox=Scheduled&mailid=33")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("scheduled_datetime", response.json()["errors"])
+        self.assertIn("scheduled_datetime", response.json())
 
     def test_attachment(self):
         self.authenticate()

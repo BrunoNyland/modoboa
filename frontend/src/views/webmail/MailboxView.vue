@@ -1,5 +1,5 @@
 <template>
-  <div class="position-relative h-100">
+  <div class="mailbox-view d-flex flex-column h-100">
     <div class="d-flex align-center ml-4">
       <span class="text-headline-medium">{{ currentFolderLabel }}</span>
       <v-btn

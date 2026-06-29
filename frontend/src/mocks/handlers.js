@@ -59,6 +59,15 @@ export const handlers = [
   ),
   http.get('*/notifications/', () => json([])),
   http.get('*/alarms/', () => json(fx.alarms)),
+  // CategoryViewSet não usa paginação: devolve um array puro. Sem este handler,
+  // o catch-all paginado ({count,results}) faria `categories.value` virar um
+  // objeto não-iterável e quebraria o AddressBook (for...of em leftMenuItems).
+  http.get('*/categories/', () =>
+    json([
+      { pk: 1, name: 'Family' },
+      { pk: 2, name: 'Work' },
+    ])
+  ),
   http.get('*/statistics/', () =>
     json({
       graphs: {

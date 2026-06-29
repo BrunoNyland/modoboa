@@ -17,7 +17,7 @@
         <div class="d-flex align-center flex-shrink-0">
           <v-btn
             prepend-icon="mdi-reply"
-            size="small"
+            height="36"
             variant="tonal"
             color="primary"
             @click="() => replyToEmail()"
@@ -25,7 +25,8 @@
             {{ $gettext('Reply') }}
           </v-btn>
           <v-btn
-            size="small"
+            height="36"
+            width="24"
             icon
             variant="tonal"
             color="primary"

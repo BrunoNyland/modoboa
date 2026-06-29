@@ -145,7 +145,7 @@ onMounted(() => {
   position: fixed;
   top: 10px;
   right: 10px;
-  z-index: 100;
+  z-index: 2000;
 }
 
 /* Match the user-menu avatar to the top-bar trigger avatar exactly:

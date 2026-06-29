@@ -1,5 +1,5 @@
 <template>
-  <v-list nav density="compact" class="pa-0 bg-transparent">
+  <v-list density="compact" class="pa-0 bg-transparent">
     <div
       v-for="mailbox in props.mailboxes"
       :key="mailbox.name"
@@ -8,7 +8,7 @@
       <v-list-item
         :active="model === mailbox.name"
         :prepend-icon="iconByMailboxType[mailbox.type]"
-        class="mailbox"
+        class="mailbox text-body-2"
         link
         @click="updateSelection(mailbox.name)"
         @mouseover="setHover(mailbox, true)"
@@ -178,5 +178,11 @@ async function onDrop(mailbox) {
 <style scoped lang="scss">
 .mailbox {
   cursor: pointer;
+}
+:deep(.v-list-item__spacer) {
+  width: 12px !important;
+}
+:deep(.v-list-item-title) {
+  font-size: 0.875rem !important;
 }
 </style>

@@ -28,6 +28,18 @@
       <v-btn
         v-if="!inScheduledView"
         class="ml-2"
+        color="secondary"
+        variant="tonal"
+        icon="mdi-pencil"
+        size="small"
+        :title="$gettext('Compose')"
+        :aria-label="$gettext('Compose')"
+        @click="openComposeForm"
+      >
+      </v-btn>
+      <v-btn
+        v-if="!inScheduledView"
+        class="ml-2"
         color="error"
         variant="tonal"
         icon="mdi-trash-can"
@@ -331,6 +343,10 @@ let intervalId = null
 const currentMailbox = computed(() => {
   return route.query.mailbox || 'INBOX'
 })
+
+const openComposeForm = () => {
+  router.push({ name: 'ComposeEmailView' })
+}
 
 const inScheduledView = computed(() => props.mailbox === 'Scheduled')
 

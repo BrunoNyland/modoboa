@@ -328,3 +328,53 @@ export const filtersMap = {
 
 
 
+
+// ----- Calendars & Contacts -----
+export const userCalendars = [
+  { pk: 1, name: 'Pessoal', color: '#3f51b5' },
+  { pk: 2, name: 'Trabalho', color: '#e91e63' },
+]
+
+export const categories = [
+  { pk: 1, name: 'Reunião', color: '#ff9800' },
+  { pk: 2, name: 'Feriado', color: '#4caf50' },
+]
+
+export const defaultAddressBook = {
+  pk: 1,
+  name: 'Contatos Pessoais',
+  is_default: true,
+}
+
+export const contacts = {
+  count: 2,
+  next: null,
+  previous: null,
+  results: [
+    { pk: 1, first_name: 'João', last_name: 'Silva', email: 'joao@example.com', phone: '11999999999' },
+    { pk: 2, first_name: 'Maria', last_name: 'Souza', email: 'maria@example.com', phone: '11988888888' },
+  ],
+}
+
+export const events = [
+  {
+    pk: 1,
+    title: 'Reunião de Alinhamento',
+    start: '2026-06-29T10:00:00Z',
+    end: '2026-06-29T11:00:00Z',
+    allDay: false,
+    color: '#3f51b5',
+    calendar: { pk: 1, name: 'Pessoal' },
+  },
+  {
+    pk: 2,
+    title: 'Feriado Nacional',
+    start: '2026-07-01T00:00:00Z',
+    end: '2026-07-01T23:59:59Z',
+    allDay: true,
+    color: '#4caf50',
+    calendar: { pk: 2, name: 'Trabalho' },
+  }
+]
+
+export const attendees = []

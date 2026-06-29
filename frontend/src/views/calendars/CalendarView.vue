@@ -62,7 +62,7 @@
         :events="events"
         first-day-of-week="1"
         :type="ctype"
-        :locale="current"
+        :locale="current.replace('_', '-')"
         event-name="title"
         :event-color="getEventColor"
         :event-ripple="false"
@@ -189,29 +189,35 @@ const leftMenuItems = computed(() => {
   for (const calendar of userCalendars.value) {
     result.push({
       text: calendar.name,
+      id: `calendar-${calendar.pk}`,
       children: [
         {
           text: $gettext('Information'),
+          id: `info-${calendar.pk}`,
           icon: 'mdi-information-outline',
           action: () => openInformation(calendar),
         },
         {
           text: $gettext('Edit'),
+          id: `edit-${calendar.pk}`,
           icon: 'mdi-pencil',
           action: () => editCalendar(calendar),
         },
         {
           text: $gettext('Access rules'),
+          id: `rules-${calendar.pk}`,
           icon: 'mdi-filter-outline',
           action: () => openAccessRulesForm(calendar),
         },
         {
           text: $gettext('Delete'),
+          id: `delete-${calendar.pk}`,
           icon: 'mdi-trash-can-outline',
           action: () => deleteCalendar(calendar.pk),
         },
         {
           text: $gettext('Import'),
+          id: `import-${calendar.pk}`,
           icon: 'mdi-calendar-import-outline',
           action: () => openImportEventsForm(calendar),
         },

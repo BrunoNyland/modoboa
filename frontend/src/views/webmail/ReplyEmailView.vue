@@ -1,5 +1,6 @@
 <template>
   <ComposeEmailForm
+    v-if="email"
     :original-email="email"
     :reply-all="route.query.all === 'true'"
     @on-toggle-html-mode="getEmailContent"
@@ -17,7 +18,7 @@ const route = useRoute()
 const email = ref()
 
 const getEmailContent = (html) => {
-  email.value = ''
+  email.value = null
   api
     .getEmailContent(route.query.mailbox, route.query.mailid, {
       context: 'reply',

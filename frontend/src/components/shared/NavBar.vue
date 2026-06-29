@@ -29,25 +29,27 @@
       >
       <v-spacer v-if="!rail" />
       <v-btn
-        :icon="rail ? 'mdi-chevron-right' : 'mdi-chevron-left'"
         variant="text"
+        class="rounded-0 ma-0"
+        style="width: 55px; height: 50px; min-width: 55px;"
         :aria-label="rail ? $gettext('Expand sidebar') : $gettext('Collapse sidebar')"
         @click.stop="rail = !rail"
       >
+        <v-icon size="large">{{ rail ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
       </v-btn>
     </div>
 
     <v-list
       :density="layoutStore.compactLeftMenu ? 'compact' : 'default'"
       :lines="layoutStore.compactLeftMenu ? false : true"
-      nav
+      class="pa-0"
     >
       <template
         v-for="(item, index) in menuItems"
         :key="item.text + '-' + index"
       >
         <template v-if="displayMenuItem(item)">
-          <v-list-subheader v-if="item.subheader" class="text-white">
+          <v-list-subheader v-if="item.subheader" class="text-white text-body-2">
             {{ item.text.toUpperCase() }}
           </v-list-subheader>
           <v-list-item
@@ -56,6 +58,7 @@
             :exact="item.exact"
             :title="item.text"
             :prepend-icon="item.icon"
+            class="text-body-2"
             @click="item.action"
           >
           </v-list-item>
@@ -67,6 +70,7 @@
             :exact="item.exact"
             :title="item.text"
             :prepend-icon="item.icon"
+            class="text-body-2"
           >
           </v-list-item>
           <v-list-group v-else :value="item.id || item.text">
@@ -77,6 +81,7 @@
                 :title="item.text"
                 color="white"
                 :prepend-icon="item.icon"
+                class="text-body-2"
               >
               </v-list-item>
             </template>
@@ -90,6 +95,7 @@
                   :title="subitem.text"
                   :value="subitem.id || subitem.text"
                   :prepend-icon="subitem.icon"
+                  class="text-body-2"
                   @click="subitem.action"
                 ></v-list-item>
                 <v-list-item
@@ -98,7 +104,9 @@
                   link
                   :title="subitem.text"
                   :value="subitem.id || subitem.text"
+                  :exact="subitem.exact"
                   :prepend-icon="subitem.icon"
+                  class="text-body-2"
                 ></v-list-item>
               </template>
             </template>
@@ -173,3 +181,11 @@ function displayMenuItem(item) {
 }
 </script>
 
+<style scoped lang="scss">
+:deep(.v-list-item__spacer) {
+  width: 12px !important;
+}
+:deep(.v-list-item-title) {
+  font-size: 0.875rem !important;
+}
+</style>

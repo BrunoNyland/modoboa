@@ -2,11 +2,21 @@
   <div>
     <ConnectedLayout>
     <template #navbar>
+      <!-- Mobile-only top bar: hosts the hamburger that toggles the drawer. -->
+      <v-app-bar v-if="mobile" flat density="comfortable" color="background">
+        <v-app-bar-nav-icon
+          :aria-label="$gettext('Toggle navigation')"
+          @click="drawer = !drawer"
+        />
+        <span class="brand-wordmark brand-wordmark--sm">webmail</span>
+      </v-app-bar>
+
       <v-navigation-drawer
         v-model="drawer"
-        :rail="rail"
+        :rail="rail && !mobile"
         :width="drawerWidth"
-        permanent
+        :permanent="!mobile"
+        :temporary="mobile"
         color="background"
       >
         <div class="resize-handle" @mousedown="startResize" />
@@ -15,38 +25,21 @@
             <span v-if="!rail" class="brand-wordmark">webmail</span>
             <v-spacer v-if="!rail" />
             <v-btn
-              :icon="rail ? 'mdi-chevron-right' : 'mdi-chevron-left'"
               variant="text"
+              class="rounded-0 ma-0"
+              style="width: 55px; height: 50px; min-width: 55px;"
               :aria-label="rail ? $gettext('Expand sidebar') : $gettext('Collapse sidebar')"
               @click.stop="rail = !rail"
             >
+              <v-icon size="large">{{ rail ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
             </v-btn>
           </div>
 
-          <div class="d-flex justify-center mb-4">
-            <v-btn
-              v-if="!rail"
-              :text="$gettext('Compose')"
-              color="secondary"
-              variant="flat"
-              prepend-icon="mdi-pencil"
-              @click="openComposeForm"
-            />
-            <v-btn
-              v-else
-              icon="mdi-pencil"
-              color="secondary"
-              variant="flat"
-              size="small"
-              :aria-label="$gettext('Compose')"
-              @click="openComposeForm"
-            />
-          </div>
+
         </template>
         <MailboxList
           v-model="selectedMailbox"
           :mailboxes="userMailboxes"
-          class="mr-2"
           :rail="rail"
           @update:model-value="openMailbox"
         />
@@ -110,14 +103,20 @@ import gettext from '@/plugins/gettext'
 import ConnectedLayout from '@/layouts/connected/ConnectedLayout.vue'
 import MailboxList from '@/components/webmail/MailboxList.vue'
 import api from '@/api/webmail'
+import { useDisplay } from 'vuetify'
 
 const { $gettext } = useGettext()
 const route = useRoute()
 const router = useRouter()
 const busStore = useBusStore()
 
-const drawer = ref(true)
+const { mobile } = useDisplay()
+const drawer = ref(!mobile.value)
 const rail = ref(false)
+
+watch(mobile, (isMobile) => {
+  drawer.value = !isMobile
+})
 const drawerWidth = ref(256)
 const isResizing = ref(false)
 
@@ -193,6 +192,9 @@ function openMailbox(mailbox) {
   api.getUserMailboxQuota(mailbox).then((resp) => {
     mailboxQuota.value = resp.data
   })
+  if (mobile.value) {
+    drawer.value = false
+  }
 }
 
 const fetchUserMailboxes = async () => {

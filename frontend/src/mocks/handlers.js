@@ -630,6 +630,14 @@ export const handlers = [
     }
   ),
 
+  // ----- calendars & contacts (mocks to avoid console warnings) -----
+  http.get('*/user-calendars/', () => json(fx.userCalendars)),
+  http.get('*/user-calendars/:id/events/', () => json(fx.events)),
+  http.get('*/attendees/', () => json(fx.attendees)),
+  http.get('*/categories/', () => json(fx.categories)),
+  http.get('*/address-books/default/', () => json(fx.defaultAddressBook)),
+  http.get('*/contacts/', () => json(fx.contacts)),
+
   // ----- catch-all: mantém a app de pé em endpoints não mockados -----
   http.all('*/api/v2/*', ({ request }) => {
     const { pathname } = new URL(request.url)

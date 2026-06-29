@@ -245,7 +245,7 @@ import { nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDisplay } from 'vuetify'
 import { useGettext } from 'vue3-gettext'
-import { useBusStore } from '@/stores'
+import { useBusStore, useProgressStore } from '@/stores'
 import constants from '@/constants.json'
 import api from '@/api/webmail'
 import ContactCard from '@/components/webmail/ContactCard.vue'
@@ -253,6 +253,7 @@ import ContactCard from '@/components/webmail/ContactCard.vue'
 const { mobile } = useDisplay()
 const { $gettext } = useGettext()
 const { displayNotification, reloadMailboxCounters } = useBusStore()
+const progress = useProgressStore()
 const route = useRoute()
 const router = useRouter()
 
@@ -297,9 +298,36 @@ const fetchMailContent = () => {
           iframeDoc.write(email.value.body)
           iframeDoc.close()
         }
+        // Feed the global top bar with reading progress. The body lives in a
+        // separate iframe document, so its scroll never reaches the parent's
+        // capture-phase listener — bind it here (re-bound on every fetch since
+        // the iframe element is replaced above).
+        progress.setScroll(0)
+        bindIframeScroll(iframe)
         loaded.value = true
       })
     })
+}
+
+const bindIframeScroll = (iframe) => {
+  const win = iframe.contentWindow
+  if (!win) {
+    return
+  }
+  win.addEventListener(
+    'scroll',
+    () => {
+      const doc =
+        iframe.contentDocument?.scrollingElement ||
+        iframe.contentDocument?.documentElement
+      if (!doc) {
+        return
+      }
+      const max = doc.scrollHeight - doc.clientHeight
+      progress.setScroll(max > 0 ? doc.scrollTop / max : 0)
+    },
+    { passive: true }
+  )
 }
 
 const downloadAttachment = (name, part) => {

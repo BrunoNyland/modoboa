@@ -1,12 +1,13 @@
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import router from '@/router'
-import { useAuthStore, useBusStore } from '@/stores'
+import { useAuthStore, useBusStore, useProgressStore } from '@/stores'
 
 const _axios = axios.create()
 
 _axios.interceptors.request.use(
   async function (config) {
+    useProgressStore().startLoading()
     const authStore = useAuthStore()
     if (authStore.isAuthenticated) {
       const token = await authStore.getAccessToken()
@@ -19,6 +20,7 @@ _axios.interceptors.request.use(
   },
   function (error) {
     // Do something with request error
+    useProgressStore().stopLoading()
     return Promise.reject(error)
   }
 )
@@ -26,10 +28,12 @@ _axios.interceptors.request.use(
 // Add a response interceptor
 _axios.interceptors.response.use(
   function (response) {
-    // Do something with response data
+    useProgressStore().stopLoading()
     return response
   },
   function (error) {
+    // Settle the loading counter on every error path below.
+    useProgressStore().stopLoading()
     if (!error.response) {
       console.log(error)
       return

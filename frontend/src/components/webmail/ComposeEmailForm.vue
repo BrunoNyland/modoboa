@@ -14,6 +14,19 @@
         />
         <div class="d-flex align-center ml-2">
           <v-btn
+            v-if="mobile"
+            icon="mdi-send"
+            variant="tonal"
+            color="primary"
+            height="36"
+            width="36"
+            :loading="working"
+            :title="$gettext('Send')"
+            :aria-label="$gettext('Send')"
+            @click="submit"
+          />
+          <v-btn
+            v-else
             prepend-icon="mdi-send"
             variant="tonal"
             color="primary"
@@ -47,6 +60,18 @@
         <v-menu :close-on-content-click="false">
           <template #activator="{ props: menuProps }">
             <v-btn
+              v-if="mobile"
+              class="ml-2"
+              variant="tonal"
+              icon="mdi-cog-outline"
+              height="36"
+              width="36"
+              :title="$gettext('Options')"
+              :aria-label="$gettext('Options')"
+              v-bind="menuProps"
+            />
+            <v-btn
+              v-else
               class="ml-2"
               variant="tonal"
               prepend-icon="mdi-cog-outline"
@@ -220,6 +245,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useDisplay } from 'vuetify'
 import { useGettext } from 'vue3-gettext'
 import { useAuthStore, useBusStore } from '@/stores'
 import constants from '@/constants.json'
@@ -245,6 +271,7 @@ const emit = defineEmits(['onToggleHtmlMode'])
 
 const route = useRoute()
 const router = useRouter()
+const { mobile } = useDisplay()
 const { $gettext } = useGettext()
 const { displayNotification, reloadData } = useBusStore()
 const authStore = useAuthStore()

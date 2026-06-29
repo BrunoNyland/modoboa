@@ -11,5 +11,6 @@ export * from './providers.store'
 export * from './contacts.store'
 export * from './webmail.store'
 export * from './plugins.store'
+export * from './progress.store'
 
 export default createPinia()

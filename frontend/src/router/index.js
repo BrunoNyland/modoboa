@@ -1,5 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore, useGlobalStore, usePluginsStore } from '@/stores'
+import {
+  useAuthStore,
+  useGlobalStore,
+  usePluginsStore,
+  useProgressStore,
+} from '@/stores'
 import { useGlobalConfig } from '@/config'
 import constants from '@/constants.json'
 import { registerRemote, loadRemoteComponent } from '@/utils/federation'
@@ -589,6 +594,19 @@ router.beforeEach(async (to, from) => {
       return { name: 'Login' }
     }
   }
+})
+
+// Drive the top progress bar during navigation (covers lazy-loaded route
+// chunks that axios can't see). `navigating` is a boolean in the store, so a
+// redirected/cancelled navigation can't leave it stuck.
+router.beforeEach(() => {
+  useProgressStore().setNavigating(true)
+})
+router.afterEach(() => {
+  useProgressStore().setNavigating(false)
+})
+router.onError(() => {
+  useProgressStore().setNavigating(false)
 })
 
 export default router

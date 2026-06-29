@@ -1,4 +1,5 @@
 <template>
+  <TopProgressBar />
   <router-view v-slot="{ Component }">
     <transition name="fade" mode="out-in">
       <Suspense v-if="Component">
@@ -8,4 +9,6 @@
   </router-view>
 </template>
 
-<script setup></script>
+<script setup>
+import TopProgressBar from '@/components/shared/TopProgressBar.vue'
+</script>

@@ -2,7 +2,10 @@
   <div class="email-list-wrapper">
   <v-card class="mt-6 mb-2 mx-1">
     <v-toolbar flat class="email-toolbar">
+      <!-- Desktop: select-all sits at the far left. On mobile it moves to the
+           bottom row, next to the message counter (see below). -->
       <v-checkbox
+        v-if="!mobile"
         v-model="selectAll"
         class="mr-4"
         hide-details
@@ -132,8 +135,20 @@
           </v-list>
         </v-menu>
       </v-btn>
+      <!-- Mobile: force a new row, then put select-all on the same line as the
+           message counter / pagination (left = checkbox, right = counter). -->
+      <div v-if="mobile" class="toolbar-break" />
+      <v-checkbox
+        v-if="mobile"
+        v-model="selectAll"
+        hide-details
+        color="primary"
+        class="select-all-mobile"
+        :aria-label="$gettext('Select all messages')"
+        @update:model-value="toggleAllSelection"
+      />
       <v-spacer />
-      <div v-if="emails.results" class="d-flex align-center">
+      <div v-if="emails.results" class="d-flex align-center count-nav">
         <div class="text-body-small mr-2">
           {{ emails.first_index }}-{{ emails.last_index }} {{ $gettext('on') }}
           {{ emails.count }}
@@ -198,6 +213,7 @@
               :color="email.flagged ? 'warning' : undefined"
               variant="text"
               size="small"
+              class="email-row__star"
               :title="
                 email.flagged
                   ? $gettext('Unfollow message')
@@ -305,6 +321,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useDisplay } from 'vuetify'
 import { useGettext } from 'vue3-gettext'
 import { useBusStore, useWebmailStore } from '@/stores'
 import { DateTime } from 'luxon'
@@ -321,6 +338,7 @@ const props = defineProps({
 })
 
 const { $gettext, $ngettext } = useGettext()
+const { mobile } = useDisplay()
 const { displayNotification, reloadMailboxCounters } = useBusStore()
 const webmailStore = useWebmailStore()
 const router = useRouter()
@@ -643,6 +661,49 @@ watch(page, () => {
     width: 100% !important;
     flex: 1 1 100%;
     margin-right: 0 !important;
+  }
+  /* Full-width zero-height break: forces select-all + counter onto their own
+     last row, away from the action buttons. */
+  .toolbar-break {
+    flex: 1 1 100%;
+    height: 0;
+  }
+  .select-all-mobile {
+    flex: 0 0 auto;
+  }
+
+  /* --- Message rows: optimise for reading on a narrow screen. --- */
+  /* The per-row follow star is desktop chrome; drop it on mobile to give the
+     subject/sender the full width (follow stays in the reading view + the
+     toolbar's "mark as followed" menu). */
+  .email-row__star {
+    display: none;
+  }
+  .email-row {
+    /* Taller rows = comfortable tap targets. */
+    padding: 10px 12px 10px 8px;
+    align-items: flex-start;
+  }
+  .email-row__main {
+    margin-left: 4px;
+  }
+  .email-row__subject {
+    font-size: 15px;
+    white-space: normal;
+    /* Keep it to two lines so rows stay scannable. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .email-row__meta {
+    padding-left: 8px;
+    flex-basis: 96px;
+  }
+  .email-row__date {
+    font-size: 10px;
+    letter-spacing: 0;
+    white-space: normal;
   }
 }
 

@@ -1,8 +1,8 @@
 <template>
-  <router-view v-slot="{ Component }">
+  <router-view v-slot="{ Component, route }">
     <transition name="fade" mode="out-in">
       <Suspense>
-        <component :is="Component" />
+        <component :is="Component" :key="route.path" />
       </Suspense>
     </transition>
   </router-view>

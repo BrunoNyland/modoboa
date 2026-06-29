@@ -145,7 +145,18 @@ onMounted(() => {
   position: fixed;
   top: 10px;
   right: 10px;
-  z-index: 100;
+  /* Sit above the app bar (default z-index ~1004) so the avatar stays
+     visible/clickable on mobile, where the app bar would otherwise cover it.
+     Kept below the temporary drawer scrim so an open drawer dims it. */
+  z-index: 1010;
+}
+
+/* On mobile the app bar is denser; nudge the avatar to line up within it. */
+@media (max-width: 600px) {
+  .top-menu {
+    top: 6px;
+    right: 6px;
+  }
 }
 
 /* Match the user-menu avatar to the top-bar trigger avatar exactly:

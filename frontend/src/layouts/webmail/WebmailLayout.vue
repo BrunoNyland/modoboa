@@ -2,16 +2,28 @@
   <div>
     <ConnectedLayout>
     <template #navbar>
+      <!-- Mobile-only top bar: hosts the hamburger that toggles the drawer. -->
+      <v-app-bar v-if="mobile" flat density="comfortable" color="background">
+        <v-app-bar-nav-icon
+          :aria-label="$gettext('Toggle navigation')"
+          @click="drawer = !drawer"
+        />
+        <span class="brand-wordmark brand-wordmark--sm">webmail</span>
+      </v-app-bar>
+
       <v-navigation-drawer
         v-model="drawer"
-        :rail="rail"
+        :rail="rail && !mobile"
         :width="drawerWidth"
-        permanent
+        :permanent="!mobile"
+        :temporary="mobile"
         color="background"
       >
-        <div class="resize-handle" @mousedown="startResize" />
+        <!-- Drag-to-resize is desktop-only; on mobile the drawer is a full
+             temporary overlay toggled by the hamburger. -->
+        <div v-if="!mobile" class="resize-handle" @mousedown="startResize" />
         <template #prepend>
-          <div class="d-flex align-center">
+          <div v-if="!mobile" class="d-flex align-center">
             <span v-if="!rail" class="brand-wordmark">webmail</span>
             <v-spacer v-if="!rail" />
             <v-btn
@@ -23,7 +35,7 @@
             </v-btn>
           </div>
 
-          <div class="d-flex justify-center mb-4">
+          <div class="d-flex justify-center mb-4 mt-2">
             <v-btn
               v-if="!rail"
               :text="$gettext('Compose')"
@@ -102,6 +114,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useDisplay } from 'vuetify'
 import { useGettext } from 'vue3-gettext'
 import { filesize } from 'filesize'
 import { useBusStore } from '@/stores'
@@ -115,11 +128,19 @@ const { $gettext } = useGettext()
 const route = useRoute()
 const router = useRouter()
 const busStore = useBusStore()
+const { mobile } = useDisplay()
 
-const drawer = ref(true)
+// Permanent drawer on desktop (open); temporary overlay on mobile (closed,
+// opened via the hamburger in the mobile app bar).
+const drawer = ref(!mobile.value)
 const rail = ref(false)
 const drawerWidth = ref(256)
 const isResizing = ref(false)
+
+// Keep the drawer state sane when crossing the mobile breakpoint.
+watch(mobile, (isMobile) => {
+  drawer.value = !isMobile
+})
 
 function startResize(e) {
   e.preventDefault()
@@ -190,6 +211,10 @@ function openMailbox(mailbox) {
     name: 'MailboxView',
     query: { mailbox },
   })
+  // Dismiss the overlay drawer after picking a folder on mobile.
+  if (mobile.value) {
+    drawer.value = false
+  }
   api.getUserMailboxQuota(mailbox).then((resp) => {
     mailboxQuota.value = resp.data
   })

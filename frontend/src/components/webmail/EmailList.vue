@@ -1,6 +1,7 @@
 <template>
+  <div class="email-list-wrapper">
   <v-card class="mt-6 mb-2 mx-1">
-    <v-toolbar flat>
+    <v-toolbar flat class="email-toolbar">
       <v-checkbox
         v-model="selectAll"
         class="mr-4"
@@ -20,7 +21,7 @@
         flat
         hide-details
         density="compact"
-        class="flex-grow-0 w-33 mr-4"
+        class="flex-grow-0 w-33 mr-4 search-field"
         clearable
         @click:clear="fetchEmails"
         @keyup.enter="submitSearch"
@@ -147,7 +148,7 @@
     </v-toolbar>
   </v-card>
   <transition name="fade" mode="out-in">
-    <div v-if="!loading" key="emails-content">
+    <div v-if="!loading" key="emails-content" class="emails-content">
     <v-alert
       v-if="inScheduledView"
       type="info"
@@ -161,10 +162,7 @@
         )
       }}
     </v-alert>
-    <div
-      class="emails position-absolute bottom-0 w-100 overflow-y-auto"
-      :class="{ 'top-0': !inScheduledView, 'scheduling-top': inScheduledView }"
-    >
+    <div class="emails overflow-y-auto">
       <template v-if="emails.results?.length">
         <div class="email-list">
           <div
@@ -289,6 +287,7 @@
     </v-dialog>
     </div>
   </transition>
+  </div>
 </template>
 
 <script setup>
@@ -591,14 +590,45 @@ watch(page, () => {
 </script>
 
 <style lang="scss" scoped>
+/* Flex column so the message list takes the remaining height and scrolls
+   internally. Replaces the old absolute positioning + magic margin-top:150px,
+   which broke when the toolbar wrapped to several rows on narrow screens. */
+.email-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  /* Also a flex item: fill the remaining height of MailboxView's column. */
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.emails-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
 .emails {
-  margin-top: 150px;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 .clickable {
   cursor: pointer;
 }
-.scheduling-top {
-  top: 45px;
+
+/* On phones the toolbar can't fit on one row: let it wrap and give the
+   search field its own full-width row instead of a fixed 33% width. */
+@media (max-width: 600px) {
+  .email-toolbar :deep(.v-toolbar__content) {
+    height: auto !important;
+    flex-wrap: wrap;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    row-gap: 6px;
+  }
+  .email-toolbar :deep(.search-field) {
+    width: 100% !important;
+    flex: 1 1 100%;
+    margin-right: 0 !important;
+  }
 }
 
 /* Dense hairline message list (portfolio editorial rows). */

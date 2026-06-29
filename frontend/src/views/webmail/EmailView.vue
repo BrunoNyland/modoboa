@@ -16,6 +16,17 @@
 
         <div class="d-flex align-center flex-shrink-0">
           <v-btn
+            v-if="mobile"
+            icon="mdi-reply"
+            size="small"
+            variant="tonal"
+            color="primary"
+            :title="$gettext('Reply')"
+            :aria-label="$gettext('Reply')"
+            @click="() => replyToEmail()"
+          />
+          <v-btn
+            v-else
             prepend-icon="mdi-reply"
             size="small"
             variant="tonal"
@@ -230,12 +241,14 @@
 <script setup>
 import { nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useDisplay } from 'vuetify'
 import { useGettext } from 'vue3-gettext'
 import { useBusStore } from '@/stores'
 import constants from '@/constants.json'
 import api from '@/api/webmail'
 import ContactCard from '@/components/webmail/ContactCard.vue'
 
+const { mobile } = useDisplay()
 const { $gettext } = useGettext()
 const { displayNotification, reloadMailboxCounters } = useBusStore()
 const route = useRoute()

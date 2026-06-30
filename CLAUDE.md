@@ -100,3 +100,5 @@ cd frontend && yarn install && yarn dev:mock   # cross-env VITE_MOCK_API=true vi
 - **Commits:** trailer `Co-Authored-By: Claude ...` + `Claude-Session: ...`.
   PRs criados como **draft**; mergeados após CI verde.
 - Não incluir identificadores internos de modelo em commits/PRs/código.
+- **Comandos de servidor/ops para o Bruno rodar via SSH:** sempre entregar
+  numa única linha, encadeados com `&&` (não em blocos separados/multi-step).

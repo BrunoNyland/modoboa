@@ -21,7 +21,7 @@
       >
         <div class="resize-handle" @mousedown="startResize" />
         <template #prepend>
-          <div class="d-flex align-center">
+          <div v-if="!mobile" class="d-flex align-center">
             <span v-if="!rail" class="brand-wordmark">webmail</span>
             <v-spacer v-if="!rail" />
             <v-btn
@@ -40,12 +40,12 @@
         <MailboxList
           v-model="selectedMailbox"
           :mailboxes="userMailboxes"
-          :rail="rail"
+          :rail="rail && !mobile"
           @update:model-value="openMailbox"
         />
         <template #append>
           <!-- Expanded drawer: full storage panel. -->
-          <div v-if="!rail" class="quota-panel">
+          <div v-if="!rail || mobile" class="quota-panel">
             <div class="quota-panel__head">
               <span class="quota-panel__eyebrow">{{ $gettext('Storage') }}</span>
               <span v-if="mailboxQuota && hasQuotaLimit" class="quota-panel__pct">

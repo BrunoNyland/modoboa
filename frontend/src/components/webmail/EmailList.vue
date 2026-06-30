@@ -5,9 +5,9 @@
       <!-- Desktop: select-all sits at the far left. On mobile it moves to the
            bottom row, next to the message counter (see below). -->
       <v-checkbox
-        v-if="!mobile"
         v-model="selectAll"
-        class="mr-4"
+        class="mr-4 select-all-desktop"
+        density="compact"
         hide-details
         color="primary"
         :aria-label="$gettext('Select all messages')"
@@ -137,10 +137,10 @@
       </v-btn>
       <!-- Mobile: force a new row, then put select-all on the same line as the
            message counter / pagination (left = checkbox, right = counter). -->
-      <div v-if="mobile" class="toolbar-break" />
+      <div class="toolbar-break" />
       <v-checkbox
-        v-if="mobile"
         v-model="selectAll"
+        density="compact"
         hide-details
         color="primary"
         class="select-all-mobile"
@@ -200,84 +200,88 @@
             draggable="true"
             @dragstart="onDragStart(email)"
           >
-            <v-checkbox
-              v-model="webmailStore.selection"
-              :value="email.imapid"
-              color="primary"
-              density="compact"
-              hide-details
-              :aria-label="$gettext('Select message: %{subject}', { subject: email.subject })"
-            />
-            <v-btn
-              :icon="email.flagged ? 'mdi-star' : 'mdi-star-outline'"
-              :color="email.flagged ? 'warning' : undefined"
-              variant="text"
-              size="small"
-              class="email-row__star"
-              :title="
-                email.flagged
-                  ? $gettext('Unfollow message')
-                  : $gettext('Follow message')
-              "
-              :aria-label="
-                email.flagged
-                  ? $gettext('Unfollow message')
-                  : $gettext('Follow message')
-              "
-              @click="toggleFollowState(email)"
-            />
-            <v-menu v-if="inScheduledView" location="bottom">
-              <template #activator="{ props }">
-                <v-btn
-                  icon="mdi-dots-vertical"
-                  v-bind="props"
-                  size="small"
-                  variant="text"
-                  :aria-label="$gettext('Message actions')"
-                >
-                </v-btn>
-              </template>
-              <MenuItems :items="getScheduledMessageActions()" :obj="email" />
-            </v-menu>
-
-            <div
-              class="email-row__main clickable"
-              @click="openEmail(email.imapid)"
-            >
-              <div class="email-row__subject">{{ email.subject }}</div>
-              <div class="email-row__from">
-                <EmailAddressList :addresses="getEmailAddresses(email)" />
-              </div>
+            <div class="email-row__actions">
+              <v-checkbox
+                v-model="webmailStore.selection"
+                :value="email.imapid"
+                color="primary"
+                density="compact"
+                hide-details
+                :aria-label="$gettext('Select message: %{subject}', { subject: email.subject })"
+              />
+              <v-btn
+                :icon="email.flagged ? 'mdi-star' : 'mdi-star-outline'"
+                :color="email.flagged ? 'warning' : undefined"
+                variant="text"
+                size="small"
+                class="email-row__star"
+                :title="
+                  email.flagged
+                    ? $gettext('Unfollow message')
+                    : $gettext('Follow message')
+                "
+                :aria-label="
+                  email.flagged
+                    ? $gettext('Unfollow message')
+                    : $gettext('Follow message')
+                "
+                @click="toggleFollowState(email)"
+              />
+              <v-menu v-if="inScheduledView" location="bottom">
+                <template #activator="{ props }">
+                  <v-btn
+                    icon="mdi-dots-vertical"
+                    v-bind="props"
+                    size="small"
+                    variant="text"
+                    :aria-label="$gettext('Message actions')"
+                  >
+                  </v-btn>
+                </template>
+                <MenuItems :items="getScheduledMessageActions()" :obj="email" />
+              </v-menu>
             </div>
 
-            <div class="email-row__meta">
-              <div v-if="!isScheduledDateOver(email)" class="email-row__date">
-                {{ getEmailDate(email) }}
-              </div>
+            <div class="email-row__content">
               <div
-                v-else
-                class="email-row__date email-row__date--error clickable"
-                @click="displaySchedulingError(email)"
+                class="email-row__main clickable"
+                @click="openEmail(email.imapid)"
               >
-                {{ getEmailDate(email) }}
+                <div class="email-row__subject">{{ email.subject }}</div>
+                <div class="email-row__from">
+                  <EmailAddressList :addresses="getEmailAddresses(email)" />
+                </div>
               </div>
-              <div class="email-row__flags">
-                <v-icon
-                  v-if="email.answered"
-                  icon="mdi-reply-outline"
-                  size="small"
-                />
-                <v-icon
-                  v-if="email.forwarded"
-                  icon="mdi-share-outline"
-                  size="small"
-                />
-                <v-icon
-                  v-if="email.attachments"
-                  icon="mdi-paperclip"
-                  size="small"
-                />
-                <span>{{ $filesize(email.size) }}</span>
+
+              <div class="email-row__meta">
+                <div v-if="!isScheduledDateOver(email)" class="email-row__date">
+                  {{ getEmailDate(email) }}
+                </div>
+                <div
+                  v-else
+                  class="email-row__date email-row__date--error clickable"
+                  @click="displaySchedulingError(email)"
+                >
+                  {{ getEmailDate(email) }}
+                </div>
+                <div class="email-row__flags">
+                  <v-icon
+                    v-if="email.answered"
+                    icon="mdi-reply-outline"
+                    size="small"
+                  />
+                  <v-icon
+                    v-if="email.forwarded"
+                    icon="mdi-share-outline"
+                    size="small"
+                  />
+                  <v-icon
+                    v-if="email.attachments"
+                    icon="mdi-paperclip"
+                    size="small"
+                  />
+                  <span>{{ $filesize(email.size) }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -646,66 +650,17 @@ watch(page, () => {
 .clickable {
   cursor: pointer;
 }
-
-/* On phones the toolbar can't fit on one row: let it wrap and give the
-   search field its own full-width row instead of a fixed 33% width. */
-@media (max-width: 600px) {
-  .email-toolbar :deep(.v-toolbar__content) {
-    height: auto !important;
-    flex-wrap: wrap;
-    padding-top: 6px;
-    padding-bottom: 6px;
-    row-gap: 6px;
-  }
-  .email-toolbar :deep(.search-field) {
-    width: 100% !important;
-    flex: 1 1 100%;
-    margin-right: 0 !important;
-  }
-  /* Full-width zero-height break: forces select-all + counter onto their own
-     last row, away from the action buttons. */
-  .toolbar-break {
-    flex: 1 1 100%;
-    height: 0;
-  }
-  .select-all-mobile {
-    flex: 0 0 auto;
-  }
-
-  /* --- Message rows: optimise for reading on a narrow screen. --- */
-  /* The per-row follow star is desktop chrome; drop it on mobile to give the
-     subject/sender the full width (follow stays in the reading view + the
-     toolbar's "mark as followed" menu). */
-  .email-row__star {
-    display: none;
-  }
-  .email-row {
-    /* Taller rows = comfortable tap targets. */
-    padding: 10px 12px 10px 8px;
-    align-items: flex-start;
-  }
-  .email-row__main {
-    margin-left: 4px;
-  }
-  .email-row__subject {
-    font-size: 15px;
-    white-space: normal;
-    /* Keep it to two lines so rows stay scannable. */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .email-row__meta {
-    padding-left: 8px;
-    flex-basis: 96px;
-  }
-  .email-row__date {
-    font-size: 10px;
-    letter-spacing: 0;
-    white-space: normal;
-  }
+.toolbar-break {
+  display: none;
 }
+.select-all-mobile {
+  display: none;
+}
+.select-all-desktop {
+  display: inline-flex;
+}
+
+
 
 /* Dense hairline message list (portfolio editorial rows). */
 .email-list {
@@ -739,15 +694,27 @@ watch(page, () => {
   width: 2px;
   background: var(--accent);
 }
-.email-row__main {
+.email-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+.email-row__content {
+  display: flex;
+  align-items: center;
   flex: 1 1 auto;
   min-width: 0;
   margin-left: 8px;
 }
+.email-row__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 .email-row__subject {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 15px;
+  font-size: clamp(13px, 2vw, 15px);
   letter-spacing: -0.01em;
   color: var(--fg);
   white-space: nowrap;
@@ -760,7 +727,7 @@ watch(page, () => {
 .email-row__from {
   margin-top: 2px;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: clamp(11px, 1.5vw, 12px);
   letter-spacing: 0.02em;
   color: var(--fg-dim);
   white-space: nowrap;
@@ -774,10 +741,13 @@ watch(page, () => {
 }
 .email-row__date {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: clamp(9px, 1.2vw, 10.5px);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--fg-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .email-row__date--error {
   color: rgb(var(--v-theme-error));
@@ -790,7 +760,104 @@ watch(page, () => {
   justify-content: flex-end;
   gap: 6px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: clamp(9px, 1.2vw, 10.5px);
   color: var(--fg-mute);
+}
+
+/* On phones the toolbar can't fit on one row: let it wrap and give the
+   search field its own full-width row instead of a fixed 33% width. */
+@media (max-width: 700px) {
+  .email-toolbar :deep(.v-toolbar__content) {
+    height: auto !important;
+    flex-wrap: wrap;
+    padding-top: 6px;
+    padding-bottom: 0px;
+    row-gap: 6px;
+  }
+  .email-toolbar :deep(.search-field) {
+    width: 100% !important;
+    flex: 1 1 100%;
+    margin-right: 0 !important;
+  }
+  .select-all-desktop {
+    display: none !important;
+  }
+  .select-all-mobile {
+    display: inline-flex !important;
+    flex: 0 0 auto;
+    margin-left: 1px;
+    margin-top: -4px;
+    margin-bottom: -4px;
+  }
+  /* Full-width zero-height break: forces select-all + counter onto their own
+     last row, away from the action buttons. */
+  .toolbar-break {
+    display: block !important;
+    flex: 1 1 100%;
+    height: 0;
+  }
+
+  /* --- Message rows: optimise for reading on a narrow screen. --- */
+  /* The per-row follow star is desktop chrome; drop it on mobile to give the
+     subject/sender the full width (follow stays in the reading view + the
+     toolbar's "mark as followed" menu). */
+  .email-row__star {
+    display: none;
+  }
+  .email-row {
+    /* Taller rows = comfortable tap targets. */
+    padding: 10px 12px 10px 8px;
+    align-items: center;
+  }
+  .email-row :deep(.v-input__control) {
+    display: flex;
+    align-items: center;
+  }
+  .email-row__actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 0 0 auto;
+  }
+  .email-row__content {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-left: 4px;
+  }
+  .email-row__main {
+    margin-left: 0;
+  }
+
+
+  .email-row__meta {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 0;
+    flex-basis: auto;
+    margin-top: 4px;
+  }
+  .email-row__date {
+    letter-spacing: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-right: 8px;
+  }
+  .email-row__flags {
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .email-row__flags :deep(.v-icon) {
+    font-size: 12px;
+  }
 }
 </style>

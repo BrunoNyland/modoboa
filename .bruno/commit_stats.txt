@@ -372,10 +372,6 @@ Date:   Thu Jun 25 22:10:53 2026 -0400
     Aproxima a UI do design de brunonyland.com e conserta a responsividade do
     menu lateral.
     
-    - SectionHeader.vue: cabeçalho editorial reutilizável (eyebrow mono numerada
-      em accent + título display Space Grotesk + subtítulo opcional).
-    - DashboardView: vira "landing" do painel — SectionHeader "00 / Dashboard"
-      com o título de boas-vindas grande, grid de estatísticas e notícias.
     - GlobalStatisticsWidget: grid hairline 2x2 de números display + rótulos mono
       (porta o `.about__stats` do portfólio), com hover de fundo.
     - NavBar: drawer agora é responsivo — permanente no desktop, temporário
@@ -479,7 +475,6 @@ Date:   Thu Jun 25 22:10:53 2026 -0400
  .../src/components/admin/logs/AuditTrailList.vue   |   2 +-
  frontend/src/components/admin/logs/MessageList.vue |   2 +-
  frontend/src/components/shared/NavBar.vue          |  47 +++++-
- frontend/src/components/shared/SectionHeader.vue   |  64 +++++++++
  frontend/src/components/tools/ChoiceField.vue      |  25 +++-
  frontend/src/components/tools/CreationForm.vue     |   2 +-
  frontend/src/components/tools/TimeSerieChart.vue   |  49 ++++++-

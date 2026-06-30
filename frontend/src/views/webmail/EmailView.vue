@@ -2,13 +2,13 @@
   <div class="h-100">
     <div
       v-show="loaded"
-      class="email-view bg-background pa-4 h-100 d-flex flex-column"
+      class="email-view bg-background h-100 d-flex flex-column"
     >
       <v-toolbar>
         <v-btn
           icon="mdi-arrow-left"
           size="small"
-          variant="flat"
+          variant="tonal"
           :title="$gettext('Back')"
           :aria-label="$gettext('Back')"
           @click="close"
@@ -16,18 +16,6 @@
 
         <div class="d-flex align-center flex-shrink-0">
           <v-btn
-            v-if="mobile"
-            icon="mdi-reply"
-            height="36"
-            width="36"
-            variant="tonal"
-            color="primary"
-            :title="$gettext('Reply')"
-            :aria-label="$gettext('Reply')"
-            @click="() => replyToEmail()"
-          />
-          <v-btn
-            v-else
             prepend-icon="mdi-reply"
             height="36"
             variant="tonal"
@@ -156,13 +144,13 @@
 
       <div v-if="email" class="email-header">
         <h2>{{ email.subject }}</h2>
-        <div class="d-flex mt-2">
+        <div class="d-flex">
           <v-menu key="sender">
             <template #activator="{ props }">
               <h3 v-bind="props">
                 <template v-if="email.from_address.name">
                   {{ email.from_address.name }}
-                  <span class="text-grey text-body-medium">
+                  <span class="text-grey">
                     &lt;{{ email.from_address.address }}&gt;
                   </span>
                 </template>
@@ -176,7 +164,7 @@
           <v-spacer />
           <span class="text-grey">{{ email.date }}</span>
         </div>
-        <div v-if="email.to?.length" class="mt-2 text-grey">
+        <div v-if="email.to?.length" class="text-grey">
           {{ $gettext('To') }}
           <v-menu v-for="(rcpt, index) in email.to" :key="`to-${index}`">
             <template #activator="{ props }">
@@ -296,6 +284,22 @@ const fetchMailContent = () => {
         if (email.value.body) {
           const iframeDoc = iframe.contentDocument
           iframeDoc.write(email.value.body)
+          // Add style to prevent content overflow inside iframe on small screens
+          const style = iframeDoc.createElement('style')
+          style.textContent = `
+            html, body {
+              max-width: 100% !important;
+              overflow-x: hidden !important;
+              word-wrap: break-word !important;
+              word-break: break-word !important;
+              box-sizing: border-box !important;
+            }
+            img, table, video, canvas, svg {
+              max-width: 100% !important;
+              height: auto !important;
+            }
+          `
+          iframeDoc.head.appendChild(style)
           iframeDoc.close()
         }
         // Feed the global top bar with reading progress. The body lives in a
@@ -481,24 +485,42 @@ const editDraft = () => {
   padding: 4px 0 16px;
   border-bottom: 1px solid var(--line-2);
 }
+.email-header > .d-flex {
+  flex-wrap: wrap;
+  row-gap: 4px;
+  align-items: baseline;
+}
 .email-header h2 {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(20px, 2.2vw, 30px);
-  line-height: 1.1;
+  font-size: clamp(16px, 5vw, 24px);
+  line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--fg);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 .email-header h3 {
+  margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 16px;
+  font-size: clamp(11px, 2.8vw, 13px) !important;
   letter-spacing: -0.01em;
   color: var(--fg);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
-.email-header .text-grey {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.03em;
+.email-header h3 span,
+.email-header .text-grey,
+.email-header .text-grey span,
+.email-header a {
+  font-family: var(--font-mono) !important;
+  font-size: clamp(9px, 2.5vw, 11px) !important;
+  letter-spacing: 0.03em !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.email-header > .d-flex > .text-grey {
+  white-space: nowrap !important;
 }
 </style>

@@ -407,7 +407,7 @@ class AccountAPITestCase(ModoAPITestCase):
         data["domains"] = ["test2.com"]
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 400)
-        self.assertIn("domains", response.json())
+        self.assertIn("domains", response.json()["errors"])
         self.assertFalse(core_models.User.objects.filter(username="pwn").exists())
 
         # An owned domain is still accepted.

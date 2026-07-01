@@ -1,11 +1,5 @@
 <template>
   <div class="dashboard">
-    <SectionHeader
-      num="00"
-      :eyebrow="$gettext('Dashboard')"
-      :title="welcomeMsg"
-    />
-
     <GlobalStatisticsWidget v-if="isSuperAdmin" class="mb-10" />
 
     <v-row>
@@ -22,7 +16,6 @@ import { computed, onMounted, ref } from 'vue'
 import { useGettext } from 'vue3-gettext'
 import { useAuthStore } from '@/stores'
 
-import SectionHeader from '@/components/shared/SectionHeader.vue'
 import GlobalStatisticsWidget from '@/components/admin/dashboard/GlobalStatisticsWidget'
 import NewsFeedWidget from '@/components/admin/dashboard/NewsFeedWidget'
 import parametersApi from '@/api/parameters'

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div ref="toolbar" class="mt-4">
+    <div ref="toolbar" class="mt-4 editor-toolbar">
       <slot name="append-toolbar"></slot>
       <v-btn-toggle
         v-if="editor"
@@ -143,6 +143,27 @@ watch(
 </script>
 
 <style lang="scss">
+/* On narrow screens the formatting toolbar becomes a single horizontally
+   scrollable strip instead of wrapping into rows that eat the viewport
+   (the composer competes with the on-screen keyboard for height). */
+@media (max-width: 960px) {
+  .editor-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .editor-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+  .editor-toolbar .v-btn-toggle,
+  .editor-toolbar .v-btn-group {
+    flex: 0 0 auto;
+  }
+}
+
 .tiptap {
   flex-grow: 1;
   :first-child {

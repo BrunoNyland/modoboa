@@ -82,7 +82,12 @@
       @open-email="onOpenEmail"
     />
 
-    <v-dialog v-model="showMailboxForm" max-width="800">
+    <v-dialog
+      v-model="showMailboxForm"
+      :fullscreen="mobile"
+      :max-width="mobile ? undefined : 800"
+      :transition="mobile ? 'dialog-bottom-transition' : undefined"
+    >
       <MailboxForm
         :user-mailboxes="userMailboxes"
         :mailbox="editedMailbox"

@@ -214,7 +214,12 @@
         <iframe class="email-frame" />
       </div>
     </div>
-    <v-dialog v-model="showEmailSource" max-width="1200">
+    <v-dialog
+      v-model="showEmailSource"
+      :fullscreen="mobile"
+      :max-width="mobile ? undefined : 1200"
+      :transition="mobile ? 'dialog-bottom-transition' : undefined"
+    >
       <v-card :title="$gettext('Message source')">
         <v-card-text class="text-body-small overflow-x-auto">
           <pre>{{ emailSource }}</pre>
@@ -234,6 +239,7 @@
 <script setup>
 import { nextTick, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useDisplay } from 'vuetify'
 import { useGettext } from 'vue3-gettext'
 import { useBusStore, useProgressStore } from '@/stores'
 import constants from '@/constants.json'
@@ -249,6 +255,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'deleted', 'loaded'])
 
 const { $gettext } = useGettext()
+const { mobile } = useDisplay()
 const { displayNotification, reloadMailboxCounters } = useBusStore()
 const progress = useProgressStore()
 const router = useRouter()

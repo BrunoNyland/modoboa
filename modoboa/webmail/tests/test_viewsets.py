@@ -271,9 +271,15 @@ class UserEmailViewSetTestCase(WebmailTestCase):
         self.authenticate()
         url = reverse("v2:webmail-email-mark-as-junk")
         body = {"source": "INBOX", "selection": [1]}
-        response = self.client.post(url, body, format="json")
+        # Regression: mark_as_junk used to move to the trash folder instead
+        # of the junk folder (copy-paste of the delete action).
+        with mock.patch(
+            "modoboa.webmail.lib.imaputils.IMAPconnector.move"
+        ) as move_mock:
+            response = self.client.post(url, body, format="json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["count"], 1)
+        move_mock.assert_called_once_with("1", "INBOX", "Junk")
 
     def test_mark_as_not_junk(self):
         self.authenticate()

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="webmail-shell">
     <ConnectedLayout>
     <template #navbar>
       <!-- Mobile-only top bar: hosts the hamburger that toggles the drawer. -->
@@ -224,6 +224,27 @@ await fetchUserMailboxes()
 const resp = await api.getUserMailboxQuota(route.query.mailbox || 'INBOX')
 mailboxQuota.value = resp.data
 </script>
+
+<style>
+/* Webmail is an app-shell: bind the layout to the viewport so the message
+   list (and, later, the reading pane) scrolls internally instead of growing
+   the whole page. Vuetify's wrap is `min-height: 100vh` by default, which
+   lets tall content push the page taller than the viewport and defeats the
+   internal scroller. Scoped to the webmail shell so other layouts keep their
+   natural page-scroll behaviour. Non-scoped on purpose (targets Vuetify's
+   generated .v-application__wrap). */
+.webmail-shell .v-application__wrap {
+  height: 100dvh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.webmail-shell .v-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+</style>
 
 <style scoped>
 .resize-handle {

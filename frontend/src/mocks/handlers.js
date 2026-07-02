@@ -6,7 +6,7 @@
  * shape que aquela view espera. O handler catch-all do final evita que a app
  * quebre em endpoints ainda não mockados (e avisa no console).
  */
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse, delay } from 'msw'
 
 import * as fx from './fixtures'
 
@@ -315,7 +315,11 @@ export const handlers = [
     list.splice(0, list.length)
     return json({ status: 'ok' })
   }),
-  http.get('*/webmail/emails/', ({ request }) => {
+  http.get('*/webmail/emails/', async ({ request }) => {
+    // Realistic latency: real IMAP FETCH is not instant, and it also lets
+    // <v-infinite-scroll> settle between pages instead of draining the whole
+    // mailbox on mount (matches production behaviour).
+    await delay(300)
     const url = new URL(request.url)
     const mailbox = url.searchParams.get('mailbox') || 'INBOX'
     const page = Number(url.searchParams.get('page') || '1')

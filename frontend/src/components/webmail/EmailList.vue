@@ -176,7 +176,10 @@
             v-for="email in store.emails"
             :key="email.imapid"
             class="email-row"
-            :class="{ 'email-row--unseen': email.style === 'unseen' }"
+            :class="{
+              'email-row--unseen': email.style === 'unseen',
+              'email-row--active': email.imapid === activeMailid,
+            }"
             draggable="true"
             @dragstart="onDragStart(email)"
           >
@@ -328,7 +331,15 @@ const props = defineProps({
     type: String,
     default: 'INBOX',
   },
+  // imapid of the message currently open in the reading pane (desktop split
+  // view); highlights the matching row.
+  activeMailid: {
+    type: String,
+    default: null,
+  },
 })
+
+const emit = defineEmits(['open-email'])
 
 const { $gettext, $ngettext } = useGettext()
 const { displayNotification, reloadMailboxCounters } = useBusStore()
@@ -443,10 +454,7 @@ const saveScroll = () => {
 
 const openEmail = (emailid) => {
   saveScroll()
-  router.push({
-    name: 'EmailView',
-    query: { mailbox: props.mailbox, mailid: emailid },
-  })
+  emit('open-email', emailid)
 }
 
 // Fetch the next page and append it. Guarded so only one request is in flight;
@@ -771,6 +779,14 @@ watch(
   bottom: 0;
   width: 2px;
   background: var(--accent);
+}
+/* Row open in the reading pane (desktop split view). */
+.email-row--active {
+  background: rgba(124, 92, 255, 0.12);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.email-row--active:hover {
+  background: rgba(124, 92, 255, 0.16);
 }
 .email-row__actions {
   display: flex;

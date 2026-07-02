@@ -134,6 +134,16 @@
           :loading="working"
           @click="saveDraft"
         />
+        <span v-if="autosaving" class="draft-indicator" role="status">
+          {{ $gettext('Saving…') }}
+        </span>
+        <span
+          v-else-if="draftSavedAt"
+          class="draft-indicator"
+          role="status"
+        >
+          {{ $gettext('Draft saved at %{ time }', { time: draftSavedAt }) }}
+        </span>
       </v-toolbar>
       <v-form ref="formRef" class="flex-grow-1 d-flex flex-column">
         <div class="d-flex flex-column gap-3 mb-4">
@@ -267,7 +277,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDisplay } from 'vuetify'
 import { useGettext } from 'vue3-gettext'
@@ -306,6 +316,13 @@ const btnSize = computed(() => (mobile.value ? 44 : 36))
 const allowedSenders = ref([])
 const attachmentCount = ref(0)
 const contacts = ref([])
+// IMAP uid of the draft backing this composition. The backend's save action
+// deletes the previous draft and pushes a new one, returning the NEW uid —
+// it must be threaded into every subsequent save or each save duplicates
+// the draft.
+const draftMailid = ref(route.query.mailid || null)
+const draftSavedAt = ref(null)
+const autosaving = ref(false)
 const editorMode = ref('plain')
 const form = ref({})
 const formRef = ref()
@@ -375,8 +392,8 @@ const prepareMessage = () => {
     }
     result.bcc = bcc
   }
-  if (route.query.mailid) {
-    result.mailid = route.query.mailid
+  if (draftMailid.value) {
+    result.mailid = draftMailid.value
   }
   return result
 }
@@ -390,6 +407,13 @@ const submit = async (reload) => {
   const body = prepareMessage()
   try {
     await api.sendEmailFromComposeSession(route.query.uid, body)
+    // The message went out: drop the backing draft (autosaved or manually
+    // saved), otherwise every sent email leaves a stale copy in Drafts.
+    if (draftMailid.value) {
+      api
+        .deleteSelection(constants.DRAFTS_FOLDER, [draftMailid.value])
+        .catch(() => {})
+    }
     router.push({ name: 'MailboxView' })
     const msg = body.scheduled_datetime
       ? $gettext('Email scheduled')
@@ -465,6 +489,10 @@ const initialize = async (body) => {
     }
   }
   editorMode.value = body.editor_format
+  // Baseline for autosave: whatever the form holds after initial population
+  // (loaded draft, reply quote, signature) is "already saved" — only real
+  // user edits from here on trigger a save.
+  lastSavedSnapshot = draftSnapshot()
 }
 
 const openSchedulingForm = () => {
@@ -482,17 +510,76 @@ const closeSchedulingForm = () => {
   showSchedulingForm.value = false
 }
 
-const saveDraft = async () => {
-  working.value = true
-  const body = prepareMessage()
+// ----- draft persistence (manual + autosave) -----
+// Snapshot of the last state written to the server; used to skip no-op saves
+// (including the initial form population / signature insertion).
+let lastSavedSnapshot = null
+
+const draftSnapshot = () => JSON.stringify(prepareMessage())
+
+const formHasContent = () =>
+  Boolean(
+    form.value.subject ||
+      form.value.body ||
+      form.value.to?.length ||
+      form.value.cc?.length ||
+      form.value.bcc?.length
+  )
+
+const persistDraft = async () => {
+  if (!route.query.uid) {
+    return
+  }
+  const snapshot = draftSnapshot()
+  if (snapshot === lastSavedSnapshot) {
+    return
+  }
+  autosaving.value = true
   try {
-    await api.saveComposeSession(route.query.uid, body)
+    const body = prepareMessage()
+    const resp = await api.saveComposeSession(route.query.uid, body)
+    // Thread the new uid into the next save, or every save duplicates the
+    // draft server-side.
+    if (resp?.data?.mailid) {
+      draftMailid.value = resp.data.mailid
+    }
+    lastSavedSnapshot = snapshot
+    draftSavedAt.value = new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
   } catch (error) {
     console.log(error)
+  } finally {
+    autosaving.value = false
+  }
+}
+
+const saveDraft = async () => {
+  working.value = true
+  try {
+    await persistDraft()
   } finally {
     working.value = false
   }
 }
+
+// Autosave: 3s after the last edit. Skips until the initial population
+// (draft/reply/signature) has been snapshotted, while sending, and when the
+// form has no content yet; persistDraft itself skips no-op saves.
+const autosave = debounce(() => {
+  if (lastSavedSnapshot === null || working.value || !formHasContent()) {
+    return
+  }
+  persistDraft()
+}, 3000)
+
+watch(form, () => autosave(), { deep: true })
+
+onUnmounted(() => {
+  // Don't let a pending autosave fire after send/navigation.
+  autosave.clear?.()
+})
 
 const getItemTitle = (item) => {
   if (typeof item === 'string') {
@@ -542,5 +629,14 @@ api.getAllowedSenders().then((resp) => {
   flex-wrap: wrap;
   row-gap: 8px;
   padding-block: 8px;
+}
+/* Subtle autosave status next to the save-draft button. */
+.draft-indicator {
+  margin-left: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--fg-mute);
+  white-space: nowrap;
 }
 </style>

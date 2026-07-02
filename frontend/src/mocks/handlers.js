@@ -482,7 +482,36 @@ export const handlers = [
     }
   ),
   http.post('*/webmail/compose-sessions/:uid/send/', () => json({ status: 'ok' })),
-  http.post('*/webmail/compose-sessions/:uid/save/', () => json({ status: 'ok' })),
+  // Como o backend real: salvar apaga o rascunho anterior (se `mailid` veio
+  // no corpo) e cria um novo com UID NOVO na pasta Drafts, devolvendo esse
+  // uid. Salvar repetidamente SEM repassar o mailid retornado duplica o
+  // rascunho — igual ao IMAP de verdade.
+  http.post('*/webmail/compose-sessions/:uid/save/', async ({ request }) => {
+    const body = await request.json()
+    if (body.mailid) {
+      webmailTake('Drafts', [body.mailid])
+    }
+    const drafts = webmailBox('Drafts')
+    const mailid =
+      drafts.reduce((mx, m) => Math.max(mx, Number(m.imapid)), 0) + 1
+    drafts.unshift({
+      imapid: String(mailid),
+      subject: body.subject || '(sem assunto)',
+      from_address: {
+        fulladdress: body.sender,
+        name: '',
+        address: body.sender,
+      },
+      date: new Date().toISOString(),
+      size: (body.body || '').length + 512,
+      style: 'unseen',
+      answered: false,
+      forwarded: false,
+      flagged: false,
+      attachments: false,
+    })
+    return json({ ...body, mailid })
+  }),
 
   // ----- admin (amostras) -----
   http.get('*/domains/', () => json(fx.domains)),

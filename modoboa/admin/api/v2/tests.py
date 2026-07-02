@@ -1,6 +1,8 @@
 """API v2 tests."""
 
 from django.core.files.base import ContentFile
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils.encoding import force_str
 
@@ -192,6 +194,23 @@ domainalias; domalias1.com; domain1.com; True
         self.assertCountEqual(
             expected_response, force_str(response.content.strip()).split("\r\n")
         )
+
+    def test_export_domains_query_count_is_constant(self):
+        """Domain export must not run one query per domain alias (N+1)."""
+        dom = models.Domain.objects.get(name="test.com")
+        factories.DomainAliasFactory(name="alias.test", target=dom)
+        with CaptureQueriesContext(connection) as ctx:
+            self.client.get(reverse("v2:domain-export"))
+        baseline = len(ctx.captured_queries)
+        # Add more domains, each with its own alias. With prefetch_related the
+        # domain aliases are loaded in a single extra query, so the total query
+        # count stays constant; without it, it would grow by one per domain.
+        for i in range(5):
+            extra = factories.DomainFactory(name=f"extra{i}.test")
+            factories.DomainAliasFactory(name=f"a{i}.test", target=extra)
+        with CaptureQueriesContext(connection) as ctx:
+            self.client.get(reverse("v2:domain-export"))
+        self.assertEqual(len(ctx.captured_queries), baseline)
 
 
 class AccountViewSetTestCase(ModoAPITestCase):

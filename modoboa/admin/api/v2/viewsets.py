@@ -136,7 +136,10 @@ class DomainViewSet(
     def export(self, request, **kwargs):
         """Export domains and aliases to CSV."""
         result = []
-        for domain in self.get_queryset():
+        # `to_csv_rows()` iterates `domain.domainalias_set.all()`; prefetch it
+        # so the export stays O(1) queries instead of one per domain (N+1).
+        queryset = self.get_queryset().prefetch_related("domainalias_set")
+        for domain in queryset:
             result += domain.to_csv_rows()
         return response.Response(result)
 

@@ -466,6 +466,13 @@ const editDraft = () => {
   row-gap: 8px;
   padding-block: 8px;
 }
+/* Reading-view actions reach the 44px touch minimum on small screens. */
+@media (max-width: 960px) {
+  .email-view .v-toolbar__content .v-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
 /* The wrapper owns the flex sizing so the iframe can be swapped freely
    inside it without touching the column layout. */
 .email-frame-wrap {

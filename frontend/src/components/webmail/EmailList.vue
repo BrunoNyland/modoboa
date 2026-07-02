@@ -15,6 +15,7 @@
       />
 
       <v-text-field
+        ref="searchField"
         v-model="search"
         prepend-inner-icon="mdi-magnify"
         :placeholder="$gettext('Search in messages')"
@@ -207,6 +208,7 @@
             :class="{
               'email-row--unseen': email.style === 'unseen',
               'email-row--active': email.imapid === activeMailid,
+              'email-row--focus': index === activeIndex,
             }"
             draggable="true"
             @dragstart="onDragStart(email)"
@@ -376,7 +378,9 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['open-email'])
+// 'active-deleted': the message currently open in the reading pane was just
+// deleted from the list side — the host should clear the pane.
+const emit = defineEmits(['open-email', 'active-deleted'])
 
 const { $gettext, $ngettext } = useGettext()
 const { mobile } = useDisplay()
@@ -496,8 +500,89 @@ const saveScroll = () => {
 
 const openEmail = (emailid) => {
   saveScroll()
+  // Keep the keyboard cursor in sync with mouse opens so j/k continues from
+  // the message the user actually read.
+  activeIndex.value = store.emails.findIndex((e) => e.imapid === emailid)
   emit('open-email', emailid)
 }
+
+// ----- keyboard navigation (driven by MailboxView's shortcuts) -----
+// Index of the row the keyboard cursor sits on; -1 = none.
+const activeIndex = ref(-1)
+const searchField = ref(null)
+
+const scrollActiveIntoView = () => {
+  const rows = scroller.value?.querySelectorAll('.email-row')
+  rows?.[activeIndex.value]?.scrollIntoView({ block: 'nearest' })
+}
+
+const moveActive = (delta) => {
+  if (!store.emails.length) {
+    return
+  }
+  const next =
+    activeIndex.value === -1
+      ? 0
+      : Math.min(Math.max(activeIndex.value + delta, 0), store.emails.length - 1)
+  activeIndex.value = next
+  scrollActiveIntoView()
+  // Keep j flowing past the loaded pages.
+  if (next >= store.emails.length - 3) {
+    loadMore()
+  }
+  // With a message open in the reading pane, j/k means next/previous message
+  // (Outlook-style); with no message open it only moves the highlight.
+  if (props.activeMailid) {
+    openEmail(store.emails[next].imapid)
+  }
+}
+
+const openActive = () => {
+  const row = store.emails[activeIndex.value]
+  if (row) {
+    openEmail(row.imapid)
+  }
+}
+
+const toggleActiveSelection = () => {
+  const row = store.emails[activeIndex.value]
+  if (!row) {
+    return
+  }
+  const i = webmailStore.selection.indexOf(row.imapid)
+  if (i === -1) {
+    webmailStore.selection = [...webmailStore.selection, row.imapid]
+  } else {
+    webmailStore.selection = webmailStore.selection.filter(
+      (id) => id !== row.imapid
+    )
+  }
+}
+
+const deleteActiveOrSelection = () => {
+  if (webmailStore.selection.length) {
+    deleteSelection()
+    return
+  }
+  const row = store.emails[activeIndex.value]
+  if (row) {
+    // Same optimistic delete + Undo snackbar as swipe.
+    swipeDelete(row)
+    activeIndex.value = Math.min(activeIndex.value, store.emails.length - 1)
+  }
+}
+
+const focusSearch = () => {
+  searchField.value?.focus()
+}
+
+defineExpose({
+  moveActive,
+  openActive,
+  toggleActiveSelection,
+  deleteActiveOrSelection,
+  focusSearch,
+})
 
 // ----- swipe gestures (touch) -----
 const commitDelete = (entry) => {
@@ -532,6 +617,11 @@ const swipeDelete = (email) => {
   store.removeEmails([email.imapid])
   entry.timer = setTimeout(() => commitDelete(entry), 5000)
   pendingDeletes.value.push(entry)
+  if (props.activeMailid === email.imapid) {
+    // The message being read was just deleted from the list: clear the pane
+    // (replying to a deleted message would 404).
+    emit('active-deleted')
+  }
   displayNotification({
     msg: $gettext('Message deleted'),
     timeout: 5000,
@@ -598,6 +688,7 @@ const reloadListing = () => {
     search.value = ''
   }
   store.resetListing(props.mailbox, search.value)
+  activeIndex.value = -1
   nextTick(() => {
     if (scroller.value) {
       scroller.value.scrollTop = 0
@@ -664,10 +755,14 @@ const deleteSelection = () => {
     return
   }
   working.value = true
+  const deletesActive = webmailStore.selection.includes(props.activeMailid)
   api.deleteSelection(currentMailbox.value, webmailStore.selection).then(() => {
     working.value = false
     webmailStore.selection = []
     displayNotification({ msg: $gettext('Message(s) deleted') })
+    if (deletesActive) {
+      emit('active-deleted')
+    }
     reloadListing()
     reloadMailboxCounters()
   })
@@ -896,6 +991,12 @@ watch(
   width: 2px;
   background: var(--accent);
 }
+/* Keyboard cursor (j/k): inset hairline ring, distinct from the opened-row
+   background highlight. */
+.email-row--focus {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
 /* Row open in the reading pane (desktop split view). */
 .email-row--active {
   background: rgba(124, 92, 255, 0.12);
@@ -1015,13 +1116,25 @@ watch(
     display: none;
   }
   .email-row {
-    /* Taller rows = comfortable tap targets. */
+    /* Taller rows = comfortable tap targets (WCAG 2.5.8). */
     padding: 10px 12px 10px 8px;
     align-items: center;
+    min-height: 56px;
   }
   .email-row :deep(.v-input__control) {
     display: flex;
     align-items: center;
+  }
+  /* Row checkbox: a full 44px hit area, not just the 24px glyph. */
+  .email-row__actions :deep(.v-selection-control) {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+  /* Toolbar action buttons reach the 44px minimum too. */
+  .email-toolbar :deep(.v-btn) {
+    min-width: 44px;
+    min-height: 44px;
   }
   .email-row__actions {
     display: flex;
@@ -1059,12 +1172,15 @@ watch(
     flex: 1 1 auto;
     min-width: 0;
     margin-right: 8px;
+    /* Readable floor on small screens (9px was too small). */
+    font-size: 11px;
   }
   .email-row__flags {
     margin-top: 0;
     display: flex;
     align-items: center;
     gap: 6px;
+    font-size: 11px;
   }
   .email-row__flags :deep(.v-icon) {
     font-size: 12px;

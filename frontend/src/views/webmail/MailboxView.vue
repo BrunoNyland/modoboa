@@ -46,9 +46,11 @@
     <div v-if="!mobile" class="mailbox-split">
       <div class="mailbox-split__list" :style="{ width: listPaneWidth + 'px' }">
         <EmailList
+          ref="listRef"
           :mailbox="currentMailbox"
           :active-mailid="openedMailid"
           @open-email="onOpenEmail"
+          @active-deleted="clearOpenedMail"
         />
       </div>
       <div
@@ -97,6 +99,7 @@
       />
     </v-dialog>
     <ConfirmDialog ref="confirm" />
+    <ShortcutHelpDialog v-model="showShortcutHelp" :bindings="shortcuts" />
   </div>
 </template>
 
@@ -109,8 +112,10 @@ import { useBusStore, useWebmailStore } from '@/stores'
 import EmailList from '@/components/webmail/EmailList.vue'
 import EmailContent from '@/components/webmail/EmailContent.vue'
 import MailboxForm from '@/components/webmail/MailboxForm.vue'
+import ShortcutHelpDialog from '@/components/webmail/ShortcutHelpDialog.vue'
 import EmptyState from '@/components/tools/EmptyState.vue'
 import ConfirmDialog from '@/components/tools/ConfirmDialog.vue'
+import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
 import api from '@/api/webmail'
 
 const { $gettext } = useGettext()
@@ -121,13 +126,76 @@ const busStore = useBusStore()
 const webmailStore = useWebmailStore()
 
 const confirm = ref()
+const listRef = ref(null)
 const userMailboxes = ref([])
 const hdelimiter = ref(null)
 const editedMailbox = ref(null)
 const showMailboxForm = ref(false)
+const showShortcutHelp = ref(false)
 
 const currentMailbox = computed(() => route.query.mailbox || 'INBOX')
 const openedMailid = computed(() => route.query.mailid || null)
+
+// ----- keyboard shortcuts (desktop only) -----
+const shortcuts = useKeyboardShortcuts(
+  [
+    {
+      keys: ['c'],
+      description: $gettext('Compose a new message'),
+      handler: () => router.push({ name: 'ComposeEmailView' }),
+    },
+    {
+      keys: ['/'],
+      description: $gettext('Focus the search field'),
+      handler: () => listRef.value?.focusSearch(),
+    },
+    {
+      keys: ['j'],
+      description: $gettext('Next message'),
+      handler: () => listRef.value?.moveActive(1),
+    },
+    {
+      keys: ['k'],
+      description: $gettext('Previous message'),
+      handler: () => listRef.value?.moveActive(-1),
+    },
+    {
+      keys: ['Enter', 'o'],
+      description: $gettext('Open the highlighted message'),
+      handler: () => listRef.value?.openActive(),
+    },
+    {
+      keys: ['x'],
+      description: $gettext('Select/unselect the highlighted message'),
+      handler: () => listRef.value?.toggleActiveSelection(),
+    },
+    {
+      keys: ['#', 'Delete'],
+      description: $gettext('Delete the selection or highlighted message'),
+      handler: () => listRef.value?.deleteActiveOrSelection(),
+    },
+    {
+      keys: ['r'],
+      description: $gettext('Reply to the open message'),
+      handler: () => {
+        if (openedMailid.value) {
+          router.push({
+            name: 'ReplyEmailView',
+            query: { mailbox: currentMailbox.value, mailid: openedMailid.value },
+          })
+        }
+      },
+    },
+    {
+      keys: ['?'],
+      description: $gettext('Show this help'),
+      handler: () => {
+        showShortcutHelp.value = true
+      },
+    },
+  ],
+  { enabled: computed(() => !mobile.value) }
+)
 
 // ----- reading pane width (desktop), persisted -----
 const LIST_WIDTH_KEY = 'webmail.listPaneWidth'
@@ -176,6 +244,15 @@ const onPaneDeleted = () => {
     query: { mailbox: currentMailbox.value },
   })
   webmailStore.listingKey++
+}
+
+// A list-side delete removed the message that was open in the pane: just
+// clear the pane (the list already updated itself optimistically).
+const clearOpenedMail = () => {
+  router.replace({
+    name: 'MailboxView',
+    query: { mailbox: currentMailbox.value },
+  })
 }
 
 const onPaneLoaded = () => {

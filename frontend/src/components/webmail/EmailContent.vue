@@ -1,0 +1,538 @@
+<template>
+  <div class="h-100">
+    <div
+      v-show="loaded"
+      class="email-view bg-background h-100 d-flex flex-column"
+    >
+      <v-toolbar>
+        <v-btn
+          v-if="showBackButton"
+          icon="mdi-arrow-left"
+          size="small"
+          variant="tonal"
+          :title="$gettext('Back')"
+          :aria-label="$gettext('Back')"
+          @click="emit('close')"
+        />
+
+        <div class="d-flex align-center flex-shrink-0">
+          <v-btn
+            prepend-icon="mdi-reply"
+            height="36"
+            variant="tonal"
+            color="primary"
+            @click="() => replyToEmail()"
+          >
+            {{ $gettext('Reply') }}
+          </v-btn>
+          <v-btn
+            height="36"
+            width="24"
+            icon
+            variant="tonal"
+            color="primary"
+            :title="$gettext('More reply options')"
+            :aria-label="$gettext('More reply options')"
+          >
+            <v-icon icon="mdi-chevron-down" />
+            <v-menu activator="parent">
+              <v-list>
+                <v-list-item
+                  :title="$gettext('Reply all')"
+                  @click="() => replyToEmail(true)"
+                />
+                <v-list-item
+                  :title="$gettext('Forward')"
+                  @click="forwardEmail"
+                />
+              </v-list>
+            </v-menu>
+          </v-btn>
+        </div>
+        <template v-if="mailbox !== 'Scheduled'">
+          <v-btn
+            class="ml-2"
+            color="error"
+            variant="tonal"
+            icon="mdi-trash-can"
+            size="small"
+            :title="$gettext('Delete')"
+            :aria-label="$gettext('Delete')"
+            :loading="working"
+            @click="deleteEmail"
+          >
+          </v-btn>
+          <v-btn
+            v-if="mailbox === 'Trash'"
+            class="ml-2"
+            color="primary"
+            variant="tonal"
+            icon="mdi-backup-restore"
+            size="small"
+            :title="$gettext('Restore to Inbox')"
+            :aria-label="$gettext('Restore to Inbox')"
+            :loading="working"
+            @click="restoreEmail"
+          >
+          </v-btn>
+          <v-btn
+            v-else-if="mailbox === 'Junk'"
+            class="ml-2"
+            color="success"
+            variant="tonal"
+            icon="mdi-thumb-up"
+            size="small"
+            :title="$gettext('Mark as not junk')"
+            :aria-label="$gettext('Mark as not junk')"
+            :loading="working"
+            @click="markEmailAsNotJunk"
+          >
+          </v-btn>
+          <v-btn
+            v-else
+            class="ml-2"
+            color="warning"
+            variant="tonal"
+            icon="mdi-alert-octagon-outline"
+            size="small"
+            :title="$gettext('Mark as junk')"
+            :aria-label="$gettext('Mark as junk')"
+            :loading="working"
+            @click="markEmailAsJunk"
+          >
+          </v-btn>
+          <v-btn
+            v-if="mailbox === constants.DRAFTS_FOLDER"
+            class="ml-2"
+            variant="tonal"
+            icon="mdi-pencil"
+            size="small"
+            :title="$gettext('Edit draft')"
+            :aria-label="$gettext('Edit draft')"
+            @click="editDraft"
+          >
+          </v-btn>
+        </template>
+        <v-btn
+          class="ml-2"
+          variant="tonal"
+          icon
+          size="small"
+          :title="$gettext('More actions')"
+          :aria-label="$gettext('More actions')"
+        >
+          <v-icon icon="mdi-cog" />
+          <v-menu activator="parent">
+            <v-list density="compact">
+              <v-list-item
+                v-if="!enableLinks"
+                :title="$gettext('Enable links')"
+                @click="enableLinks = true"
+              />
+              <v-list-item
+                v-else
+                :title="$gettext('Disable links')"
+                @click="enableLinks = false"
+              />
+              <v-list-item
+                :title="$gettext('Display source')"
+                @click="openEmailSourceDialog"
+              />
+            </v-list>
+          </v-menu>
+        </v-btn>
+      </v-toolbar>
+
+      <div v-if="email" class="email-header">
+        <h2>{{ email.subject }}</h2>
+        <div class="d-flex">
+          <v-menu key="sender">
+            <template #activator="{ props: menuProps }">
+              <h3 v-bind="menuProps">
+                <template v-if="email.from_address.name">
+                  {{ email.from_address.name }}
+                  <span class="text-grey">
+                    &lt;{{ email.from_address.address }}&gt;
+                  </span>
+                </template>
+                <template v-else>
+                  {{ email.from_address.address }}
+                </template>
+              </h3>
+            </template>
+            <ContactCard v-model="email.from_address" />
+          </v-menu>
+          <v-spacer />
+          <span class="text-grey">{{ email.date }}</span>
+        </div>
+        <div v-if="email.to?.length" class="text-grey">
+          {{ $gettext('To') }}
+          <v-menu v-for="(rcpt, index) in email.to" :key="`to-${index}`">
+            <template #activator="{ props: menuProps }">
+              <span v-if="index > 0">, </span>
+              <span v-bind="menuProps">{{ rcpt.name || rcpt.address }}</span>
+            </template>
+            <ContactCard v-model="email.to[index]" />
+          </v-menu>
+          <template v-if="email.cc?.length">
+            <v-menu v-for="(rcpt, index) in email.cc" :key="`cc-${index}`">
+              <template #activator="{ props: menuProps }">
+                <span>, </span>
+                <span v-bind="menuProps">{{ rcpt.name || rcpt.address }}</span>
+              </template>
+              <ContactCard v-model="email.cc[index]" />
+            </v-menu>
+          </template>
+        </div>
+        <div v-if="email.attachments?.length" class="mt-2">
+          <v-icon icon="mdi-paperclip" />
+          <template
+            v-for="(attachment, index) in email.attachments"
+            :key="attachment.name"
+          >
+            <template v-if="index > 0">, </template>
+            <a
+              href="#"
+              @click="downloadAttachment(attachment.name, attachment.partnum)"
+            >
+              {{ attachment.name }}
+            </a>
+          </template>
+        </div>
+      </div>
+      <v-alert
+        v-if="email?.scheduled_datetime"
+        type="info"
+        variant="tonal"
+        density="compact"
+        class="mx-1"
+      >
+        {{ $gettext('Message scheduled at:') }}
+        {{ $date(email.scheduled_datetime) }}
+      </v-alert>
+      <div ref="frameWrapper" class="email-frame-wrap">
+        <iframe class="email-frame" />
+      </div>
+    </div>
+    <v-dialog v-model="showEmailSource" max-width="1200">
+      <v-card :title="$gettext('Message source')">
+        <v-card-text class="text-body-small overflow-x-auto">
+          <pre>{{ emailSource }}</pre>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            :text="$gettext('Close')"
+            @click="showEmailSource = false"
+          ></v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
+</template>
+
+<script setup>
+import { nextTick, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useGettext } from 'vue3-gettext'
+import { useBusStore, useProgressStore } from '@/stores'
+import constants from '@/constants.json'
+import api from '@/api/webmail'
+import ContactCard from '@/components/webmail/ContactCard.vue'
+
+const props = defineProps({
+  mailbox: { type: String, required: true },
+  mailid: { type: String, required: true },
+  showBackButton: { type: Boolean, default: true },
+})
+
+const emit = defineEmits(['close', 'deleted', 'loaded'])
+
+const { $gettext } = useGettext()
+const { displayNotification, reloadMailboxCounters } = useBusStore()
+const progress = useProgressStore()
+const router = useRouter()
+
+const enableLinks = ref(false)
+const email = ref(null)
+const emailSource = ref(null)
+const frameWrapper = ref(null)
+const loaded = ref(false)
+const showEmailSource = ref(false)
+const working = ref(false)
+
+onMounted(() => {
+  fetchMailContent()
+})
+
+watch(enableLinks, () => {
+  fetchMailContent()
+})
+
+// The same instance is reused when the opened message changes (split pane,
+// j/k navigation): refetch and drop per-message state. Turning enableLinks
+// off already refetches through its own watcher, so avoid a double fetch.
+watch(
+  () => props.mailid,
+  () => {
+    emailSource.value = null
+    showEmailSource.value = false
+    if (enableLinks.value) {
+      enableLinks.value = false
+    } else {
+      fetchMailContent()
+    }
+  }
+)
+
+const fetchMailContent = () => {
+  const options = {
+    dformat: 'html',
+    links: enableLinks.value ? '1' : '0',
+  }
+  api.getEmailContent(props.mailbox, props.mailid, options).then((resp) => {
+    reloadMailboxCounters()
+    email.value = resp.data
+    nextTick(() => {
+      if (!frameWrapper.value) {
+        return
+      }
+      // Rebuild the iframe on every fetch: writing into a fresh document is
+      // the only reliable way to reset scripts/styles from the previous
+      // message. Scoped to this component's wrapper (never a global query).
+      const iframe = document.createElement('iframe')
+      iframe.classList.add('email-frame')
+      frameWrapper.value.replaceChildren(iframe)
+      if (email.value.body) {
+        const iframeDoc = iframe.contentDocument
+        iframeDoc.write(email.value.body)
+        // Add style to prevent content overflow inside iframe on small screens
+        const style = iframeDoc.createElement('style')
+        style.textContent = `
+          html, body {
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+            word-wrap: break-word !important;
+            word-break: break-word !important;
+            box-sizing: border-box !important;
+          }
+          img, table, video, canvas, svg {
+            max-width: 100% !important;
+            height: auto !important;
+          }
+        `
+        iframeDoc.head.appendChild(style)
+        iframeDoc.close()
+      }
+      // Feed the global top bar with reading progress. The body lives in a
+      // separate iframe document, so its scroll never reaches the parent's
+      // capture-phase listener — bind it here (re-bound on every fetch since
+      // the iframe element is replaced above).
+      progress.setScroll(0)
+      bindIframeScroll(iframe)
+      loaded.value = true
+      emit('loaded', email.value)
+    })
+  })
+}
+
+const bindIframeScroll = (iframe) => {
+  const win = iframe.contentWindow
+  if (!win) {
+    return
+  }
+  win.addEventListener(
+    'scroll',
+    () => {
+      const doc =
+        iframe.contentDocument?.scrollingElement ||
+        iframe.contentDocument?.documentElement
+      if (!doc) {
+        return
+      }
+      const max = doc.scrollHeight - doc.clientHeight
+      progress.setScroll(max > 0 ? doc.scrollTop / max : 0)
+    },
+    { passive: true }
+  )
+}
+
+const downloadAttachment = (name, part) => {
+  api.getEmailAttachment(props.mailbox, props.mailid, part).then((resp) => {
+    const blob = new Blob([resp.data], { type: resp.headers['Content-Type'] })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = name
+    link.click()
+    URL.revokeObjectURL(link.href)
+  })
+}
+
+const deleteEmail = () => {
+  working.value = true
+  api.deleteSelection(props.mailbox, [props.mailid]).then(() => {
+    working.value = false
+    displayNotification({ msg: $gettext('Message deleted') })
+    reloadMailboxCounters()
+    emit('deleted')
+  })
+}
+
+const restoreEmail = () => {
+  working.value = true
+  api.moveSelection(props.mailbox, 'INBOX', [props.mailid]).then(() => {
+    working.value = false
+    displayNotification({ msg: $gettext('Message restored to Inbox') })
+    reloadMailboxCounters()
+    emit('deleted')
+  })
+}
+
+const markEmailAsJunk = () => {
+  working.value = true
+  api.markSelectionAsJunk(props.mailbox, [props.mailid]).then(() => {
+    working.value = false
+    displayNotification({ msg: $gettext('Message marked as junk') })
+    reloadMailboxCounters()
+    emit('deleted')
+  })
+}
+
+const markEmailAsNotJunk = () => {
+  working.value = true
+  api.markSelectionAsNotJunk(props.mailbox, [props.mailid]).then(() => {
+    working.value = false
+    displayNotification({ msg: $gettext('Message marked as not junk') })
+    reloadMailboxCounters()
+    emit('deleted')
+  })
+}
+
+const openEmailSourceDialog = async () => {
+  if (!emailSource.value) {
+    const resp = await api.getEmailSource(props.mailbox, props.mailid)
+    emailSource.value = resp.data.source
+  }
+  showEmailSource.value = true
+}
+
+const replyToEmail = (all) => {
+  const query = { mailbox: props.mailbox, mailid: props.mailid }
+  if (all) {
+    query.all = all
+  }
+  router.push({ name: 'ReplyEmailView', query })
+}
+
+const forwardEmail = () => {
+  router.push({
+    name: 'ForwardEmailView',
+    query: { mailbox: props.mailbox, mailid: props.mailid },
+  })
+}
+
+const editDraft = () => {
+  router.push({
+    name: 'ComposeEmailView',
+    query: { mailid: props.mailid },
+  })
+}
+</script>
+
+<style>
+/* The view is a flex column: toolbar + header + (optional alert) in flow,
+   then the message frame fills whatever height is left. No JS positioning,
+   so the body never slides up from the bottom or fails to anchor. */
+.email-view {
+  height: 100%;
+  min-height: 0;
+}
+/* Let the action toolbar wrap to a second line when the buttons don't fit
+   (e.g. longer labels in pt-BR like "RESPONDER") instead of forcing a
+   horizontal scrollbar. */
+.email-view .v-toolbar,
+.email-view .v-toolbar__content {
+  height: auto !important;
+}
+.email-view .v-toolbar__content {
+  flex-wrap: wrap;
+  row-gap: 8px;
+  padding-block: 8px;
+}
+/* The wrapper owns the flex sizing so the iframe can be swapped freely
+   inside it without touching the column layout. */
+.email-frame-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.email-frame {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  margin-top: 12px;
+  overflow-y: auto;
+  border: none;
+  /* The rendered email keeps a light canvas (messages assume white). */
+  background-color: #fff;
+  /* Soft fade-in instead of an abrupt white pop. */
+  animation: email-frame-in 0.3s ease both;
+}
+
+@keyframes email-frame-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Message header is app chrome, not email content. Flush with the content
+   edge (no side padding) so the subject lines up with the body below; a
+   single bottom rule separates it from the rendered email. */
+.email-header {
+  padding: 4px 0 16px;
+  border-bottom: 1px solid var(--line-2);
+}
+.email-header > .d-flex {
+  flex-wrap: wrap;
+  row-gap: 4px;
+  align-items: baseline;
+}
+.email-header h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(16px, 5vw, 24px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.email-header h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(11px, 2.8vw, 13px) !important;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.email-header h3 span,
+.email-header .text-grey,
+.email-header .text-grey span,
+.email-header a {
+  font-family: var(--font-mono) !important;
+  font-size: clamp(9px, 2.5vw, 11px) !important;
+  letter-spacing: 0.03em !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.email-header > .d-flex > .text-grey {
+  white-space: nowrap !important;
+}
+</style>

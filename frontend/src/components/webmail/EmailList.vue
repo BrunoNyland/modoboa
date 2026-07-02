@@ -26,7 +26,7 @@
         density="compact"
         class="flex-grow-0 w-33 mr-4 search-field"
         clearable
-        @click:clear="fetchEmails"
+        @click:clear="submitSearch"
         @keyup.enter="submitSearch"
       ></v-text-field>
       <v-btn
@@ -148,34 +148,14 @@
         @update:model-value="toggleAllSelection"
       />
       <v-spacer />
-      <div v-if="emails.results" class="d-flex align-center count-nav">
-        <div class="text-body-small mr-2">
-          {{ emails.first_index }}-{{ emails.last_index }} {{ $gettext('on') }}
-          {{ emails.count }}
-        </div>
-        <div>
-          <v-btn
-            icon="mdi-chevron-left"
-            size="x-small"
-            :title="$gettext('Previous page')"
-            :aria-label="$gettext('Previous page')"
-            :disabled="emails.prev_page === null"
-            @click="page = emails.prev_page"
-          />
-          <v-btn
-            icon="mdi-chevron-right"
-            size="x-small"
-            :title="$gettext('Next page')"
-            :aria-label="$gettext('Next page')"
-            :disabled="emails.next_page === null"
-            @click="page = emails.next_page"
-          />
+      <div class="d-flex align-center count-nav">
+        <div class="text-body-small">
+          {{ store.emails.length }} / {{ store.emailCount }}
         </div>
       </div>
     </v-toolbar>
   </v-card>
-  <transition name="fade" mode="out-in">
-    <div v-if="!loading" key="emails-content" class="emails-content">
+    <div class="emails-content">
     <v-alert
       v-if="inScheduledView"
       type="info"
@@ -189,11 +169,11 @@
         )
       }}
     </v-alert>
-    <div class="emails overflow-y-auto">
-      <template v-if="emails.results?.length">
+    <div ref="scroller" class="emails" @scroll="onScroll">
+      <template v-if="store.emails.length">
         <div class="email-list">
           <div
-            v-for="email in emails.results"
+            v-for="email in store.emails"
             :key="email.imapid"
             class="email-row"
             :class="{ 'email-row--unseen': email.style === 'unseen' }"
@@ -287,13 +267,23 @@
           </div>
         </div>
       </template>
-      <v-alert
-        v-else
-        class="mt-4"
-        type="info"
-        :text="$gettext('No message yet in this mailbox')"
-        variant="tonal"
+      <EmptyState
+        v-else-if="showEmpty && search"
+        icon="mdi-magnify"
+        :eyebrow="$gettext('Search')"
+        :title="$gettext('No messages match your search')"
+        :message="$gettext('Try a different term or clear the search to see all messages.')"
       />
+      <EmptyState
+        v-else-if="showEmpty"
+        icon="mdi-inbox"
+        :eyebrow="$gettext('Mailbox')"
+        :title="$gettext('This mailbox is empty')"
+        :message="$gettext('New messages will appear here.')"
+      />
+      <div v-if="loadingMore" class="emails__loader">
+        <v-progress-circular indeterminate size="20" width="2" color="primary" />
+      </div>
     </div>
     <v-dialog v-model="showSchedulingForm" max-width="800">
       <EmailSchedulingForm
@@ -318,19 +308,18 @@
       </v-card>
     </v-dialog>
     </div>
-  </transition>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useDisplay } from 'vuetify'
 import { useGettext } from 'vue3-gettext'
 import { useBusStore, useWebmailStore } from '@/stores'
 import { DateTime } from 'luxon'
 import EmailAddressList from './EmailAddressList.vue'
 import EmailSchedulingForm from './EmailSchedulingForm.vue'
+import EmptyState from '@/components/tools/EmptyState.vue'
 import MenuItems from '@/components/tools/MenuItems.vue'
 import api from '@/api/webmail'
 
@@ -342,22 +331,26 @@ const props = defineProps({
 })
 
 const { $gettext, $ngettext } = useGettext()
-const { mobile } = useDisplay()
 const { displayNotification, reloadMailboxCounters } = useBusStore()
 const webmailStore = useWebmailStore()
+const store = webmailStore
 const router = useRouter()
 const route = useRoute()
 
 const selectedScheduledEmail = ref(null)
-const loading = ref(false)
-const emails = ref({})
-const page = ref(1)
+const scroller = ref(null)
+const loadingMore = ref(false)
 const schedulingError = ref('')
 const search = ref('')
 const selectAll = ref(false)
 const showSchedulingError = ref(false)
 const showSchedulingForm = ref(false)
 const working = ref(false)
+
+// Empty state only once the first load settled with nothing to show.
+const showEmpty = computed(
+  () => store.emails.length === 0 && store.nextPage === null
+)
 
 let intervalId = null
 
@@ -420,7 +413,7 @@ const updateScheduledEmail = async (datetime) => {
     selectedScheduledEmail.value.scheduled_id,
     data
   )
-  fetchEmails()
+  reloadListing()
   displayNotification({ msg: $gettext('Scheduling updated') })
 }
 
@@ -430,7 +423,7 @@ const closeSchedulingForm = () => {
 
 const deleteScheduledMessage = async (email) => {
   await api.deleteScheduledMessage(email.scheduled_id)
-  fetchEmails()
+  reloadListing()
   displayNotification({
     msg: $gettext('Scheduled canceled and message moved to trash folder'),
   })
@@ -442,40 +435,119 @@ const displaySchedulingError = async (email) => {
   showSchedulingError.value = true
 }
 
+const saveScroll = () => {
+  if (scroller.value) {
+    store.listScrollTop = scroller.value.scrollTop
+  }
+}
+
 const openEmail = (emailid) => {
+  saveScroll()
   router.push({
     name: 'EmailView',
     query: { mailbox: props.mailbox, mailid: emailid },
   })
 }
 
-const fetchEmails = () => {
-  emails.value = {}
-  loading.value = true
-  api
-    .getMailboxEmails(props.mailbox, { page: page.value, search: search.value })
-    .then((resp) => {
-      emails.value = resp.data
-      loading.value = false
+// Fetch the next page and append it. Guarded so only one request is in flight;
+// after appending, if the list still doesn't overflow the viewport, keep
+// loading until it does or the mailbox is exhausted (initial viewport fill).
+const loadMore = async () => {
+  if (loadingMore.value || store.nextPage === null) {
+    return
+  }
+  loadingMore.value = true
+  try {
+    const resp = await api.getMailboxEmails(props.mailbox, {
+      page: store.nextPage,
+      search: search.value,
     })
-    .catch(() => {
-      loading.value = false
-    })
+    store.appendPage(resp.data)
+  } finally {
+    loadingMore.value = false
+  }
+  await nextTick()
+  const el = scroller.value
+  if (el && store.nextPage !== null && el.scrollHeight <= el.clientHeight) {
+    loadMore()
+  }
+}
+
+// Load the next page as the user nears the bottom (300px lookahead).
+const onScroll = () => {
+  const el = scroller.value
+  if (!el) {
+    return
+  }
+  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 300) {
+    loadMore()
+  }
+}
+
+// Reset accumulated pages then fetch page 1.
+const reloadListing = () => {
+  if (!search.value) {
+    search.value = ''
+  }
+  store.resetListing(props.mailbox, search.value)
+  nextTick(() => {
+    if (scroller.value) {
+      scroller.value.scrollTop = 0
+    }
+    loadMore()
+  })
+}
+
+// Restore a saved scroll position once the rows have actually laid out.
+// Setting scrollTop too early clamps it to a still-growing scrollHeight, so
+// retry across a few frames until the target is reachable (or we give up).
+const restoreScroll = (target, tries = 40) => {
+  const el = scroller.value
+  if (!el || target <= 0) {
+    return
+  }
+  el.scrollTop = target
+  // Keep retrying until the target is reachable: the route's out-in
+  // transition means the rows may still be settling their height for a few
+  // hundred ms after mount, which would clamp an early scrollTop.
+  if (Math.abs(el.scrollTop - target) > 1 && tries > 0) {
+    requestAnimationFrame(() => restoreScroll(target, tries - 1))
+  }
+}
+
+// Called on mount and mailbox change: restore the cached pages + scroll
+// position when still fresh (back from the reading view on mobile), else
+// start over from page 1.
+const initListing = () => {
+  if (store.isListingFresh(props.mailbox, search.value)) {
+    const target = store.listScrollTop
+    nextTick(() => restoreScroll(target))
+  } else {
+    reloadListing()
+  }
 }
 
 const autoRefreshContent = () => {
-  fetchEmails()
+  // Don't yank the user's position: only refresh when the tab is visible and
+  // they're near the top of the list.
+  if (document.visibilityState !== 'visible') {
+    return
+  }
+  if (scroller.value && scroller.value.scrollTop > 200) {
+    return
+  }
+  reloadListing()
 }
 
 const submitSearch = () => {
-  fetchEmails()
+  reloadListing()
 }
 
 const toggleAllSelection = (value) => {
   if (!value) {
     webmailStore.selection = []
   } else {
-    webmailStore.selection = emails.value.results.map((email) => email.imapid)
+    webmailStore.selection = store.emails.map((email) => email.imapid)
   }
 }
 
@@ -488,7 +560,7 @@ const deleteSelection = () => {
     working.value = false
     webmailStore.selection = []
     displayNotification({ msg: $gettext('Message(s) deleted') })
-    fetchEmails()
+    reloadListing()
     reloadMailboxCounters()
   })
 }
@@ -504,7 +576,7 @@ const restoreSelection = () => {
       working.value = false
       webmailStore.selection = []
       displayNotification({ msg: $gettext('Message(s) restored to Inbox') })
-      fetchEmails()
+      reloadListing()
       reloadMailboxCounters()
     })
 }
@@ -520,7 +592,7 @@ const markSelectionAsJunk = () => {
       working.value = false
       webmailStore.selection = []
       displayNotification({ msg: $gettext('Message(s) marked as junk') })
-      autoRefreshContent()
+      reloadListing()
       reloadMailboxCounters()
     })
 }
@@ -536,7 +608,7 @@ const markSelectionAsNotJunk = () => {
       working.value = false
       webmailStore.selection = []
       displayNotification({ msg: $gettext('Message(s) marked as not junk') })
-      autoRefreshContent()
+      reloadListing()
       reloadMailboxCounters()
     })
 }
@@ -552,16 +624,14 @@ const flagSelection = (status) => {
       working.value = false
       webmailStore.selection = []
       displayNotification({ msg: $gettext('Message(s) flagged') })
-      fetchEmails()
+      reloadListing()
       reloadMailboxCounters()
     })
 }
 
 const emptyMailbox = () => {
-  loading.value = true
   api.emptyUserMailbox(currentMailbox.value).then(() => {
-    emails.value = {}
-    loading.value = false
+    reloadListing()
     reloadMailboxCounters()
   })
 }
@@ -592,19 +662,24 @@ const onDragStart = (email) => {
 }
 
 onMounted(() => {
+  initListing()
   intervalId = setInterval(autoRefreshContent, 300 * 1000)
 })
 
 onUnmounted(() => {
+  // Note: the scroll position is saved in openEmail() at click time, not
+  // here — during route navigation the container can be scrolled/reset before
+  // unmount, which would overwrite the position the user actually left from.
   clearInterval(intervalId)
 })
 
 watch(
   () => props.mailbox,
   () => {
-    fetchEmails()
-  },
-  { immediate: true }
+    // Mailbox switch always starts fresh (also clears search + selection).
+    search.value = ''
+    reloadListing()
+  }
 )
 watch(
   () => webmailStore.selection,
@@ -619,12 +694,9 @@ watch(
 watch(
   () => webmailStore.listingKey,
   () => {
-    fetchEmails()
+    reloadListing()
   }
 )
-watch(page, () => {
-  fetchEmails()
-})
 </script>
 
 <style lang="scss" scoped>
@@ -646,6 +718,12 @@ watch(page, () => {
 .emails {
   flex: 1 1 auto;
   min-height: 0;
+  overflow-y: auto;
+}
+.emails__loader {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
 }
 .clickable {
   cursor: pointer;

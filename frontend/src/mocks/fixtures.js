@@ -80,38 +80,62 @@ export const mailboxes = {
 export const quota = { usage: 25, current: 524288, limit: 2097152 }
 
 // /webmail/emails/?mailbox=INBOX&page=1
-export const emails = {
-  count: 2,
-  first_index: 1,
-  last_index: 2,
-  prev_page: null,
-  next_page: null,
-  results: [
-    {
-      imapid: '2',
-      subject: 'Bem-vindo ao Modoboa (mock)',
-      from_address: { fulladdress: 'noreply@example.com', name: 'Modoboa' },
-      date: '2026-06-24T12:00:00Z',
-      size: 4096,
-      style: 'unseen',
-      answered: false,
-      forwarded: false,
-      flagged: false,
-      attachments: false,
-    },
-    {
-      imapid: '1',
-      subject: 'Relatório semanal',
-      from_address: { fulladdress: 'reports@example.com', name: 'Reports' },
-      date: '2026-06-23T08:30:00Z',
-      size: 20480,
-      style: '',
-      answered: true,
-      forwarded: false,
-      flagged: true,
-      attachments: true,
-    },
-  ],
+// Caixas COM ESTADO, mutáveis pelos handlers (mover/apagar/flag), para o
+// dev:mock exercitar fluxos completos (paginação, swipe, undo...). Os UIDs
+// (imapid) são por caixa e MUDAM quando a mensagem é movida — mesmo contrato
+// do IMAP real (não confie no UID antigo após um move/delete).
+const MOCK_PEOPLE = [
+  ['Modoboa', 'noreply@example.com'],
+  ['Reports', 'reports@example.com'],
+  ['João Silva', 'joao@example.com'],
+  ['Maria Souza', 'maria@example.com'],
+  ['Financeiro', 'financeiro@example.com'],
+  ['Suporte TI', 'suporte@example.com'],
+  ['Newsletter Dev', 'news@devweekly.example'],
+  ['RH', 'rh@example.com'],
+]
+
+const MOCK_TOPICS = [
+  'Relatório semanal de atividades',
+  'Reunião de alinhamento — pauta e horário',
+  'Fatura disponível para download',
+  'Atualização de política interna',
+  'Convite: treinamento de segurança',
+  'Backup concluído com sucesso',
+  'Pendências do projeto Alfa',
+  'Férias — confirmação de período',
+  'Novo chamado aberto no suporte',
+  'Resumo mensal da newsletter',
+]
+
+function makeMessages(count, { unseenEvery = 3 } = {}) {
+  const newest = Date.UTC(2026, 5, 24, 12, 0, 0)
+  const list = []
+  // i decrescente: a primeira mensagem da lista é a mais nova (UID maior).
+  for (let i = count; i >= 1; i--) {
+    const [name, address] = MOCK_PEOPLE[i % MOCK_PEOPLE.length]
+    list.push({
+      imapid: String(i),
+      subject: `${MOCK_TOPICS[i % MOCK_TOPICS.length]} #${i}`,
+      from_address: { fulladdress: `${name} <${address}>`, name, address },
+      date: new Date(newest - (count - i) * 7_200_000).toISOString(),
+      size: 2048 + ((i * 977) % 50000),
+      style: i % unseenEvery === 0 ? 'unseen' : '',
+      answered: i % 5 === 0,
+      forwarded: i % 7 === 0,
+      flagged: i % 6 === 0,
+      attachments: i % 4 === 0,
+    })
+  }
+  return list
+}
+
+export const webmailMessages = {
+  INBOX: makeMessages(42),
+  Drafts: makeMessages(2, { unseenEvery: 999 }),
+  Sent: makeMessages(12, { unseenEvery: 999 }),
+  Junk: makeMessages(4),
+  Trash: makeMessages(6, { unseenEvery: 999 }),
 }
 
 // /domains/

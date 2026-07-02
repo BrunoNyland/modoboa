@@ -6,7 +6,7 @@
  * shape que aquela view espera. O handler catch-all do final evita que a app
  * quebre em endpoints ainda não mockados (e avisa no console).
  */
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse, delay } from 'msw'
 
 import * as fx from './fixtures'
 
@@ -14,6 +14,38 @@ const json = (data, init) => HttpResponse.json(data, init)
 
 // In-memory attachments per compose session (mock mode only).
 const composeSessions = {}
+
+// ----- webmail: helpers das caixas com estado (fx.webmailMessages) -----
+const WEBMAIL_PAGE_SIZE = 20
+
+const webmailBox = (name) => fx.webmailMessages[name] || []
+
+// Remove da caixa de origem as mensagens da seleção (na ordem pedida).
+function webmailTake(mailbox, selection) {
+  const list = webmailBox(mailbox)
+  const taken = []
+  for (const id of selection || []) {
+    const idx = list.findIndex((m) => m.imapid === String(id))
+    if (idx !== -1) {
+      taken.push(list.splice(idx, 1)[0])
+    }
+  }
+  return taken
+}
+
+// Insere mensagens numa caixa destino com UID NOVO — mesmo contrato do IMAP
+// real (o UID antigo deixa de valer após move/delete).
+function webmailAppend(mailbox, messages) {
+  if (!fx.webmailMessages[mailbox]) {
+    fx.webmailMessages[mailbox] = []
+  }
+  const list = fx.webmailMessages[mailbox]
+  let nextId = list.reduce((mx, m) => Math.max(mx, Number(m.imapid)), 0)
+  for (const msg of messages) {
+    nextId += 1
+    list.unshift({ ...msg, imapid: String(nextId) })
+  }
+}
 
 export const handlers = [
   // ----- bootstrap (necessário para a app subir "logada") -----
@@ -254,63 +286,159 @@ export const handlers = [
   ),
 
   // ----- webmail -----
-  http.get('*/webmail/mailboxes/', () => json(fx.mailboxes)),
-  http.get('*/webmail/mailboxes/unseen/', () => json({ counter: 0 })),
+  http.get('*/webmail/mailboxes/', () => {
+    // Contadores derivados do estado atual das caixas mockadas.
+    const mailboxes = fx.mailboxes.mailboxes.map((mb) => {
+      const msgs = fx.webmailMessages[mb.name]
+      if (!msgs) {
+        return mb
+      }
+      return {
+        ...mb,
+        nbmessages: msgs.length,
+        unseen: msgs.filter((m) => m.style === 'unseen').length,
+      }
+    })
+    return json({ ...fx.mailboxes, mailboxes })
+  }),
+  http.get('*/webmail/mailboxes/unseen/', ({ request }) => {
+    const url = new URL(request.url)
+    const mailbox = url.searchParams.get('mailbox') || 'INBOX'
+    return json({
+      counter: webmailBox(mailbox).filter((m) => m.style === 'unseen').length,
+    })
+  }),
   http.get('*/webmail/mailboxes/quota/', () => json(fx.quota)),
-  http.get('*/webmail/emails/', () => json(fx.emails)),
+  http.post('*/webmail/mailboxes/empty/', async ({ request }) => {
+    const body = await request.json()
+    const list = webmailBox(body.name)
+    list.splice(0, list.length)
+    return json({ status: 'ok' })
+  }),
+  http.get('*/webmail/emails/', async ({ request }) => {
+    // Realistic latency: real IMAP FETCH is not instant, and it also lets
+    // <v-infinite-scroll> settle between pages instead of draining the whole
+    // mailbox on mount (matches production behaviour).
+    await delay(300)
+    const url = new URL(request.url)
+    const mailbox = url.searchParams.get('mailbox') || 'INBOX'
+    const page = Number(url.searchParams.get('page') || '1')
+    const search = (url.searchParams.get('search') || '').toLowerCase()
+    let list = webmailBox(mailbox)
+    if (search) {
+      list = list.filter(
+        (m) =>
+          m.subject.toLowerCase().includes(search) ||
+          m.from_address.fulladdress.toLowerCase().includes(search)
+      )
+    }
+    const count = list.length
+    const start = (page - 1) * WEBMAIL_PAGE_SIZE
+    const results = list.slice(start, start + WEBMAIL_PAGE_SIZE)
+    return json({
+      count,
+      first_index: count ? start + 1 : 0,
+      last_index: start + results.length,
+      prev_page: page > 1 ? page - 1 : null,
+      next_page: start + WEBMAIL_PAGE_SIZE < count ? page + 1 : null,
+      results,
+    })
+  }),
   http.get('*/webmail/emails/content/', ({ request }) => {
     const url = new URL(request.url)
+    const mailbox = url.searchParams.get('mailbox') || 'INBOX'
     const mailid = url.searchParams.get('mailid')
-
-    let emailContent = {
-      subject: 'Bem-vindo ao Modoboa (mock)',
-      from_address: {
-        fulladdress: 'noreply@example.com',
-        address: 'noreply@example.com',
-        name: 'Modoboa',
-      },
+    const msg = webmailBox(mailbox).find((m) => m.imapid === mailid)
+    if (!msg) {
+      return new HttpResponse(null, { status: 404 })
+    }
+    // Como no IMAP: buscar o conteúdo marca a mensagem como lida.
+    msg.style = ''
+    const paragraphs = Array.from(
+      { length: 6 },
+      (_, i) =>
+        `<p>Parágrafo ${i + 1} do corpo mockado de "${msg.subject}". ` +
+        'Texto suficiente para exercitar rolagem e leitura no dev:mock.</p>'
+    ).join('')
+    return json({
+      subject: msg.subject,
+      from_address: msg.from_address,
       to: [
         {
-          fulladdress: 'admin@example.com',
-          address: 'admin@example.com',
+          fulladdress: fx.currentUser.email,
+          address: fx.currentUser.email,
           name: 'Dev Admin',
         },
       ],
       cc: [],
-      body: '<h3>Bem-vindo ao Modoboa!</h3><p>Este é o corpo do e-mail de boas-vindas mockado em modo local.</p>',
-      date: '2026-06-24T12:00:00Z',
-      attachments: [],
+      body: `<h3>${msg.subject}</h3>${paragraphs}`,
+      date: msg.date,
+      attachments: msg.attachments ? [{ name: 'anexo.pdf', partnum: '2' }] : [],
+    })
+  }),
+  http.get('*/webmail/emails/source/', ({ request }) => {
+    const url = new URL(request.url)
+    const mailbox = url.searchParams.get('mailbox') || 'INBOX'
+    const mailid = url.searchParams.get('mailid')
+    const msg = webmailBox(mailbox).find((m) => m.imapid === mailid)
+    if (!msg) {
+      return new HttpResponse(null, { status: 404 })
     }
-
-    if (mailid === '1') {
-      emailContent = {
-        subject: 'Relatório semanal',
-        from_address: {
-          fulladdress: 'reports@example.com',
-          address: 'reports@example.com',
-          name: 'Reports',
-        },
-        to: [
-          {
-            fulladdress: 'admin@example.com',
-            address: 'admin@example.com',
-            name: 'Dev Admin',
-          },
-        ],
-        cc: [
-          {
-            fulladdress: 'manager@example.com',
-            address: 'manager@example.com',
-            name: 'Manager',
-          },
-        ],
-        body: '<h3>Relatório Semanal</h3><p>Olá,</p><p>Aqui está o seu relatório de performance semanal mockado.</p>',
-        date: '2026-06-23T08:30:00Z',
-        attachments: [{ name: 'report.pdf', partnum: '2' }],
+    return json({
+      source:
+        `From: ${msg.from_address.fulladdress}\r\n` +
+        `To: ${fx.currentUser.email}\r\n` +
+        `Subject: ${msg.subject}\r\n` +
+        `Date: ${msg.date}\r\n\r\n(corpo mockado)`,
+    })
+  }),
+  http.post('*/webmail/emails/move/', async ({ request }) => {
+    const body = await request.json()
+    const taken = webmailTake(body.source, body.selection)
+    webmailAppend(body.destination, taken)
+    return json({ count: taken.length })
+  }),
+  http.post('*/webmail/emails/delete/', async ({ request }) => {
+    const body = await request.json()
+    const taken = webmailTake(body.source, body.selection)
+    // Como o backend real: delete move para a Lixeira; se a origem JÁ É a
+    // Lixeira, apaga em definitivo.
+    if (body.source !== 'Trash') {
+      webmailAppend('Trash', taken)
+    }
+    return json({ count: taken.length })
+  }),
+  http.post('*/webmail/emails/mark_as_junk/', async ({ request }) => {
+    const body = await request.json()
+    const taken = webmailTake(body.source, body.selection)
+    webmailAppend('Junk', taken)
+    return json({ count: taken.length })
+  }),
+  http.post('*/webmail/emails/mark_as_not_junk/', async ({ request }) => {
+    const body = await request.json()
+    const taken = webmailTake(body.source, body.selection)
+    webmailAppend('INBOX', taken)
+    return json({ count: taken.length })
+  }),
+  http.post('*/webmail/emails/flag/', async ({ request }) => {
+    const body = await request.json()
+    const list = webmailBox(body.mailbox)
+    for (const id of body.selection || []) {
+      const msg = list.find((m) => m.imapid === String(id))
+      if (!msg) {
+        continue
+      }
+      if (body.status === 'read') {
+        msg.style = ''
+      } else if (body.status === 'unread') {
+        msg.style = 'unseen'
+      } else if (body.status === 'flagged') {
+        msg.flagged = true
+      } else if (body.status === 'unflagged') {
+        msg.flagged = false
       }
     }
-
-    return json(emailContent)
+    return json({ count: (body.selection || []).length })
   }),
 
   // ----- webmail: compose sessions + attachments -----

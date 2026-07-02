@@ -2,17 +2,24 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+const DEFAULT_TIMEOUT = 2000
+
 export const useBusStore = defineStore('bus', () => {
   const notification = ref('')
   const notificationColor = ref('')
-  const notificationTimeout = ref(2000)
+  const notificationTimeout = ref(DEFAULT_TIMEOUT)
+  // Optional { label, handler } rendered as an extra snackbar button
+  // (e.g. "Undo"). Cleared on every notification that doesn't provide one,
+  // so an action never leaks into an unrelated message.
+  const notificationAction = ref(null)
   const dataKey = ref(1)
   const mbCounterKey = ref(1)
 
   async function $reset() {
     notification.value = ''
     notificationColor.value = ''
-    notificationTimeout.value = 2000
+    notificationTimeout.value = DEFAULT_TIMEOUT
+    notificationAction.value = null
     dataKey.value = 1
     mbCounterKey.value = 1
   }
@@ -20,13 +27,14 @@ export const useBusStore = defineStore('bus', () => {
   function displayNotification(options) {
     notification.value = options.msg
     notificationColor.value = options.type ? options.type : 'success'
-    if (options.timeout !== undefined) {
-      notificationTimeout.value = options.timeout
-    }
+    notificationTimeout.value =
+      options.timeout !== undefined ? options.timeout : DEFAULT_TIMEOUT
+    notificationAction.value = options.action || null
   }
 
   function hideNotification() {
     notification.value = ''
+    notificationAction.value = null
   }
 
   function reloadData() {
@@ -41,6 +49,7 @@ export const useBusStore = defineStore('bus', () => {
     notification,
     notificationColor,
     notificationTimeout,
+    notificationAction,
     displayNotification,
     hideNotification,
     reloadMailboxCounters,

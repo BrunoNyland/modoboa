@@ -29,6 +29,10 @@ class Registry:
     def __init__(self):
         """Constructor."""
         self._registry2 = {"global": {}, "user": {}}
+        #: Whether default values have been computed for each level. Defaults
+        #: are loaded lazily on first access (see ``ensure_defaults``) and the
+        #: flag is reset whenever a new app registers parameters.
+        self._defaults_loaded = {"global": False, "user": False}
 
     def add(
         self,
@@ -47,6 +51,8 @@ class Registry:
             "is_extension": is_extension,
             "defaults": {},
         }
+        # A new app means the computed defaults for this level are stale.
+        self._defaults_loaded[level] = False
 
     def _load_default_values(self, level):
         """Load default values."""
@@ -57,6 +63,22 @@ class Registry:
                     data["defaults"][name] = field.default
                 else:
                     data["defaults"][name] = None
+        self._defaults_loaded[level] = True
+
+    def ensure_defaults(self, level):
+        """Make sure default values have been computed for the level.
+
+        Defaults are populated lazily on first access rather than eagerly at
+        registration time. This keeps the registry correct even when the
+        consumer never went through ``Manager.__init__`` — most notably when a
+        ``LocalConfig`` instance is restored from the cache (Django unpickles
+        the cached object, bypassing ``__init__``). Without this, a process
+        that only ever sees a cached ``LocalConfig`` (e.g. a ``migrate`` run
+        against a warm cache) would have apps registered but empty defaults,
+        and any ``get_value`` would wrongly raise ``NotDefined``.
+        """
+        if not self._defaults_loaded[level]:
+            self._load_default_values(level)
 
     def get_applications(self, level):
         """Return all applications registered for level."""
@@ -152,6 +174,7 @@ class Registry:
 
     def exists(self, level: str, app: str, parameter: str | None = None) -> bool:
         """Check if parameter exists."""
+        self.ensure_defaults(level)
         parameters = self._registry2[level]
         result = app in parameters
         if parameter:
@@ -160,6 +183,7 @@ class Registry:
 
     def get_default(self, level: str, app: str, parameter: str):
         """Retrieve default value for parameter."""
+        self.ensure_defaults(level)
         if (
             app in self._registry2[level]
             and parameter in self._registry2[level][app]["defaults"]
@@ -169,6 +193,7 @@ class Registry:
 
     def get_defaults(self, level: str, app: str) -> dict:
         """Retrieve default values for application."""
+        self.ensure_defaults(level)
         if app in self._registry2[level]:
             return self._registry2[level][app]["defaults"]
         raise NotDefined(app)
@@ -184,7 +209,7 @@ class Manager:
         """Constructor."""
         self._level = level
         self._parameters = parameters
-        registry._load_default_values(level)
+        registry.ensure_defaults(level)
 
     def get_value(self, parameter, app=None, raise_exception=True):
         """Return the value associated to the specified parameter."""

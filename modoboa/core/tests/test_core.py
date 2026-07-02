@@ -328,3 +328,30 @@ class LocalConfigCacheTestCase(ModoTestCase):
 
         second = models.LocalConfig.get_instance()
         self.assertFalse(second.need_dovecot_update)
+
+    def test_cached_instance_resolves_params_without_init(self):
+        """A cached instance must resolve parameters with an unprimed registry.
+
+        The cached LocalConfig is unpickled on retrieval, which bypasses
+        ``__init__`` and therefore the registry default-loading it used to
+        trigger. Simulate a fresh process that only ever sees the cached
+        instance (apps registered, but their defaults not yet computed) and
+        make sure parameter lookups still work instead of raising
+        ``NotDefined`` (regression: ``migrate`` against a warm cache failing
+        with "Application core not registered").
+        """
+        # Prime the cache.
+        models.LocalConfig.get_instance()
+
+        # Reproduce a fresh process: apps are registered but their default
+        # values have not been computed yet.
+        registry = param_tools.registry
+        for level, apps in registry._registry2.items():
+            for data in apps.values():
+                data["defaults"] = {}
+            registry._defaults_loaded[level] = False
+
+        cached = models.LocalConfig.get_instance()
+        self.assertEqual(
+            cached.parameters.get_value("rounds_number", app="core"), 70000
+        )

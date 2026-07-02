@@ -183,7 +183,7 @@ class UserCalendarViewSetTestCase(TestDataMixin, ModoAPITestCase):
         }
         response = self.client.post(url, payload, format="json")
         self.assertEqual(response.status_code, 400)
-        self.assertIn("name", response.json())
+        self.assertIn("name", response.json()["errors"])
         self.assertFalse(
             models.UserCalendar.objects.filter(name__contains="zzz-pwned").exists()
         )

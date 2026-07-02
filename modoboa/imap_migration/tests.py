@@ -314,11 +314,11 @@ class SettingsTestCase(ModoAPITestCase):
         )
         response = self._update({"folder_filter_exclude": payload})
         self.assertEqual(response.status_code, 400)
-        self.assertIn("folder_filter_exclude", response.json())
+        self.assertIn("folder_filter_exclude", response.json()["errors"])
 
         response = self._update({"folder_filter_include": "a','b']);__import__"})
         self.assertEqual(response.status_code, 400)
-        self.assertIn("folder_filter_include", response.json())
+        self.assertIn("folder_filter_include", response.json()["errors"])
 
         # A newline could inject extra offlineimap config directives.
         response = self._update({"folder_filter_exclude": "Trash\npythonfile = /x"})
@@ -327,7 +327,7 @@ class SettingsTestCase(ModoAPITestCase):
     def test_folder_filter_exclude_rejects_invalid_regex(self):
         response = self._update({"folder_filter_exclude": "(unbalanced"})
         self.assertEqual(response.status_code, 400)
-        self.assertIn("folder_filter_exclude", response.json())
+        self.assertIn("folder_filter_exclude", response.json()["errors"])
 
     def test_legitimate_folder_filters_accepted(self):
         response = self._update(

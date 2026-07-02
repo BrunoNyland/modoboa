@@ -3,6 +3,7 @@
 import re
 from email.header import Header
 
+from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 from django.db import models
@@ -501,11 +502,52 @@ class LocalConfig(models.Model):
     # Dovecot LDAP update
     need_dovecot_update = models.BooleanField(default=False)
 
+    #: Cache key under which the singleton instance is stored.
+    CACHE_KEY = "modoboa_localconfig"
+
     def __init__(self, *args, **kwargs):
         """Load parameter manager."""
         super().__init__(*args, **kwargs)
         if self.pk:
             self.parameters = param_tools.Manager("global", self._parameters)
+
+    @classmethod
+    def get_instance(cls):
+        """Return the singleton instance, using the cache when possible.
+
+        ``LocalConfig`` is read on (almost) every request through the
+        ``LocalConfigMiddleware``. Querying the database and parsing the
+        parameters JSON each time is wasteful, so the instance is cached
+        and only refreshed when it is modified (see ``save``/``delete``).
+
+        Django's cache framework serializes stored values, therefore each
+        call returns a fresh, independent copy: callers can safely mutate
+        the returned instance without affecting other requests.
+
+        Caching can be disabled by setting ``MODOBOA_LOCALCONFIG_CACHE_TIMEOUT``
+        to ``0`` (the test suite does this: a cached instance bypasses
+        ``__init__`` and would not see the parameters registry being reloaded
+        between tests).
+        """
+        timeout = getattr(settings, "MODOBOA_LOCALCONFIG_CACHE_TIMEOUT", 300)
+        if timeout:
+            instance = cache.get(cls.CACHE_KEY)
+            if instance is not None:
+                return instance
+        instance = cls.objects.select_related("site").first()
+        if instance is not None and timeout:
+            cache.set(cls.CACHE_KEY, instance, timeout)
+        return instance
+
+    def save(self, *args, **kwargs):
+        """Persist the instance and invalidate the cache."""
+        super().save(*args, **kwargs)
+        cache.delete(self.CACHE_KEY)
+
+    def delete(self, *args, **kwargs):
+        """Delete the instance and invalidate the cache."""
+        cache.delete(self.CACHE_KEY)
+        return super().delete(*args, **kwargs)
 
 
 class ExtensionUpdateHistory(models.Model):

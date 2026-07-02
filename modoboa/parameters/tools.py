@@ -254,7 +254,7 @@ def get_localconfig():
     request = signals.get_request()
     if request:
         return request.localconfig
-    return core_models.LocalConfig.objects.first()
+    return core_models.LocalConfig.get_instance()
 
 
 def get_global_parameter(name, app=None, **kwargs):

@@ -332,6 +332,12 @@ CACHES = {
     }
 }
 
+# Disable LocalConfig caching during tests: the cache is not reset between
+# tests while the database and parameters registry are, so a cached instance
+# would leak state across tests. Caching is exercised explicitly by
+# LocalConfigCacheTestCase.
+MODOBOA_LOCALCONFIG_CACHE_TIMEOUT = 0
+
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 

@@ -30,6 +30,7 @@ doc-ng/.vitepress/dist/
 # TOX stuff
 test_project/modoboa.db
 test_project/frontend
+test_project/cache/
 
 /.project
 /.pydevproject

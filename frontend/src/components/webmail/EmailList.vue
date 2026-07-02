@@ -170,11 +170,39 @@
       }}
     </v-alert>
     <div ref="scroller" class="emails" @scroll="onScroll">
+      <div
+        v-show="pullPx > 0 || refreshing"
+        class="emails__ptr"
+        :style="{ transform: `translateY(${pullPx}px)` }"
+      >
+        <v-progress-circular
+          :indeterminate="refreshing"
+          :model-value="Math.min(100, (pullPx / 70) * 100)"
+          size="24"
+          width="2"
+          color="primary"
+        />
+      </div>
       <template v-if="store.emails.length">
         <div class="email-list">
-          <div
-            v-for="email in store.emails"
+          <SwipeableRow
+            v-for="(email, index) in store.emails"
             :key="email.imapid"
+            :enabled="!inScheduledView"
+            :left-action="{
+              icon: 'mdi-trash-can',
+              color: 'error',
+              label: $gettext('Delete'),
+            }"
+            :right-action="{
+              icon: email.style === 'unseen' ? 'mdi-email-open-outline' : 'mdi-email-outline',
+              color: 'primary',
+              label: email.style === 'unseen' ? $gettext('Read') : $gettext('Unread'),
+            }"
+            @swipe-left="swipeDelete(email, index)"
+            @swipe-right="swipeToggleRead(email)"
+          >
+          <div
             class="email-row"
             :class="{
               'email-row--unseen': email.style === 'unseen',
@@ -268,6 +296,7 @@
               </div>
             </div>
           </div>
+          </SwipeableRow>
         </div>
       </template>
       <EmptyState
@@ -323,7 +352,9 @@ import { DateTime } from 'luxon'
 import EmailAddressList from './EmailAddressList.vue'
 import EmailSchedulingForm from './EmailSchedulingForm.vue'
 import EmptyState from '@/components/tools/EmptyState.vue'
+import SwipeableRow from './SwipeableRow.vue'
 import MenuItems from '@/components/tools/MenuItems.vue'
+import { usePullToRefresh } from '@/composables/usePullToRefresh'
 import api from '@/api/webmail'
 
 const props = defineProps({
@@ -351,6 +382,10 @@ const route = useRoute()
 const selectedScheduledEmail = ref(null)
 const scroller = ref(null)
 const loadingMore = ref(false)
+// Deferred swipe-deletes awaiting their Undo window: { imapid, row, index,
+// timer }. The server call is delayed so Undo needs no reverse-move (which
+// would be unreliable — IMAP re-keys UIDs on move).
+const pendingDeletes = ref([])
 const schedulingError = ref('')
 const search = ref('')
 const selectAll = ref(false)
@@ -456,6 +491,64 @@ const openEmail = (emailid) => {
   saveScroll()
   emit('open-email', emailid)
 }
+
+// ----- swipe gestures (touch) -----
+const commitDelete = (entry) => {
+  const i = pendingDeletes.value.indexOf(entry)
+  if (i === -1) {
+    return
+  }
+  pendingDeletes.value.splice(i, 1)
+  clearTimeout(entry.timer)
+  api.deleteSelection(currentMailbox.value, [entry.imapid]).then(() => {
+    reloadMailboxCounters()
+  })
+}
+
+const undoDelete = (entry) => {
+  const i = pendingDeletes.value.indexOf(entry)
+  if (i === -1) {
+    return
+  }
+  pendingDeletes.value.splice(i, 1)
+  clearTimeout(entry.timer)
+  // Server was never told to delete (deferred), so just put the row back.
+  store.restoreEmails([entry.row], Math.min(entry.index, store.emails.length))
+}
+
+const swipeDelete = (email) => {
+  const index = store.emails.findIndex((e) => e.imapid === email.imapid)
+  if (index === -1) {
+    return
+  }
+  const entry = { imapid: email.imapid, row: email, index }
+  store.removeEmails([email.imapid])
+  entry.timer = setTimeout(() => commitDelete(entry), 5000)
+  pendingDeletes.value.push(entry)
+  displayNotification({
+    msg: $gettext('Message deleted'),
+    timeout: 5000,
+    action: { label: $gettext('Undo'), handler: () => undoDelete(entry) },
+  })
+}
+
+const swipeToggleRead = (email) => {
+  const status = email.style === 'unseen' ? 'read' : 'unread'
+  store.patchEmail(email.imapid, { style: status === 'read' ? '' : 'unseen' })
+  api
+    .flagSelection(currentMailbox.value, [email.imapid], status)
+    .then(() => reloadMailboxCounters())
+}
+
+// ----- pull to refresh (touch) -----
+const refreshListing = async () => {
+  store.resetListing(props.mailbox, search.value)
+  await loadMore()
+}
+
+const { pullPx, refreshing } = usePullToRefresh(scroller, {
+  onRefresh: refreshListing,
+})
 
 // Fetch the next page and append it. Guarded so only one request is in flight;
 // after appending, if the list still doesn't overflow the viewport, keep
@@ -679,6 +772,8 @@ onUnmounted(() => {
   // here — during route navigation the container can be scrolled/reset before
   // unmount, which would overwrite the position the user actually left from.
   clearInterval(intervalId)
+  // Flush any pending swipe-deletes so leaving the view still deletes them.
+  pendingDeletes.value.slice().forEach(commitDelete)
 })
 
 watch(
@@ -724,14 +819,28 @@ watch(
   flex-direction: column;
 }
 .emails {
+  position: relative;
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
 }
 .emails__loader {
   display: flex;
   justify-content: center;
   padding: 16px 0;
+}
+/* Pull-to-refresh indicator: pinned just above the list, pushed down by the
+   pull distance. */
+.emails__ptr {
+  position: absolute;
+  top: -36px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1;
 }
 .clickable {
   cursor: pointer;

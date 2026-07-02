@@ -63,7 +63,7 @@ class DomainViewSetTestCase(ModoAPITestCase):
             }
             resp = self.client.post(url, data, format="json")
             self.assertEqual(resp.status_code, 400, f"{name} should be rejected")
-            self.assertIn("name", resp.json())
+            self.assertIn("name", resp.json()["errors"])
             self.assertFalse(models.Domain.objects.filter(name=name).exists())
 
     def test_update(self):

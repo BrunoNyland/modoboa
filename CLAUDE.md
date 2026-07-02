@@ -99,6 +99,10 @@ cd frontend && yarn install && yarn dev:mock   # cross-env VITE_MOCK_API=true vi
   frontend `yarn test` (vitest).
 - **Commits:** trailer `Co-Authored-By: Claude ...` + `Claude-Session: ...`.
   PRs criados como **draft**; mergeados após CI verde.
+- **Idioma de commits/PRs:** títulos e mensagens sempre em **inglês**.
+- **Conteúdo de commits/PRs:** sempre detalhar o que está sendo feito (o quê
+  e por quê). Se for fix de bug ou melhoria de performance, incluir também
+  **como replicar/testar** (passos concretos, comandos, viewport, etc.).
 - Não incluir identificadores internos de modelo em commits/PRs/código.
 - **Comandos de servidor/ops para o Bruno rodar via SSH:** sempre entregar
   numa única linha, encadeados com `&&` (não em blocos separados/multi-step).

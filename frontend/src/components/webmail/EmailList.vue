@@ -317,7 +317,12 @@
         <v-progress-circular indeterminate size="20" width="2" color="primary" />
       </div>
     </div>
-    <v-dialog v-model="showSchedulingForm" max-width="800">
+    <v-dialog
+      v-model="showSchedulingForm"
+      :fullscreen="mobile"
+      :max-width="mobile ? undefined : 800"
+      :transition="mobile ? 'dialog-bottom-transition' : undefined"
+    >
       <EmailSchedulingForm
         :initial-date="selectedScheduledEmail.scheduled_datetime_raw"
         @schedule="updateScheduledEmail"
@@ -346,6 +351,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useDisplay } from 'vuetify'
 import { useGettext } from 'vue3-gettext'
 import { useBusStore, useWebmailStore } from '@/stores'
 import { DateTime } from 'luxon'
@@ -373,6 +379,7 @@ const props = defineProps({
 const emit = defineEmits(['open-email'])
 
 const { $gettext, $ngettext } = useGettext()
+const { mobile } = useDisplay()
 const { displayNotification, reloadMailboxCounters } = useBusStore()
 const webmailStore = useWebmailStore()
 const store = webmailStore

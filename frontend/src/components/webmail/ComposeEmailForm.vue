@@ -7,8 +7,8 @@
         <v-btn
           icon="mdi-arrow-left"
           variant="flat"
-          height="36"
-          width="36"
+          :height="btnSize"
+          :width="btnSize"
           :aria-label="$gettext('Back')"
           @click="close"
         />
@@ -18,8 +18,8 @@
             icon="mdi-send"
             variant="tonal"
             color="primary"
-            height="36"
-            width="36"
+            :height="btnSize"
+            :width="btnSize"
             :loading="working"
             :title="$gettext('Send')"
             :aria-label="$gettext('Send')"
@@ -40,8 +40,8 @@
             icon
             variant="tonal"
             color="primary"
-            height="36"
-            width="24"
+            :height="btnSize"
+            :width="mobile ? 36 : 24"
             :aria-label="$gettext('More send options')"
           >
             <v-icon icon="mdi-chevron-down" />
@@ -64,8 +64,8 @@
               class="ml-2"
               variant="tonal"
               icon="mdi-cog-outline"
-              height="36"
-              width="36"
+              :height="btnSize"
+              :width="btnSize"
               :title="$gettext('Options')"
               :aria-label="$gettext('Options')"
               v-bind="menuProps"
@@ -106,6 +106,17 @@
           offset-y="2"
         >
           <v-btn
+            v-if="mobile"
+            variant="tonal"
+            icon="mdi-paperclip"
+            :height="btnSize"
+            :width="btnSize"
+            :title="$gettext('Attachments')"
+            :aria-label="$gettext('Attachments')"
+            @click="openAttachmentsDialog"
+          />
+          <v-btn
+            v-else
             variant="tonal"
             prepend-icon="mdi-paperclip"
             height="36"
@@ -116,7 +127,8 @@
         <v-btn
           class="ml-2"
           icon="mdi-content-save-outline"
-          height="36"
+          :height="btnSize"
+          :width="btnSize"
           :title="$gettext('Save as draft')"
           :aria-label="$gettext('Save as draft')"
           :loading="working"
@@ -159,13 +171,15 @@
               <v-btn
                 v-if="!showCcField"
                 :text="$gettext('Cc')"
-                size="small"
+                :size="mobile ? 'default' : 'small'"
+                :min-height="mobile ? 44 : undefined"
                 @click="showCcField = true"
               />
               <v-btn
                 v-if="!showBccField"
                 :text="$gettext('Bcc')"
-                size="small"
+                :size="mobile ? 'default' : 'small'"
+                :min-height="mobile ? 44 : undefined"
                 @click="showBccField = true"
               />
             </v-btn-group>
@@ -226,14 +240,24 @@
         />
       </v-form>
     </div>
-    <v-dialog v-model="showAttachmentsDialog" max-width="800">
+    <v-dialog
+      v-model="showAttachmentsDialog"
+      :fullscreen="mobile"
+      :max-width="mobile ? undefined : 800"
+      :transition="mobile ? 'dialog-bottom-transition' : undefined"
+    >
       <AttachmentsDialog
         :session-uid="route.query.uid"
         @change="(count) => (attachmentCount = count)"
         @close="closeAttachmentDialog"
       />
     </v-dialog>
-    <v-dialog v-model="showSchedulingForm" max-width="800">
+    <v-dialog
+      v-model="showSchedulingForm"
+      :fullscreen="mobile"
+      :max-width="mobile ? undefined : 800"
+      :transition="mobile ? 'dialog-bottom-transition' : undefined"
+    >
       <EmailSchedulingForm
         @schedule="scheduleAndSubmit"
         @close="closeSchedulingForm"
@@ -243,7 +267,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDisplay } from 'vuetify'
 import { useGettext } from 'vue3-gettext'
@@ -275,6 +299,9 @@ const { mobile } = useDisplay()
 const { $gettext } = useGettext()
 const { displayNotification, reloadData } = useBusStore()
 const authStore = useAuthStore()
+
+// 44px touch targets on mobile (WCAG 2.5.8), compact 36px on desktop.
+const btnSize = computed(() => (mobile.value ? 44 : 36))
 
 const allowedSenders = ref([])
 const attachmentCount = ref(0)

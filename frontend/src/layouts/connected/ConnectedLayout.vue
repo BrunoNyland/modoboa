@@ -15,6 +15,14 @@
     >
       {{ formattedNotification }}
       <template #actions>
+        <v-btn
+          v-if="notificationAction"
+          color="white"
+          variant="outlined"
+          @click="runNotificationAction"
+        >
+          {{ notificationAction.label }}
+        </v-btn>
         <v-btn color="white" variant="text" @click="snackbar = false">
           {{ $gettext('Close') }}
         </v-btn>
@@ -72,8 +80,17 @@ const authUser = computed(() => authStore.authUser)
 const notificationColor = computed(() => busStore.notificationColor)
 const notificationTimeout = computed(() => busStore.notificationTimeout)
 const notification = computed(() => busStore.notification)
+const notificationAction = computed(() => busStore.notificationAction)
 const snackbar = ref(false)
 const errorDialog = ref(false)
+
+const runNotificationAction = () => {
+  const action = notificationAction.value
+  snackbar.value = false
+  if (action?.handler) {
+    action.handler()
+  }
+}
 
 const formattedNotification = computed(() => {
   const msg = notification.value

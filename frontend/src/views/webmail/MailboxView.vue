@@ -410,11 +410,12 @@ onMounted(fetchUserMailboxes)
   display: flex;
   flex-direction: column;
 }
-/* 7px divider + a ::before overhang of 5px on each side = ~17px grab zone,
-   while the visible line stays hairline (1px, thickening to 3px accent on
-   hover/focus/drag). z-index keeps the overhang clickable over the panes. */
+/* 18px gutter with the hairline centered: gives the list and the message
+   ~8px of breathing room off the divider on each side, and the whole gutter
+   (plus a 2px overhang) is grabbable — ~22px hit zone. The visible line
+   stays 1px, thickening to 3px accent on hover/focus/drag. */
 .mailbox-split__divider {
-  flex: 0 0 7px;
+  flex: 0 0 18px;
   cursor: col-resize;
   position: relative;
   background: transparent;
@@ -427,15 +428,15 @@ onMounted(fetchUserMailboxes)
   position: absolute;
   top: 0;
   bottom: 0;
-  left: -5px;
-  right: -5px;
+  left: -2px;
+  right: -2px;
 }
 .mailbox-split__divider::after {
   content: '';
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 3px;
+  left: 9px;
   width: 1px;
   background: var(--line-2);
   transition:
@@ -448,7 +449,7 @@ onMounted(fetchUserMailboxes)
 .mailbox-split__divider.is-dragging::after {
   background: var(--accent);
   width: 3px;
-  left: 2px;
+  left: 8px;
 }
 .mailbox-split__pane {
   flex: 1 1 auto;

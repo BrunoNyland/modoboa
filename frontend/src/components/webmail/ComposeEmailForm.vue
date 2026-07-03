@@ -59,29 +59,31 @@
 
         <v-spacer />
         <div class="d-flex align-center flex-shrink-0">
-          <span v-if="autosaving" class="draft-indicator mr-1" role="status">
-            {{ $gettext('Saving…') }}
-          </span>
-          <span
-            v-else-if="draftSavedAt"
-            class="draft-indicator mr-1"
-            role="status"
-          >
-            {{ $gettext('Draft saved at %{ time }', { time: draftSavedAt }) }}
-          </span>
-          <v-btn
-            class="ml-1"
-            :class="{ 'tb-quiet': !htmlMode }"
-            :variant="htmlMode ? 'tonal' : 'text'"
-            :color="htmlMode ? 'primary' : undefined"
-            icon="mdi-code-tags"
-            :height="btnSize"
-            :width="btnSize"
-            :title="$gettext('HTML mode')"
-            :aria-label="$gettext('HTML mode')"
-            :aria-pressed="htmlMode ? 'true' : 'false'"
-            @click="toggleHtmlMode"
-          />
+          <template v-if="!mobile">
+            <span v-if="autosaving" class="draft-indicator mr-1" role="status">
+              {{ $gettext('Saving…') }}
+            </span>
+            <span
+              v-else-if="draftSavedAt"
+              class="draft-indicator mr-1"
+              role="status"
+            >
+              {{ $gettext('Draft saved at %{ time }', { time: draftSavedAt }) }}
+            </span>
+            <v-btn
+              class="ml-1"
+              :class="{ 'tb-quiet': !htmlMode }"
+              :variant="htmlMode ? 'tonal' : 'text'"
+              :color="htmlMode ? 'primary' : undefined"
+              icon="mdi-code-tags"
+              :height="btnSize"
+              :width="btnSize"
+              :title="$gettext('HTML mode')"
+              :aria-label="$gettext('HTML mode')"
+              :aria-pressed="htmlMode ? 'true' : 'false'"
+              @click="toggleHtmlMode"
+            />
+          </template>
           <v-badge
             class="ml-1"
             :content="attachmentCount"
@@ -102,6 +104,7 @@
             />
           </v-badge>
           <v-btn
+            v-if="!mobile"
             class="ml-1 tb-quiet"
             variant="text"
             icon="mdi-content-save-outline"
@@ -117,7 +120,7 @@
               <v-btn
                 class="ml-1 tb-quiet"
                 variant="text"
-                icon="mdi-cog-outline"
+                :icon="mobile ? 'mdi-dots-vertical' : 'mdi-cog-outline'"
                 :height="btnSize"
                 :width="btnSize"
                 :title="$gettext('Options')"
@@ -126,6 +129,27 @@
               />
             </template>
             <v-card class="pa-4">
+              <!-- Mobile: HTML toggle and manual save collapse in here so the
+                   toolbar never wraps to a second line. -->
+              <template v-if="mobile">
+                <v-switch
+                  :model-value="htmlMode"
+                  :label="$gettext('HTML mode')"
+                  density="compact"
+                  hide-details
+                  color="primary"
+                  @update:model-value="toggleHtmlMode"
+                />
+                <v-btn
+                  block
+                  variant="tonal"
+                  prepend-icon="mdi-content-save-outline"
+                  class="mb-2 mt-1"
+                  :text="$gettext('Save as draft')"
+                  :loading="working"
+                  @click="saveDraft"
+                />
+              </template>
               <v-switch
                 v-model="form.request_dsn"
                 :label="$gettext('Request delivery status notification')"

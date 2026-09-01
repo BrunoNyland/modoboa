@@ -723,6 +723,7 @@ class WritableAccountSerializer(v1_serializers.WritableAccountSerializer):
         mailbox_data = validated_data.pop("mailbox", None)
         password = validated_data.pop("password", None)
         aliases = validated_data.pop("aliases", None)
+        domains = validated_data.pop("domains", None)
         for key, value in validated_data.items():
             setattr(instance, key, value)
         if password:
@@ -760,6 +761,8 @@ class WritableAccountSerializer(v1_serializers.WritableAccountSerializer):
                 if alias.exists():
                     alias.first().remove_recipient_or_delete(validated_data["username"])
         instance.save()
+        if domains is not None:
+            self.set_permissions(instance, domains)
         resources = validated_data.get("resources")
         if resources:
             owner = get_object_owner(instance)

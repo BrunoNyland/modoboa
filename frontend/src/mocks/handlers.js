@@ -51,6 +51,22 @@ export const handlers = [
   // ----- bootstrap (necessário para a app subir "logada") -----
   http.get('*/account/me/', () => json(fx.currentUser)),
   http.get('*/account/available_applications/', () => json(fx.applications)),
+  // Contacts' addresses, searched by the recipient fields of the compose form
+  http.get('*/api/v2/emails/', ({ request }) => {
+    const search = (new URL(request.url).searchParams.get('search') || '')
+      .toLowerCase()
+    return json(
+      [
+        { address: 'maria@example.com', display_name: 'Maria Souza' },
+        { address: 'maria.souza@example.org', display_name: 'Maria Souza' },
+        { address: 'joao@example.com', display_name: 'João Silva' },
+      ].filter(
+        (item) =>
+          item.address.startsWith(search) ||
+          item.display_name.toLowerCase().startsWith(search)
+      )
+    )
+  }),
   http.get('*/capabilities/', () =>
     json({
       capabilities: {

@@ -20,7 +20,7 @@ msgstr ""
 msgid "Unable to reach the server, please check your connection"
 msgstr ""
 
-#: src/api/repository.js:71
+#: src/api/repository.js:67
 msgid "An unexpected error occurred (code %{ status })"
 msgstr ""
 
@@ -119,7 +119,7 @@ msgstr ""
 #: src/components/account/AutoReplyForm.vue:12
 #: src/components/quarantine/QuarantineList.vue:49
 #: src/components/quarantine/QuarantineList.vue:235
-#: src/components/webmail/ComposeEmailForm.vue:267
+#: src/components/webmail/ComposeEmailForm.vue:235
 msgid "Subject"
 msgstr ""
 
@@ -668,7 +668,7 @@ msgstr ""
 #: src/components/webmail/EmailContent.vue:130
 #: src/components/webmail/EmailList.vue:242
 #: src/components/webmail/EmailList.vue:566
-#: src/views/account/FiltersView.vue:351
+#: src/views/account/FiltersView.vue:342
 #: src/views/calendars/CalendarView.vue:213
 msgid "Delete"
 msgstr ""
@@ -1260,7 +1260,7 @@ msgstr ""
 #: src/components/admin/identities/IdentityList.vue:449
 #: src/components/admin/imap_migration/ProvidersList.vue:152
 #: src/components/contacts/ContactList.vue:232
-#: src/views/account/FiltersView.vue:346
+#: src/views/account/FiltersView.vue:337
 #: src/views/calendars/CalendarView.vue:201
 msgid "Edit"
 msgstr ""
@@ -1954,7 +1954,7 @@ msgstr ""
 #: src/components/quarantine/QuarantineList.vue:52
 #: src/components/quarantine/QuarantineList.vue:233
 #: src/components/tools/TimeSerieChart.vue:20
-#: src/components/webmail/ComposeEmailForm.vue:196
+#: src/components/webmail/ComposeEmailForm.vue:193
 #: src/components/webmail/EmailContent.vue:239
 msgid "To"
 msgstr ""
@@ -2553,45 +2553,39 @@ msgstr ""
 msgid "Request read receipt"
 msgstr ""
 
-#: src/components/webmail/ComposeEmailForm.vue:197
-#: src/components/webmail/ComposeEmailForm.vue:232
-#: src/components/webmail/ComposeEmailForm.vue:252
-msgid "Provide one or more addresses"
-msgstr ""
-
-#: src/components/webmail/ComposeEmailForm.vue:211
-#: src/components/webmail/ComposeEmailForm.vue:231
+#: src/components/webmail/ComposeEmailForm.vue:201
+#: src/components/webmail/ComposeEmailForm.vue:218
 msgid "Cc"
 msgstr ""
 
-#: src/components/webmail/ComposeEmailForm.vue:218
-#: src/components/webmail/ComposeEmailForm.vue:251
+#: src/components/webmail/ComposeEmailForm.vue:208
+#: src/components/webmail/ComposeEmailForm.vue:227
 msgid "Bcc"
 msgstr ""
 
-#: src/components/webmail/ComposeEmailForm.vue:410
+#: src/components/webmail/ComposeEmailForm.vue:382
 msgid "Switch to plain text"
 msgstr ""
 
-#: src/components/webmail/ComposeEmailForm.vue:411
+#: src/components/webmail/ComposeEmailForm.vue:383
 msgid ""
 "The formatting of the message (bold, links, images...) will be lost. "
 "Continue?"
 msgstr ""
 
-#: src/components/webmail/ComposeEmailForm.vue:414
+#: src/components/webmail/ComposeEmailForm.vue:386
 msgid "Continue"
 msgstr ""
 
-#: src/components/webmail/ComposeEmailForm.vue:622
+#: src/components/webmail/ComposeEmailForm.vue:585
 msgid "Email scheduled"
 msgstr ""
 
-#: src/components/webmail/ComposeEmailForm.vue:623
+#: src/components/webmail/ComposeEmailForm.vue:586
 msgid "Email sent"
 msgstr ""
 
-#: src/components/webmail/ComposeEmailForm.vue:657
+#: src/components/webmail/ComposeEmailForm.vue:619
 msgid "You must provide one recipient at least"
 msgstr ""
 
@@ -2923,6 +2917,16 @@ msgstr ""
 msgid "Moving selection..."
 msgstr ""
 
+#: src/components/webmail/RecipientField.vue:7
+msgid "Provide one or more addresses"
+msgstr ""
+
+#: src/components/webmail/RecipientField.vue:69
+msgid "Invalid address: %{addresses}"
+msgid_plural "Invalid addresses: %{addresses}"
+msgstr[0] ""
+msgstr[1] ""
+
 #: src/components/webmail/RemoteContentBanner.vue:12
 msgid "Remote images have been blocked to protect your privacy."
 msgstr ""
@@ -3086,67 +3090,67 @@ msgstr ""
 msgid "New"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:249
+#: src/views/account/FiltersView.vue:240
 msgid "Failed to display template. Using raw mode"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:264
+#: src/views/account/FiltersView.vue:255
 msgid "Filter enabled"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:273
+#: src/views/account/FiltersView.vue:264
 msgid "Filter disabled"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:279
+#: src/views/account/FiltersView.vue:270
 msgid "Filter removed"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:297
+#: src/views/account/FiltersView.vue:288
 msgid "Filter set activated"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:304
+#: src/views/account/FiltersView.vue:295
 msgid "Active filter set deactivated"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:310
+#: src/views/account/FiltersView.vue:301
 msgid "Filter set removed"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:324
+#: src/views/account/FiltersView.vue:315
 msgid "Filter set updated"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:362
+#: src/views/account/FiltersView.vue:353
 msgid "Disable"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:369
+#: src/views/account/FiltersView.vue:360
 msgid "Enable"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:377
+#: src/views/account/FiltersView.vue:368
 msgid "Move down"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:384
+#: src/views/account/FiltersView.vue:375
 msgid "Move up"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:394
+#: src/views/account/FiltersView.vue:385
 msgid "Download filter set"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:399
+#: src/views/account/FiltersView.vue:390
 msgid "Delete filter set"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:410
+#: src/views/account/FiltersView.vue:401
 msgid "Activate filter set"
 msgstr ""
 
-#: src/views/account/FiltersView.vue:417
+#: src/views/account/FiltersView.vue:408
 msgid "Deactivate filter set"
 msgstr ""
 

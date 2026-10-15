@@ -188,22 +188,12 @@
             class="mb-3 mt-4"
           />
           <div class="d-flex align-center mb-3">
-            <v-combobox
+            <RecipientField
               v-model="form.to"
-              :items="contacts"
-              :item-title="(item) => getItemTitle(item)"
-              return-object
               :label="$gettext('To')"
-              :placeholder="$gettext('Provide one or more addresses')"
               persistent-placeholder
-              variant="outlined"
-              density="compact"
-              hide-details="auto"
-              chips
-              multiple
               :rules="[rules.required]"
               class="flex-grow-1 mr-2"
-              @update:search="lookForContacts"
             />
             <v-btn-group density="compact" variant="tonal" class="rounded">
               <v-btn
@@ -222,45 +212,23 @@
               />
             </v-btn-group>
           </div>
-          <v-combobox
+          <RecipientField
             v-if="showCcField"
             v-model="form.cc"
-            :items="contacts"
-            :item-title="(item) => getItemTitle(item)"
-            return-object
             :label="$gettext('Cc')"
-            :placeholder="$gettext('Provide one or more addresses')"
             persistent-placeholder
-            variant="outlined"
-            density="compact"
-            hide-details="auto"
-            chips
-            multiple
-            :hide-no-data="false"
             class="mb-3"
             append-inner-icon="mdi-close"
-            @click:append-inner="showCcField = false"
-            @update:search="lookForContacts"
+            @click:append-inner="hideCcField"
           />
-          <v-combobox
+          <RecipientField
             v-if="showBccField"
             v-model="form.bcc"
-            :items="contacts"
-            :item-title="(item) => getItemTitle(item)"
-            return-object
             :label="$gettext('Bcc')"
-            :placeholder="$gettext('Provide one or more addresses')"
             persistent-placeholder
-            variant="outlined"
-            density="compact"
-            hide-details="auto"
-            chips
-            multiple
-            :hide-no-data="false"
             class="mb-3"
             append-inner-icon="mdi-close"
-            @click:append-inner="showBccField = false"
-            @update:search="lookForContacts"
+            @click:append-inner="hideBccField"
           />
           <v-text-field
             v-model="form.subject"
@@ -304,15 +272,19 @@ import { useRoute, useRouter } from 'vue-router'
 import { useDisplay } from 'vuetify'
 import { useGettext } from 'vue3-gettext'
 import { useAuthStore, useBusStore, useWebmailStore } from '@/stores'
-import { useSpecialFolders } from '@/composables/webmail'
+import {
+  formatRecipient,
+  useRecentRecipients,
+  useSpecialFolders,
+} from '@/composables/webmail'
 import debounce from 'debounce'
 import ConfirmDialog from '@/components/tools/ConfirmDialog'
 import AttachmentsDialog from '@/components/webmail/AttachmentsDialog'
 import BodyEditor from '@/components/webmail/BodyEditor'
 import EmailSchedulingForm from '@/components/webmail/EmailSchedulingForm'
+import RecipientField from '@/components/webmail/RecipientField'
 import rules from '@/plugins/rules'
 import api from '@/api/webmail'
-import contactsApi from '@/api/contacts'
 
 const props = defineProps({
   // Reply to the message given by the route (mailbox, mailid)
@@ -346,6 +318,7 @@ const webmailStore = useWebmailStore()
 
 // 44px touch targets on mobile (WCAG 2.5.8), compact 36px on desktop.
 const btnSize = computed(() => (mobile.value ? 44 : 36))
+const recentRecipients = useRecentRecipients()
 
 // Only the compose view opened from the drafts folder edits a draft: in
 // reply/forward views, route.query.mailid is the original message UID.
@@ -356,7 +329,6 @@ const isEditingDraft =
 
 const allowedSenders = ref([])
 const attachmentCount = ref(0)
-const contacts = ref([])
 // IMAP uid of the draft backing this composition. The backend's save action
 // deletes the previous draft and pushes a new one, returning the NEW uid —
 // it must be threaded into every subsequent save or each save duplicates
@@ -426,14 +398,6 @@ const toggleHtmlMode = async () => {
   } finally {
     converting.value = false
   }
-}
-
-// "Name <address>" when the name is known: the API keeps it
-const formatRecipient = (rcpt) => {
-  if (!rcpt.name) {
-    return rcpt.address
-  }
-  return `"${rcpt.name.replace(/(["\\])/g, '\\$1')}" <${rcpt.address}>`
 }
 
 // Is this one of the addresses the user can send from (aliases included)?
@@ -576,12 +540,6 @@ const initFormFromDraft = (session, draft) => {
 
 const prepareMessage = () => {
   const result = { ...form.value }
-
-  for (const field of ['to', 'cc', 'bcc']) {
-    if (result[field]?.length) {
-      result[field] = result[field].map(getRecipient).filter(Boolean)
-    }
-  }
   result.body_format = htmlMode.value ? 'html' : 'plain'
   if (draftMailid.value) {
     result.mailid = draftMailid.value
@@ -616,6 +574,11 @@ const submit = async (scheduledDatetime = null) => {
         .deleteSelection(webmailStore.specialFolders.draft, [draftMailid.value])
         .catch(() => {})
     }
+    recentRecipients.remember([
+      ...(body.to || []),
+      ...(body.cc || []),
+      ...(body.bcc || []),
+    ])
     router.push({ name: 'MailboxView' })
     reloadData()
     const msg = scheduledDatetime
@@ -639,17 +602,16 @@ const closeAttachmentDialog = async () => {
   attachmentCount.value = resp.data.attachments.length
 }
 
-const lookForContacts = debounce(async (search) => {
-  if (search) {
-    const params = { search }
-    const resp = await contactsApi.getContacts(params)
-    if (resp.data.count > 0) {
-      contacts.value = resp.data.results
-    }
-  } else {
-    contacts.value = []
-  }
-}, 500)
+// A hidden field is not sent
+const hideCcField = () => {
+  showCcField.value = false
+  form.value.cc = []
+}
+
+const hideBccField = () => {
+  showBccField.value = false
+  form.value.bcc = []
+}
 
 const openSchedulingForm = () => {
   if (!form.value.to?.length) {
@@ -761,30 +723,6 @@ onUnmounted(() => {
   // Don't let a pending autosave fire after send/navigation.
   autosave.clear?.()
 })
-
-const getContactName = (contact) =>
-  contact.display_name ||
-  [contact.first_name, contact.last_name].filter(Boolean).join(' ')
-
-const getItemTitle = (item) => {
-  if (typeof item === 'string') {
-    // Without the quotes of the name: "John Doe" <john@example.com>
-    return item.replace(/^"(.*)"(\s*<)/, '$1$2').replace(/\\(["\\])/g, '$1')
-  }
-  return getContactName(item)
-}
-
-// A recipient typed by the user, or a contact picked in the list
-const getRecipient = (item) => {
-  if (typeof item === 'string') {
-    return item
-  }
-  const address = item.emails?.[0]?.address
-  if (!address) {
-    return null
-  }
-  return formatRecipient({ name: getContactName(item), address })
-}
 
 const getComposeSession = async () => {
   if (route.query.uid) {

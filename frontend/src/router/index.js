@@ -551,9 +551,7 @@ const router = createRouter({
 router.beforeEach(async (to, from) => {
   const config = useGlobalConfig()
 
-  document.title = config.HTML_PAGE_TITLE
-    ? config.HTML_PAGE_TITLE
-    : 'Welcome to Modoboa'
+  document.title = config.HTML_PAGE_TITLE || 'Webmail'
   if (to.meta?.requiresAuth === true) {
     const previousPage = window.location.href
     sessionStorage.setItem('previousPage', previousPage)
@@ -576,6 +574,19 @@ router.beforeEach(async (to, from) => {
           resolved.matched[0].path !== to.matched[0]?.path
         ) {
           return { ...resolved, replace: true }
+        }
+      }
+      // The root of the site (where the login lands) opens the webmail for
+      // anyone who has a mailbox, administrators included. The admin
+      // dashboard (/admin) is still reached through its menu entry.
+      if (
+        to.redirectedFrom?.path === '/' &&
+        to.name === 'Dashboard' &&
+        authStore.authUser.mailbox
+      ) {
+        await globalStore.fetchAvailableApplications()
+        if (globalStore.webmailEnabled) {
+          return { name: 'MailboxView', replace: true }
         }
       }
       if (to.meta.allowedRoles !== undefined) {

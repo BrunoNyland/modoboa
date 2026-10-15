@@ -752,15 +752,6 @@ msgstr "Konto"
 msgid "Aliases"
 msgstr "Alias"
 
-#: src/components/admin/dashboard/NewsFeedWidget.vue:2
-#, fuzzy
-msgid "Latest news"
-msgstr "Senaste version"
-
-#: src/components/admin/dashboard/NewsFeedWidget.vue:21
-msgid "Visit the official weblog for more information"
-msgstr ""
-
 #: src/components/admin/dmarc/DmarcAligmentChart.vue:5
 msgid "Alignment"
 msgstr "Placering"
@@ -3502,7 +3493,7 @@ msgstr "Kontakter"
 msgid "Add a category"
 msgstr "Lägg till en kategori"
 
-#: src/views/DashboardView.vue:27
+#: src/views/DashboardView.vue:19
 msgid "Welcome to Modoboa"
 msgstr "Välkommen till Modoboa"
 
@@ -3634,6 +3625,10 @@ msgstr "Ta bort den här brevlådan?"
 #: src/views/webmail/MailboxView.vue:389
 msgid "Mailbox deleted"
 msgstr "Brevlåda raderad"
+
+#, fuzzy
+#~ msgid "Latest news"
+#~ msgstr "Senaste version"
 
 #, fuzzy
 #~ msgid "Applications"

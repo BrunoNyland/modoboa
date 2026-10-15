@@ -760,14 +760,6 @@ msgstr "Comptes"
 msgid "Aliases"
 msgstr "Alias"
 
-#: src/components/admin/dashboard/NewsFeedWidget.vue:2
-msgid "Latest news"
-msgstr "Dernières nouvelles"
-
-#: src/components/admin/dashboard/NewsFeedWidget.vue:21
-msgid "Visit the official weblog for more information"
-msgstr "Visitez le weblog officiel pour plus d'information"
-
 #: src/components/admin/dmarc/DmarcAligmentChart.vue:5
 msgid "Alignment"
 msgstr "Alignement"
@@ -3467,7 +3459,7 @@ msgstr "Contacts"
 msgid "Add a category"
 msgstr "Ajouter une catégorie"
 
-#: src/views/DashboardView.vue:27
+#: src/views/DashboardView.vue:19
 msgid "Welcome to Modoboa"
 msgstr "Bienvenue dans Modoboa"
 
@@ -3595,6 +3587,12 @@ msgstr "Supprimer cette boite aux lettres ?"
 #: src/views/webmail/MailboxView.vue:389
 msgid "Mailbox deleted"
 msgstr "Boite aux lettres supprimée"
+
+#~ msgid "Latest news"
+#~ msgstr "Dernières nouvelles"
+
+#~ msgid "Visit the official weblog for more information"
+#~ msgstr "Visitez le weblog officiel pour plus d'information"
 
 #, fuzzy
 #~ msgid "Applications"

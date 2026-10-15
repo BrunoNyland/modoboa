@@ -764,15 +764,6 @@ msgstr "Cuenta"
 msgid "Aliases"
 msgstr "Alias"
 
-#: src/components/admin/dashboard/NewsFeedWidget.vue:2
-#, fuzzy
-msgid "Latest news"
-msgstr "Versión instalada"
-
-#: src/components/admin/dashboard/NewsFeedWidget.vue:21
-msgid "Visit the official weblog for more information"
-msgstr ""
-
 #: src/components/admin/dmarc/DmarcAligmentChart.vue:5
 msgid "Alignment"
 msgstr ""
@@ -3538,7 +3529,7 @@ msgstr "Contactos"
 msgid "Add a category"
 msgstr "Acciones"
 
-#: src/views/DashboardView.vue:27
+#: src/views/DashboardView.vue:19
 msgid "Welcome to Modoboa"
 msgstr "Bienvenido a Modoboa"
 
@@ -3674,6 +3665,10 @@ msgstr ""
 #, fuzzy
 msgid "Mailbox deleted"
 msgstr "Fecha de creación"
+
+#, fuzzy
+#~ msgid "Latest news"
+#~ msgstr "Versión instalada"
 
 #, fuzzy
 #~ msgid "Applications"

@@ -726,14 +726,6 @@ msgstr ""
 msgid "Aliases"
 msgstr ""
 
-#: src/components/admin/dashboard/NewsFeedWidget.vue:2
-msgid "Latest news"
-msgstr ""
-
-#: src/components/admin/dashboard/NewsFeedWidget.vue:21
-msgid "Visit the official weblog for more information"
-msgstr ""
-
 #: src/components/admin/dmarc/DmarcAligmentChart.vue:5
 msgid "Alignment"
 msgstr ""
@@ -3342,7 +3334,7 @@ msgstr ""
 msgid "Add a category"
 msgstr ""
 
-#: src/views/DashboardView.vue:27
+#: src/views/DashboardView.vue:19
 msgid "Welcome to Modoboa"
 msgstr ""
 

@@ -759,14 +759,6 @@ msgstr "Account"
 msgid "Aliases"
 msgstr "Alias"
 
-#: src/components/admin/dashboard/NewsFeedWidget.vue:2
-msgid "Latest news"
-msgstr "Ultime notizie"
-
-#: src/components/admin/dashboard/NewsFeedWidget.vue:21
-msgid "Visit the official weblog for more information"
-msgstr "Visita il blog ufficiale per maggiori informazioni"
-
 #: src/components/admin/dmarc/DmarcAligmentChart.vue:5
 msgid "Alignment"
 msgstr "Allineamento"
@@ -3461,7 +3453,7 @@ msgstr "Contatti"
 msgid "Add a category"
 msgstr "Aggiungi una categoria"
 
-#: src/views/DashboardView.vue:27
+#: src/views/DashboardView.vue:19
 msgid "Welcome to Modoboa"
 msgstr "Benvenuti in Modoboa"
 
@@ -3589,6 +3581,12 @@ msgstr "Eliminare questa casella di posta?"
 #: src/views/webmail/MailboxView.vue:389
 msgid "Mailbox deleted"
 msgstr "Casella di posta eliminata"
+
+#~ msgid "Latest news"
+#~ msgstr "Ultime notizie"
+
+#~ msgid "Visit the official weblog for more information"
+#~ msgstr "Visita il blog ufficiale per maggiori informazioni"
 
 #, fuzzy
 #~ msgid "Applications"

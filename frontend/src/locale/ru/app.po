@@ -757,14 +757,6 @@ msgstr "Учётные записи"
 msgid "Aliases"
 msgstr "Псевдонимы"
 
-#: src/components/admin/dashboard/NewsFeedWidget.vue:2
-msgid "Latest news"
-msgstr "Последние новости"
-
-#: src/components/admin/dashboard/NewsFeedWidget.vue:21
-msgid "Visit the official weblog for more information"
-msgstr "Подробности — в официальном блоге"
-
 #: src/components/admin/dmarc/DmarcAligmentChart.vue:5
 msgid "Alignment"
 msgstr "Выравнивание"
@@ -3446,7 +3438,7 @@ msgstr "Контакты"
 msgid "Add a category"
 msgstr "Добавить категорию"
 
-#: src/views/DashboardView.vue:27
+#: src/views/DashboardView.vue:19
 msgid "Welcome to Modoboa"
 msgstr "Добро пожаловать в Modoboa!"
 
@@ -3574,6 +3566,12 @@ msgstr "Удалить этот почтовый ящик?"
 #: src/views/webmail/MailboxView.vue:389
 msgid "Mailbox deleted"
 msgstr "Почтовый ящик удалён"
+
+#~ msgid "Latest news"
+#~ msgstr "Последние новости"
+
+#~ msgid "Visit the official weblog for more information"
+#~ msgstr "Подробности — в официальном блоге"
 
 #, fuzzy
 #~ msgid "Applications"

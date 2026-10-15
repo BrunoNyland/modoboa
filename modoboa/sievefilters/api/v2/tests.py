@@ -350,8 +350,9 @@ class FilterSetViewSetTestCase(PatcherMixin, ModoAPITestCase):
         ):
             resp = self.client.get(reverse("v2:filterset-list"))
         self.assertEqual(resp.status_code, 400)
-        # Empty errmsg is replaced by a generic message
-        self.assertTrue(resp.json()["error"])
+        # Empty errmsg is replaced by a generic message (the fork's error
+        # envelope carries it in "detail")
+        self.assertTrue(resp.json()["detail"])
 
     def test_disable_filter(self):
         self.authenticate()

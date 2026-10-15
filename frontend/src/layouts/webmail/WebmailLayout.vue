@@ -253,6 +253,19 @@ function updateMailboxUnseen(mailboxes, name, counter) {
   return false
 }
 
+function findMailbox(mailboxes, name) {
+  for (const mailbox of mailboxes || []) {
+    if (mailbox.name === name) {
+      return mailbox
+    }
+    const found = findMailbox(mailbox.sub, name)
+    if (found) {
+      return found
+    }
+  }
+  return null
+}
+
 function refreshMailboxUnseen(mailbox) {
   api.getUserMailboxUnseen(mailbox).then((resp) => {
     updateMailboxUnseen(userMailboxes.value, mailbox, resp.data.counter)
@@ -297,6 +310,20 @@ watch(
   () => busStore.mbCounterKey,
   () => {
     fetchUserMailboxes()
+  }
+)
+
+watch(
+  () => busStore.mbCounterAdjustment,
+  (adjustment) => {
+    for (const change of adjustment?.changes || []) {
+      const mailbox = findMailbox(userMailboxes.value, change.mailbox)
+      if (!mailbox) {
+        continue
+      }
+      mailbox.nbmessages = Math.max(0, (mailbox.nbmessages || 0) + change.total)
+      mailbox.unseen = Math.max(0, (mailbox.unseen || 0) + change.unseen)
+    }
   }
 )
 

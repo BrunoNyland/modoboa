@@ -84,6 +84,28 @@ export const useWebmailStore = defineStore('webmail', () => {
     }
   }
 
+  // The message was opened, hence seen. A conversation row stays unread
+  // while other messages of it are: ``threadUnseen`` is what remains unseen
+  // in the conversation, when known.
+  const markSeen = (imapid, threadUnseen = null) => {
+    const id = String(imapid)
+    const row = emails.value.find((e) => uidsOf(e).map(String).includes(id))
+    if (!row) {
+      return
+    }
+    if (!row.thread || row.thread.uids?.length <= 1) {
+      row.style = ''
+      if (row.thread) {
+        row.thread.unseen_count = 0
+      }
+      return
+    }
+    if (threadUnseen !== null) {
+      row.thread.unseen_count = threadUnseen
+      row.style = threadUnseen > 0 ? 'unseen' : ''
+    }
+  }
+
   const $reset = async () => {
     selection.value = []
     listingKey.value = 0
@@ -146,6 +168,7 @@ export const useWebmailStore = defineStore('webmail', () => {
     removeEmails,
     restoreEmails,
     patchEmail,
+    markSeen,
     specialFolders,
     setMailboxes,
     isFolder,

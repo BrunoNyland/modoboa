@@ -163,6 +163,16 @@ class FetchResponseParser:
         self.__current_message[self.__cur_data_item] = tvalue
         self.__args_parsing_func = None
 
+    def __modseq_args_parser(self, ttype, tvalue):
+        """MODSEQ arguments parser: ``MODSEQ (<number>)`` (RFC 7162)."""
+        if ttype == "left_parenthesis":
+            self.set_expected("number")
+        elif ttype == "number":
+            self.__current_message[self.__cur_data_item] = int(tvalue)
+            self.set_expected("right_parenthesis")
+        else:
+            self.__args_parsing_func = None
+
     def __flags_args_parser(self, ttype, tvalue):
         """FLAGS arguments parser."""
         if ttype == "left_parenthesis":
@@ -247,6 +257,12 @@ class FetchResponseParser:
                 self.set_expected("left_parenthesis")
                 self.lexer.mode = "flags"
                 self.__args_parsing_func = self.__flags_args_parser
+            elif tvalue == "MODSEQ":
+                # Sent once CONDSTORE is enabled (the mailbox state uses
+                # HIGHESTMODSEQ), e.g. on its own line when opening an unread
+                # message sets \Seen: ``1 (MODSEQ (13))``.
+                self.set_expected("left_parenthesis")
+                self.__args_parsing_func = self.__modseq_args_parser
             else:
                 self.__args_parsing_func = self.__default_args_parser
             return

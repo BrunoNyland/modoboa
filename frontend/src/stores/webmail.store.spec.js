@@ -111,4 +111,33 @@ describe('webmail.store listing', () => {
     store.patchEmail('1', { style: '' })
     expect(store.emails[0].style).toBe('')
   })
+
+  it('markSeen clears an unread message row', () => {
+    const store = useWebmailStore()
+    store.resetListing('INBOX')
+    store.appendPage(page([{ imapid: '1', style: 'unseen' }], 1, null))
+    store.markSeen(1)
+    expect(store.emails[0].style).toBe('')
+  })
+
+  it('markSeen keeps a conversation unread while others are unseen', () => {
+    const store = useWebmailStore()
+    store.resetListing('INBOX')
+    const thread = { uids: ['5', '7'], unseen_count: 2 }
+    store.appendPage(page([{ imapid: '7', style: 'unseen', thread }], 1, null))
+    store.markSeen('5', 1)
+    expect(store.emails[0].style).toBe('unseen')
+    expect(thread.unseen_count).toBe(1)
+    store.markSeen('7', 0)
+    expect(store.emails[0].style).toBe('')
+    expect(thread.unseen_count).toBe(0)
+  })
+
+  it('markSeen ignores a message that is not listed', () => {
+    const store = useWebmailStore()
+    store.resetListing('INBOX')
+    store.appendPage(page([{ imapid: '1', style: 'unseen' }], 1, null))
+    store.markSeen('9')
+    expect(store.emails[0].style).toBe('unseen')
+  })
 })

@@ -46,8 +46,8 @@
     "vuetify": "^4.2.6"
   },
   "devDependencies": {
-    "@module-federation/runtime": "^2.9.2",
-    "@module-federation/vite": "^1.23.5",
+    "@module-federation/runtime": "~2.6.0",
+    "@module-federation/vite": "~1.16.11",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
     "@vitejs/plugin-vue": "^6.0.10",
     "cross-env": "^10.1.0",

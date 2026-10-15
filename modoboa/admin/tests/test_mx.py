@@ -135,10 +135,10 @@ class MXTestCase(ModoTestCase):
         log.check(
             (
                 "modoboa.dns",
-                "ERROR",
+                "INFO",
                 _("No DNS record found for %s") % "does-not-exist.example.com",
             ),
-            ("modoboa.dns", "ERROR", _("No MX record for %s") % "no-mx.example.com"),
+            ("modoboa.dns", "INFO", _("No MX record for %s") % "no-mx.example.com"),
             ("modoboa.dns", "ERROR", _("No working name servers found")),
             (
                 "modoboa.dns",
@@ -148,12 +148,12 @@ class MXTestCase(ModoTestCase):
             ),
             (
                 "modoboa.dns",
-                "ERROR",
+                "INFO",
                 _("No DNS record found for %s") % "does-not-exist.example.com",
             ),
             (
                 "modoboa.dns",
-                "ERROR",
+                "INFO",
                 _("No DNS record found for %s") % "does-not-exist.example.com",
             ),
             (
@@ -182,7 +182,7 @@ class MXTestCase(ModoTestCase):
         with LogCapture("modoboa.dns") as log:
             get_domain_mx_list("test3.com")
         log.check(
-            ("modoboa.dns", "ERROR", _("No AAAA record for %s") % "mx3.example.com")
+            ("modoboa.dns", "INFO", _("No AAAA record for %s") % "mx3.example.com")
         )
         localconfig = core_models.LocalConfig.objects.first()
         localconfig.parameters.set_value("enable_ipv6_mx_checks", False, "admin")

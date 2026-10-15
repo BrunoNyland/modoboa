@@ -60,7 +60,6 @@ export const handlers = [
     })
   ),
 
-  http.get('*/admin/news_feed/', () => json([])),
   http.get('*/admin/statistics/', () =>
     json({
       domain_count: 1,

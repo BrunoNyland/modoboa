@@ -66,7 +66,6 @@ CORE_SETTINGS = {
     "ldap_import_username_attr": "cn",
     "ldap_dovecot_sync": False,
     "ldap_dovecot_conf_file": "/etc/dovecot/dovecot-modoboa.conf",
-    "rss_feed_url": "",
     "hide_features_widget": False,
     "sender_address": "noreply@yourdomain.test",
     "enable_api_communication": True,
@@ -410,56 +409,6 @@ class FIDOViewSetTestCase(ModoAPITestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn("tokens", resp.json())
 
-
-
-class NewsFeedAPIViewTestCase(ModoAPITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        """Create test data."""
-        super().setUpTestData()
-        factories.populate_database()
-
-    def test_get(self):
-        url = reverse("v2:news-feed")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()), 5)
-
-    @override_settings(DISABLE_DASHBOARD_EXTERNAL_QUERIES=True)
-    def test_if_disabling_from_settings_works(self):
-        url = reverse("v2:news-feed")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()), 0)
-
-    def test_custom_rss_feed(self):
-        self.set_global_parameter(
-            "rss_feed_url", "https://www.djangoproject.com/rss/weblog/"
-        )
-        # Try as superadmin
-        url = reverse("v2:news-feed")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("modoboa", response.json()[0]["link"])
-
-        # Try as superadmin and show_rss_feed_to_superadmins enabled
-        self.set_global_parameter("show_rss_feed_to_superadmins", True)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("django", response.json()[0]["link"])
-
-        # Try as domainadmin
-        dadmin = models.User.objects.get(username="admin@test.com")
-        self.authenticate_user(dadmin)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("django", response.json()[0]["link"])
-
-        # Try fallback
-        self.set_global_parameter("rss_feed_url", "")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("modoboa", response.json()[0]["link"])
 
 
 class StatisticsAPIViewTestCase(ModoAPITestCase):

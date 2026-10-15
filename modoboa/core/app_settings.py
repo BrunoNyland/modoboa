@@ -478,28 +478,6 @@ GLOBAL_PARAMETERS_STRUCT = collections.OrderedDict(
                             },
                         ),
                         (
-                            "rss_feed_url",
-                            {
-                                "label": gettext_lazy("Custom RSS feed"),
-                                "help_text": gettext_lazy(
-                                    "Display custom RSS feed to resellers and domain "
-                                    "administrators"
-                                ),
-                            },
-                        ),
-                        (
-                            "show_rss_feed_to_superadmins",
-                            {
-                                "label": gettext_lazy(
-                                    "Display custom RSS feed to super admins"
-                                ),
-                                "help_text": gettext_lazy(
-                                    "Display custom RSS feed also to super administrators"
-                                ),
-                                "widget": "BooleanField",
-                            },
-                        ),
-                        (
                             "hide_features_widget",
                             {
                                 "label": gettext_lazy("Hide features widget"),

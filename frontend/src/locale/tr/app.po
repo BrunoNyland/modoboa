@@ -769,15 +769,6 @@ msgstr "Ayarlar"
 msgid "Aliases"
 msgstr ""
 
-#: src/components/admin/dashboard/NewsFeedWidget.vue:2
-#, fuzzy
-msgid "Latest news"
-msgstr "Kurulu sürüm"
-
-#: src/components/admin/dashboard/NewsFeedWidget.vue:21
-msgid "Visit the official weblog for more information"
-msgstr ""
-
 #: src/components/admin/dmarc/DmarcAligmentChart.vue:5
 msgid "Alignment"
 msgstr ""
@@ -3483,7 +3474,7 @@ msgstr ""
 msgid "Add a category"
 msgstr ""
 
-#: src/views/DashboardView.vue:27
+#: src/views/DashboardView.vue:19
 msgid "Welcome to Modoboa"
 msgstr "Modoboa'ya hoş geldiniz"
 
@@ -3615,6 +3606,10 @@ msgstr ""
 #, fuzzy
 msgid "Mailbox deleted"
 msgstr "Onayla"
+
+#, fuzzy
+#~ msgid "Latest news"
+#~ msgstr "Kurulu sürüm"
 
 #, fuzzy
 #~ msgid "Applications"

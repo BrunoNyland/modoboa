@@ -119,10 +119,6 @@ class CoreGlobalParametersSerializer(serializers.Serializer):
     custom_welcome_message = serializers.CharField(
         required=False, allow_blank=True, allow_null=True
     )
-    rss_feed_url = serializers.URLField(
-        allow_blank=True, required=False, allow_null=True
-    )
-    show_rss_feed_to_superadmins = serializers.BooleanField(default=False)
     hide_features_widget = serializers.BooleanField(default=False)
 
 
@@ -430,13 +426,6 @@ class ModoboaApplicationSerializer(serializers.Serializer):
     icon = serializers.CharField()
     url = serializers.CharField()
     description = serializers.CharField(required=False)
-
-
-class NewsFeedEntrySerializer(serializers.Serializer):
-    title = serializers.CharField()
-    link = serializers.CharField()
-    published = serializers.DateTimeField()
-
 
 
 class StatisticsSerializer(serializers.Serializer):

@@ -767,15 +767,6 @@ msgstr "Kont"
 msgid "Aliases"
 msgstr "Aliasoù"
 
-#: src/components/admin/dashboard/NewsFeedWidget.vue:2
-#, fuzzy
-msgid "Latest news"
-msgstr "Stumm staliet"
-
-#: src/components/admin/dashboard/NewsFeedWidget.vue:21
-msgid "Visit the official weblog for more information"
-msgstr ""
-
 #: src/components/admin/dmarc/DmarcAligmentChart.vue:5
 msgid "Alignment"
 msgstr ""
@@ -3547,7 +3538,7 @@ msgstr "Darempredoù"
 msgid "Add a category"
 msgstr "Oberioù"
 
-#: src/views/DashboardView.vue:27
+#: src/views/DashboardView.vue:19
 msgid "Welcome to Modoboa"
 msgstr "Degemer mat e-barzh Modoboa"
 
@@ -3683,6 +3674,10 @@ msgstr ""
 #, fuzzy
 msgid "Mailbox deleted"
 msgstr "Deiziad krouidigezh"
+
+#, fuzzy
+#~ msgid "Latest news"
+#~ msgstr "Stumm staliet"
 
 #, fuzzy
 #~ msgid "Applications"

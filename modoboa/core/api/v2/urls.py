@@ -22,11 +22,6 @@ urlpatterns += [
         name="components_information",
     ),
     path(
-        "admin/news_feed/",
-        views.NewsFeedAPIView.as_view(),
-        name="news-feed",
-    ),
-    path(
         "admin/statistics/",
         views.StatisticsAPIView.as_view(),
         name="statistics",

@@ -3,11 +3,6 @@
 from functools import reduce
 import logging
 
-from dateutil import parser
-import feedparser
-
-from django.conf import settings
-
 from django.core.files.storage import default_storage
 
 from drf_spectacular.utils import extend_schema
@@ -18,14 +13,13 @@ from modoboa.admin import models as admin_models
 from modoboa.core import models, signals
 from modoboa.core.extensions import exts_pool
 from modoboa.core.utils import check_for_updates, get_capabilities
-from modoboa.lib.permissions import IsSuperUser, IsPrivilegedUser
+from modoboa.lib.permissions import IsSuperUser
 from modoboa.lib.throttle import UserLesserDdosUser
 
 from . import serializers
 
 logger = logging.getLogger("modoboa.auth")
 
-MODOBOA_WEBSITE_URL = "https://modoboa.org/"
 
 
 class ComponentsInformationAPIView(APIView):
@@ -72,34 +66,6 @@ class CapabilitiesAPIView(APIView):
     def get(self, *args, **kwargs):
         return response.Response({"capabilities": get_capabilities()})
 
-
-
-class NewsFeedAPIView(APIView):
-    """Return list of latest news from configured RSS feed."""
-
-    permission_classes = [permissions.IsAuthenticated, IsPrivilegedUser]
-    throttle_classes = [UserLesserDdosUser]
-
-    @extend_schema(responses=serializers.NewsFeedEntrySerializer(many=True))
-    def get(self, request, *args, **kwargs):
-        lang = "fr" if request.user.language == "fr" else "en"
-        feed_url = f"{MODOBOA_WEBSITE_URL}{lang}/weblog/feeds/"
-        show_rss_feed_to_superadmins = request.localconfig.parameters.get_value(
-            "show_rss_feed_to_superadmins"
-        )
-        if request.user.role != "SuperAdmins" or show_rss_feed_to_superadmins:
-            custom_feed_url = request.localconfig.parameters.get_value("rss_feed_url")
-            if custom_feed_url:
-                feed_url = custom_feed_url
-        entries = []
-        if not settings.DISABLE_DASHBOARD_EXTERNAL_QUERIES:
-            posts = feedparser.parse(feed_url)
-            for entry in posts["entries"][:5]:
-                entry["published"] = parser.parse(entry["published"])
-                entries.append(entry)
-
-        serializer = serializers.NewsFeedEntrySerializer(entries, many=True)
-        return response.Response(serializer.data)
 
 
 class FrontendPluginsAPIView(APIView):

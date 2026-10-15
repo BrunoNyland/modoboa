@@ -781,15 +781,6 @@ msgstr "Tili"
 msgid "Aliases"
 msgstr "Aliakset"
 
-#: src/components/admin/dashboard/NewsFeedWidget.vue:2
-#, fuzzy
-msgid "Latest news"
-msgstr "Asennettu versio"
-
-#: src/components/admin/dashboard/NewsFeedWidget.vue:21
-msgid "Visit the official weblog for more information"
-msgstr ""
-
 #: src/components/admin/dmarc/DmarcAligmentChart.vue:5
 msgid "Alignment"
 msgstr ""
@@ -3601,7 +3592,7 @@ msgstr ""
 msgid "Add a category"
 msgstr "Toiminnot"
 
-#: src/views/DashboardView.vue:27
+#: src/views/DashboardView.vue:19
 msgid "Welcome to Modoboa"
 msgstr "Tervetuloa Modoboaan"
 
@@ -3739,6 +3730,10 @@ msgstr "Postilaatikolla"
 #, fuzzy
 msgid "Mailbox deleted"
 msgstr "Luontipäivä"
+
+#, fuzzy
+#~ msgid "Latest news"
+#~ msgstr "Asennettu versio"
 
 #, fuzzy
 #~ msgid "Applications"

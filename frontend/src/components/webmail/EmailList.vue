@@ -470,7 +470,8 @@ const emit = defineEmits(['open-email', 'active-deleted'])
 
 const { $gettext, $ngettext } = useGettext()
 const { mobile } = useDisplay()
-const { displayNotification, reloadMailboxCounters } = useBusStore()
+const { displayNotification, reloadMailboxCounters, adjustMailboxCounters } =
+  useBusStore()
 const webmailStore = useWebmailStore()
 const store = webmailStore
 const router = useRouter()
@@ -737,7 +738,28 @@ const commitDelete = (entry) => {
   clearTimeout(entry.timer)
   api
     .deleteSelection(entry.mailbox || currentMailbox.value, entry.uids)
-    .then(() => {
+    .catch(() => {
+      // Nothing was deleted: put the row back (if its folder is still the
+      // one listed) and tell the user
+      const listed = store.emails.some(
+        (e) => String(e.imapid) === String(entry.imapid)
+      )
+      if (
+        !listed &&
+        (entry.mailbox || currentMailbox.value) === currentMailbox.value
+      ) {
+        store.restoreEmails(
+          [entry.row],
+          Math.min(entry.index, store.emails.length)
+        )
+      }
+      displayNotification({
+        msg: $gettext('The message could not be deleted'),
+        type: 'error',
+      })
+    })
+    .finally(() => {
+      // The real counters replace the optimistic ones, success or not
       reloadMailboxCounters()
     })
 }
@@ -751,6 +773,29 @@ const undoDelete = (entry) => {
   clearTimeout(entry.timer)
   // Server was never told to delete (deferred), so just put the row back.
   store.restoreEmails([entry.row], Math.min(entry.index, store.emails.length))
+  adjustMailboxCounters(
+    entry.counterChanges.map((c) => ({
+      ...c,
+      total: -c.total,
+      unseen: -c.unseen,
+    }))
+  )
+}
+
+// Counter deltas of deleting a row: it leaves its folder and, unless it is
+// deleted from the trash itself (permanent), lands in the trash.
+const deleteCounterChanges = (row, mailbox) => {
+  const total = store.uidsOf(row).length
+  let unseen = row.style === 'unseen' ? 1 : 0
+  if (row.thread) {
+    unseen = row.thread.unseen_count || 0
+  }
+  const changes = [{ mailbox, total: -total, unseen: -unseen }]
+  const trash = webmailStore.specialFolders.trash
+  if (trash && trash !== mailbox) {
+    changes.push({ mailbox: trash, total, unseen })
+  }
+  return changes
 }
 
 const swipeDelete = (email) => {
@@ -764,8 +809,11 @@ const swipeDelete = (email) => {
     uids: store.uidsOf(email),
     row: email,
     index,
+    counterChanges: deleteCounterChanges(email, currentMailbox.value),
   }
   store.removeEmails([email.imapid])
+  // The server call waits for the Undo window: show the new counts now
+  adjustMailboxCounters(entry.counterChanges)
   entry.timer = setTimeout(() => commitDelete(entry), 5000)
   pendingDeletes.value.push(entry)
   if (props.activeMailid === email.imapid) {

@@ -62,6 +62,37 @@ class FetchParserTestCase(unittest.TestCase):
         self.assertEqual(result[36]["FLAGS"], ["\\Seen"])
         self.assertIn("BODYSTRUCTURE", result[36])
 
+    def test_modseq_on_separate_line(self):
+        """MODSEQ sent apart from the requested items must not break parsing.
+
+        With CONDSTORE enabled, fetching the body of an unread message sets
+        \\Seen and Dovecot adds ``1 (MODSEQ (13))`` on its own line. The
+        parser used to fail with "unexpected number" and the message view
+        answered 500.
+        """
+        result = self.parser.parse(
+            [
+                (
+                    b'1 (UID 1 FLAGS (\\Seen) BODYSTRUCTURE ("text" "plain" '
+                    b'("charset" "utf-8") NIL NIL "7bit" 17 1 NIL NIL NIL NIL) '
+                    b"BODY[HEADER.FIELDS (SUBJECT)] {23}",
+                    b"Subject: teste\r\n\r\n\r\n",
+                ),
+                b")",
+                b"1 (MODSEQ (13))",
+            ]
+        )
+        self.assertEqual(list(result.keys()), [1])
+        self.assertEqual(result[1]["MODSEQ"], 13)
+        self.assertEqual(result[1]["FLAGS"], ["\\Seen"])
+        self.assertIn("BODY[HEADER.FIELDS (SUBJECT)]", result[1])
+
+    def test_parse_modseq_with_uid(self):
+        """MODSEQ along with other items on the same line."""
+        result = self.parser.parse([b"3 (UID 7 MODSEQ (42) FLAGS (\\Seen))"])
+        self.assertEqual(result[7]["MODSEQ"], 42)
+        self.assertEqual(result[7]["FLAGS"], ["\\Seen"])
+
     def test_parse_bodystructure(self):
         """Test the parsing of several responses containing BS."""
         self._test_bodystructure_output(

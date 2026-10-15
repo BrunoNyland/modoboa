@@ -383,10 +383,26 @@ const loadThread = async () => {
     const resp = await api.getThread(props.mailbox, props.mailid)
     if (resp.data.threading_supported && resp.data.results.length > 1) {
       thread.value = resp.data.results
+      if (loaded.value) {
+        // Loaded after the message: its flags already include \\Seen
+        syncListRow()
+      }
     }
   } catch {
     // The message itself is still displayed
   }
+}
+
+// The server marks the message seen when its content is fetched. Reflect
+// it in the cached listing, which is restored as is when going back to the
+// list (the mobile reading route) — otherwise the row stays unread.
+const syncListRow = () => {
+  webmailStore.markSeen(
+    currentMailid.value,
+    thread.value.length
+      ? thread.value.filter((msg) => msg.style === 'unseen').length
+      : null
+  )
 }
 
 // Display another message of the conversation in the reader
@@ -450,6 +466,7 @@ const fetchMailContent = () => {
       // Opening a message marks it as read
       item.style = ''
     }
+    syncListRow()
     nextTick(() => {
       // Reading progress for the global top bar: the sandboxed document
       // reports its scroll through postMessage (onFrameMessage).

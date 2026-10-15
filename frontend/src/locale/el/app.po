@@ -71,7 +71,7 @@ msgstr ""
 #: src/components/admin/identities/IdentityList.vue:546
 #: src/components/tools/CreationForm.vue:135
 #: src/views/calendars/CalendarView.vue:541
-#: src/views/webmail/MailboxView.vue:386
+#: src/views/webmail/MailboxView.vue:377
 msgid "Warning"
 msgstr ""
 
@@ -291,7 +291,7 @@ msgstr ""
 #: src/components/admin/identities/IdentityList.vue:525
 #: src/components/admin/identities/IdentityList.vue:551
 #: src/components/tools/CreationForm.vue:142
-#: src/views/webmail/MailboxView.vue:391
+#: src/views/webmail/MailboxView.vue:382
 msgid "No"
 msgstr ""
 
@@ -303,7 +303,7 @@ msgstr ""
 #: src/components/admin/identities/IdentityList.vue:524
 #: src/components/admin/identities/IdentityList.vue:550
 #: src/components/tools/CreationForm.vue:141
-#: src/views/webmail/MailboxView.vue:390
+#: src/views/webmail/MailboxView.vue:381
 msgid "Yes"
 msgstr ""
 
@@ -668,7 +668,7 @@ msgstr ""
 #: src/components/webmail/EmailContent.vue:129
 #: src/components/webmail/EmailContent.vue:130
 #: src/components/webmail/EmailList.vue:242
-#: src/components/webmail/EmailList.vue:565
+#: src/components/webmail/EmailList.vue:566
 #: src/views/account/FiltersView.vue:351
 #: src/views/calendars/CalendarView.vue:213
 msgid "Delete"
@@ -2709,21 +2709,21 @@ msgstr ""
 msgid "Message source"
 msgstr ""
 
-#: src/components/webmail/EmailContent.vue:580
-#: src/components/webmail/EmailList.vue:777
+#: src/components/webmail/EmailContent.vue:597
+#: src/components/webmail/EmailList.vue:825
 #: src/views/quarantine/MessageView.vue:201
 msgid "Message deleted"
 msgstr ""
 
-#: src/components/webmail/EmailContent.vue:594
+#: src/components/webmail/EmailContent.vue:611
 msgid "Message restored to Inbox"
 msgstr ""
 
-#: src/components/webmail/EmailContent.vue:608
+#: src/components/webmail/EmailContent.vue:625
 msgid "Message marked as junk"
 msgstr ""
 
-#: src/components/webmail/EmailContent.vue:622
+#: src/components/webmail/EmailContent.vue:639
 msgid "Message marked as not junk"
 msgstr ""
 
@@ -2832,49 +2832,53 @@ msgstr ""
 msgid "Sending failure"
 msgstr ""
 
-#: src/components/webmail/EmailList.vue:503
+#: src/components/webmail/EmailList.vue:504
 msgid "%{ count } selected"
 msgid_plural "%{ count } selected"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/components/webmail/EmailList.vue:560
+#: src/components/webmail/EmailList.vue:561
 msgid "Reschedule"
 msgstr ""
 
-#: src/components/webmail/EmailList.vue:611
+#: src/components/webmail/EmailList.vue:612
 msgid "Scheduling updated"
 msgstr ""
 
-#: src/components/webmail/EmailList.vue:622
+#: src/components/webmail/EmailList.vue:623
 msgid "Scheduled canceled and message moved to trash folder"
 msgstr ""
 
-#: src/components/webmail/EmailList.vue:779
+#: src/components/webmail/EmailList.vue:757
+msgid "The message could not be deleted"
+msgstr ""
+
+#: src/components/webmail/EmailList.vue:827
 msgid "Undo"
 msgstr ""
 
-#: src/components/webmail/EmailList.vue:931
+#: src/components/webmail/EmailList.vue:979
 msgid "Message(s) deleted"
 msgstr ""
 
-#: src/components/webmail/EmailList.vue:950
+#: src/components/webmail/EmailList.vue:998
 msgid "Message(s) restored to Inbox"
 msgstr ""
 
-#: src/components/webmail/EmailList.vue:966
+#: src/components/webmail/EmailList.vue:1014
 msgid "Message(s) marked as junk"
 msgstr ""
 
-#: src/components/webmail/EmailList.vue:982
+#: src/components/webmail/EmailList.vue:1030
 msgid "Message(s) marked as not junk"
 msgstr ""
 
-#: src/components/webmail/EmailList.vue:998
+#: src/components/webmail/EmailList.vue:1046
 msgid "Message(s) flagged"
 msgstr ""
 
-#: src/components/webmail/EmailList.vue:1024
+#: src/components/webmail/EmailList.vue:1072
 msgid "%{count} message"
 msgid_plural "%{count} messages"
 msgstr[0] ""
@@ -3414,62 +3418,62 @@ msgstr ""
 msgid "Resize reading pane"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:78
+#: src/views/webmail/MailboxView.vue:77
 msgid "Reading pane"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:79
+#: src/views/webmail/MailboxView.vue:78
 msgid "No message selected"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:80
+#: src/views/webmail/MailboxView.vue:79
 msgid "Pick a message from the list to read it here."
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:143
+#: src/views/webmail/MailboxView.vue:142
 msgid "Compose a new message"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:148
+#: src/views/webmail/MailboxView.vue:147
 msgid "Focus the search field"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:153
+#: src/views/webmail/MailboxView.vue:152
 msgid "Next message"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:158
+#: src/views/webmail/MailboxView.vue:157
 msgid "Previous message"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:163
+#: src/views/webmail/MailboxView.vue:162
 msgid "Open the highlighted message"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:168
+#: src/views/webmail/MailboxView.vue:167
 msgid "Select/unselect the highlighted message"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:173
+#: src/views/webmail/MailboxView.vue:172
 msgid "Delete the selection or highlighted message"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:178
+#: src/views/webmail/MailboxView.vue:177
 msgid "Reply to the open message"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:193
+#: src/views/webmail/MailboxView.vue:192
 msgid "Show this help"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:381
+#: src/views/webmail/MailboxView.vue:372
 msgid "Mailbox compressed"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:387
+#: src/views/webmail/MailboxView.vue:378
 msgid "Delete this mailbox?"
 msgstr ""
 
-#: src/views/webmail/MailboxView.vue:398
+#: src/views/webmail/MailboxView.vue:389
 msgid "Mailbox deleted"
 msgstr ""

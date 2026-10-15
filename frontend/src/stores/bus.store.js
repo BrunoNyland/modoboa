@@ -14,6 +14,9 @@ export const useBusStore = defineStore('bus', () => {
   const notificationAction = ref(null)
   const dataKey = ref(1)
   const mbCounterKey = ref(1)
+  // Last optimistic change of the folder counters:
+  // { changes: [{ mailbox, total, unseen }] } (deltas)
+  const mbCounterAdjustment = ref(null)
 
   async function $reset() {
     notification.value = ''
@@ -22,6 +25,7 @@ export const useBusStore = defineStore('bus', () => {
     notificationAction.value = null
     dataKey.value = 1
     mbCounterKey.value = 1
+    mbCounterAdjustment.value = null
   }
 
   function displayNotification(options) {
@@ -45,6 +49,13 @@ export const useBusStore = defineStore('bus', () => {
     mbCounterKey.value++
   }
 
+  // Apply deltas to the folder counters right away, before the server
+  // knows (deferred actions such as a swipe-delete with Undo). A reload
+  // replaces them with the real numbers.
+  function adjustMailboxCounters(changes) {
+    mbCounterAdjustment.value = { changes }
+  }
+
   return {
     notification,
     notificationColor,
@@ -53,6 +64,8 @@ export const useBusStore = defineStore('bus', () => {
     displayNotification,
     hideNotification,
     reloadMailboxCounters,
+    adjustMailboxCounters,
+    mbCounterAdjustment,
     dataKey,
     mbCounterKey,
     reloadData,

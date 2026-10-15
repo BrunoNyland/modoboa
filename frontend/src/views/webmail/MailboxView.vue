@@ -70,7 +70,6 @@
           :mailid="openedMailid"
           :show-back-button="false"
           @deleted="onPaneDeleted"
-          @loaded="onPaneLoaded"
         />
         <EmptyState
           v-else
@@ -299,14 +298,6 @@ const clearOpenedMail = () => {
     name: 'MailboxView',
     query: { mailbox: currentMailbox.value },
   })
-}
-
-const onPaneLoaded = () => {
-  // Backend marks the message seen on content fetch; clear the unseen bar in
-  // the list without a refetch.
-  if (openedMailid.value) {
-    webmailStore.patchEmail(openedMailid.value, { style: '' })
-  }
 }
 
 // A message deep-linked on desktop should open on the mobile route instead

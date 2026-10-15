@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 from logging.handlers import SysLogHandler
 import os
+import sys
 
 from modoboa.test_settings import *  # noqa
 
@@ -350,6 +351,12 @@ CACHES = {
         "LOCATION": f"{BASE_DIR}/cache",
     }
 }
+if len(sys.argv) > 1 and sys.argv[1] == "test":
+    # The cache directory would be shared by the processes of a parallel
+    # test run
+    CACHES["default"] = {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    }
 
 # Disable LocalConfig caching during tests: the cache is not reset between
 # tests while the database and parameters registry are, so a cached instance

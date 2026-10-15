@@ -3,7 +3,6 @@
 import asyncio
 from aiosmtplib import send
 from unittest.mock import AsyncMock
-import multiprocessing
 from multiprocessing import Process
 import os
 import socket
@@ -31,7 +30,6 @@ FAILURE_RESPONSE = b"action=defer_if_permit Daily limit reached, retry later\n\n
 # policy daemon already listens there, the test daemon can't bind, and the
 # tests end up talking to the production daemon.
 TEST_PORT = int(os.environ.get("POLICYD_TEST_PORT", 19999))
-multiprocessing.set_start_method("fork")
 
 
 def start_policy_daemon(*args):

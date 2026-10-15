@@ -28,6 +28,10 @@ on:
     branches: [master]
     types: [published]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   POSTGRES_HOST: localhost
 
@@ -81,30 +85,24 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: pyproject.toml
       - name: Install dependencies
         run: |
           sudo apt-get update -y \
           && sudo apt-get install -y \
-            postfix librrd-dev rrdtool libldap2-dev libsasl2-dev libssl-dev redis-server
-          python -m pip install --upgrade pip
-          pip install -e .[ldap,test,dev]
-          echo "Testing redis connection"
-          redis-cli -h $REDIS_HOST -p $REDIS_PORT ping
-        env:
-          REDIS_HOST: localhost
-          REDIS_PORT: ${{ job.services.redis.ports[6379] }}
-      - name: Install postgres requirements
-        if: ${{ matrix.database == 'postgres' }}
-        run: |
-          pip install -e .[postgresql]
-          pip install coverage
+            librrd-dev rrdtool libldap2-dev libsasl2-dev libssl-dev
+          uv pip install --system -e ".[ldap,test,dev,postgresql]" coverage
           echo "DB=postgres" >> $GITHUB_ENV
       - name: Run tests
         if: ${{ matrix.python-version != '3.14' || matrix.database != 'postgres' }}
         run: |
           python ./tests.py
           cd test_project
-          python3 manage.py test modoboa
+          python3 manage.py test --parallel auto modoboa
         env:
           # use localhost for the host here because we are running the job on the VM.
           # If we were running the job on in a container this would be postgres
@@ -137,7 +135,7 @@ jobs:
         run: |
           python ./tests.py
           cd test_project
-          coverage run manage.py test modoboa
+          coverage run manage.py test --parallel auto modoboa
           coverage combine
           coverage xml
           coverage report

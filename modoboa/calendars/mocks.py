@@ -43,6 +43,9 @@ class DAVClientMock:
     """Mock class for DAVClient instance."""
 
     url = URL.objectify("http://localhost")
+    # Read by caldav >= 3.5 to decide how long to wait after a write
+    # (None: no wait)
+    features = None
 
     def mkcalendar(self, url):
         return True

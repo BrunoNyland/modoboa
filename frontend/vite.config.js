@@ -203,8 +203,8 @@ export default defineConfig({
       // installed minor versions differ.
       shared: {
         vue: { singleton: true, requiredVersion: '^3.4.0' },
-        'vue-router': { singleton: true, requiredVersion: '^4.0.0' },
-        pinia: { singleton: true, requiredVersion: '^3.0.0' },
+        'vue-router': { singleton: true, requiredVersion: '^5.0.0' },
+        pinia: { singleton: true, requiredVersion: '^4.0.0' },
         vuetify: { singleton: true, requiredVersion: '^4.0.0' },
         'vue3-gettext': { singleton: true, requiredVersion: '^4.0.0-beta.1' },
       },
@@ -213,6 +213,13 @@ export default defineConfig({
     bundledTranslations(),
   ],
   base: '/',
+  optimizeDeps: {
+    // vue3-gettext is a federation shared module, left out of the dev
+    // pre-bundling: its CommonJS dependency must be pre-bundled explicitly,
+    // or its default import fails ("pofile ... does not provide an export
+    // named 'default'") and the app never mounts.
+    include: ['vue3-gettext > pofile'],
+  },
   define: { 'process.env': {} },
   resolve: {
     alias: {

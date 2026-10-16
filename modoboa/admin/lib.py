@@ -264,12 +264,13 @@ def get_dns_records(name, typ, resolver=None):
     try:
         resolver = get_authoritative_resolver(name, resolver=resolver)
         dns_answers = resolver.resolve(name, typ, search=True)
-    except dns.resolver.NXDOMAIN as e:
-        logger.error(_("No DNS record found for %s") % name, exc_info=e)
-    except dns.resolver.NoAnswer as e:
-        logger.error(
-            _("No %(type)s record for %(name)s") % {"type": typ, "name": name},
-            exc_info=e,
+    # A missing record is an answer, not a failure (a server without IPv6
+    # has no AAAA record): no error level, no traceback.
+    except dns.resolver.NXDOMAIN:
+        logger.info(_("No DNS record found for %s") % name)
+    except dns.resolver.NoAnswer:
+        logger.info(
+            _("No %(type)s record for %(name)s") % {"type": typ, "name": name}
         )
     except dns.resolver.NoNameservers as e:
         logger.error(_("No working name servers found"), exc_info=e)
